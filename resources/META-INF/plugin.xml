@@ -1,0 +1,77 @@
+<idea-plugin>
+    <id>EditorGroups</id>
+    <name>Editor Groups</name>
+    <version>1.0</version>
+
+    <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
+
+    <description><![CDATA[
+        Implementation of <a href="https://github.com/SomewhatCloudy/phpstorm-related-proposal"/>
+    ]]></description>
+
+    <change-notes><![CDATA[
+    ]]>
+    </change-notes>
+
+    <depends>com.intellij.modules.lang</depends>
+
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+    <idea-version since-build="172.0"/>
+
+    <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <editorNotificationProvider implementation="krasa.editorGroups.MyEditorNotificationsProvider"/>
+        <!-- Add your extensions here -->
+        <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>
+        <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
+
+        <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
+    </extensions>
+
+    <project-components>
+        <!-- Add your project components here -->
+        <component>
+            <implementation-class>krasa.editorGroups.ProjectComponent</implementation-class>
+        </component>
+    </project-components>
+    <actions>
+        <group id="krasa.EditorGroups">
+            <action class="krasa.editorGroups.actions.RefreshAction" id="krasa.editorGroups.Refresh"
+                    text="Refresh Editor Groups">
+                <keyboard-shortcut first-keystroke="ctrl alt shift E" keymap="$default"/>
+            </action>
+
+
+            <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
+                    text=" Open Previous File in Group">
+                <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
+            </action>
+            <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
+                    text=" Open Next File in Group">
+                <keyboard-shortcut first-keystroke="ctrl  BACK_SLASH" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
+            </action>
+
+
+            <action class="krasa.editorGroups.actions.PreviousInNewTabAction" id="krasa.editorGroups.PreviousInNewTab"
+                    text=" Open Previous File in Group in a New Tab">
+                <keyboard-shortcut first-keystroke="ctrl alt  QUOTE" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl alt button143" keymap="$default"/>
+            </action>
+            <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
+                    text=" Open Next File in Group in a New Tab">
+                <keyboard-shortcut first-keystroke="ctrl alt BACK_SLASH" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
+            </action>
+        </group>
+        <!-- Add your actions here -->
+    </actions>
+
+</idea-plugin>
