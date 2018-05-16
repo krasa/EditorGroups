@@ -1,19 +1,24 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>1.0</version>
+    <version>0.1</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
         Implementation of <a href="https://github.com/SomewhatCloudy/phpstorm-related-proposal"/>
+     <ul>
+     <li>      - Use [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  to switch files (closing the previous one)           </li>
+     <li> - Use [Ctrl + Alt + Mouse Wheel] or [Ctrl Alt + \ or ' ] to switch files (leaving the previous one opened)</li>
+     <li> - Ctrl + Alt + Shift + E - reload the group                                                               </li>
+     </ul> 
+         
     ]]></description>
 
     <change-notes><![CDATA[
     ]]>
     </change-notes>
 
-    <depends>com.intellij.modules.lang</depends>
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
@@ -21,10 +26,8 @@
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
-    <!-- uncomment to enable plugin in all products
     <depends>com.intellij.modules.lang</depends>
-    -->
-
+                
     <extensions defaultExtensionNs="com.intellij">
         <editorNotificationProvider implementation="krasa.editorGroups.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
@@ -35,7 +38,6 @@
     </extensions>
 
     <project-components>
-        <!-- Add your project components here -->
         <component>
             <implementation-class>krasa.editorGroups.ProjectComponent</implementation-class>
         </component>
@@ -71,7 +73,6 @@
                 <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
             </action>
         </group>
-        <!-- Add your actions here -->
     </actions>
 
 </idea-plugin>
