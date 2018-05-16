@@ -1,3 +1,9 @@
+/*
+ * @idea.title CORE
+ * @idea.related EditorGroupPanel.java
+ * @idea.related ProjectComponent.java
+ * @idea.related EditorGroupTabTitleProvider.java
+ */
 package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
@@ -11,7 +17,8 @@ import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
 public class EditorGroupManager {
-	
+
+
 	private final Project project;
 	//	@NotNull
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
