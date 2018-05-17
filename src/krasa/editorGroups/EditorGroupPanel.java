@@ -26,7 +26,6 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBDimension;
-import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -258,11 +257,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
 				Font font = button.getFont();
 				button.setFont(font.deriveFont(Font.BOLD));
-				if (UIUtil.isUnderDarcula()) {
-					button.setForeground(Color.WHITE);
-				} else {
 					button.setForeground(Color.BLACK);
-				}
 				currentIndex = i1;
 			}
 
