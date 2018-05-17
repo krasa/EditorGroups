@@ -1,13 +1,12 @@
 package krasa.editorGroups;
 
-import com.intellij.openapi.Disposable;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -39,7 +38,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 							continue;
 						}
 
-						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, file.getUserData(EditorGroupPanel.EDITOR_GROUP), file);
+						FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
+						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP), file);
 						manager.addTopComponent(fileEditor, panel);
 					}
 				}
@@ -47,7 +47,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 			@Override
 			public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-				file.putUserData(EditorGroupPanel.EDITOR_GROUP, null);
 			}
 		});
 

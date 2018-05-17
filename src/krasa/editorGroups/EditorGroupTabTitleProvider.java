@@ -1,7 +1,9 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.extensions.Extensions;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.impl.EditorTabTitleProvider;
+import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -12,15 +14,22 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
+
+	/**
+	 * TODO bad EP, no way to distinguishe between windows
+	 */
 	@Nullable
 	@Override
 	public String getEditorTabTitle(@NotNull Project project, @NotNull VirtualFile virtualFile) {
 		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
 
-		EditorGroup group = virtualFile.getUserData(EditorGroupPanel.EDITOR_GROUP);
-		if (group == null) {
-			group=EditorGroupManager.getInstance(project).getGroupByOwner(virtualFile);
+		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(virtualFile);
+		EditorGroup group = null;
+		if (textEditor != null) {
+			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
 		}
+
+
 		if (group!=null && group .valid()) {
 			int size = group.size();
 			if (group.getTitle() != null) {
