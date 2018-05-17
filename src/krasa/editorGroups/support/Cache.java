@@ -66,12 +66,7 @@ public class Cache {
 		}
 
 		for (String s : editorGroup.getPaths()) {
-			VirtualFile fileByPath = Utils.getFileByPath(s);
-			if (fileByPath != null) {
-				putToMultiCache(editorGroup, fileByPath.getCanonicalPath());
-			} else {
-				Notifications.notifyMissingFile(editorGroup, s);
-			}
+			putToMultiCache(editorGroup, s);
 		}
 		putToMultiCache(editorGroup, canonicalPath);
 		put(editorGroup.getOwnerPath(), editorGroup);
