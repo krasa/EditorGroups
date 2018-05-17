@@ -8,13 +8,16 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.support.Cache;
-import krasa.editorGroups.support.Parser;
+import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class EditorGroupManager {
 
@@ -22,8 +25,12 @@ public class EditorGroupManager {
 	private final Project project;
 	//	@NotNull
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
-	Cache cache = new Cache();
-	Parser parser = new Parser();
+	Cache cache = new IndexCache();
+
+	/**
+	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
+	 */
+	private boolean switching;
 
 	public EditorGroupManager(Project project) {
 
@@ -34,34 +41,28 @@ public class EditorGroupManager {
 		return ServiceManager.getService(project, EditorGroupManager.class);
 	}
 
-	public void reparse(VirtualFile file) {
-		parser.parse(Utils.getFileContent(file), file.getCanonicalPath(), cache);
-	}
 
 	@NotNull
-	EditorGroup getGroup(TextEditorImpl fileEditor, @NotNull EditorGroup lastGroup, boolean reparse) {
-		EditorGroup result = EditorGroup.EMPTY;
-		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + reparse);
+	EditorGroup getGroup(Project project, TextEditorImpl fileEditor, @NotNull EditorGroup lastGroup, boolean refresh) {
+		if (DumbService.isDumb(project)) {
+			throw new RuntimeException("check for dumb");
+		}
 
-		VirtualFile currentFile = Utils.getFileFromTextEditor(project, fileEditor);
+		EditorGroup result = EditorGroup.EMPTY;
+		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + refresh);
+
+
+		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
+		if (currentFile == null) {
+			System.out.println("< getGroup - currentFile is null for " + fileEditor);
+			return EditorGroup.EMPTY;
+		}
 		String currentFilePath = currentFile.getCanonicalPath();
-		if (reparse) {
-			result = parse(currentFile);
+		if (refresh) {
 
 			if (result.invalid()) {
-				if (lastGroup.valid()) {
-					result = parse(lastGroup.getOwnerVirtualFile());
-				}
-
+				result = cache.getByOwner(project, currentFilePath);
 			}
-//			if (result.invalid()) {
-//				if (currentGroup.valid()) {
-//					EditorGroup parse = parse(currentGroup.getOwnerVirtualFile());
-//					if (result.contains(currentFilePath)) {
-//						result = parse;
-//					}
-//				}
-//			}
 		}
 
 		if (result.invalid()) {
@@ -69,21 +70,20 @@ public class EditorGroupManager {
 				result = lastGroup;
 			}
 		}
+
 		if (result.invalid()) {
-			result = cache.getByOwner(currentFilePath);
+			result = cache.getByOwner(project, currentFilePath);
 		}
 
-//		if (result.invalid()) {
-//			if (currentGroup.valid()) {
-//				if (currentGroup.contains(currentFilePath)) {
-//					result = currentGroup;
-//				}
-//			}
-//		}
+
 		if (result.invalid()) {
-			EditorGroup slaveGroup = cache.findGroupAsSlave(currentFilePath);
-			if (slaveGroup.valid()) {
-				result = slaveGroup;
+			List<EditorGroup> groupsAsSlave = cache.findGroupsAsSlave(project, currentFilePath);
+			//TODO union?
+			for (EditorGroup editorGroup : groupsAsSlave) {
+				if (editorGroup.valid()) {
+					result = editorGroup;
+				}
+				break;
 			}
 		}
 
@@ -91,27 +91,15 @@ public class EditorGroupManager {
 		if (result.invalid()) {
 			System.out.println("no group found");
 		}
-		System.out.println("getGroup returning " + result.getTitle());
+		System.out.println("< getGroup " + fileEditor.getName() + " " + result.getTitle());
 		return result;
 	}
 
-	@NotNull
-	private EditorGroup parse(VirtualFile currentFile) {
-		String text = Utils.getFileContent(currentFile);
-		return parser.parse(text, currentFile.getCanonicalPath(), cache);
+	public void switching(boolean b) {
+		switching = b;
 	}
 
-
-	@NotNull
-	public EditorGroup getGroupByOwner(@NotNull VirtualFile virtualFile) {
-		EditorGroup ifPresent = cache.getByOwner(virtualFile.getCanonicalPath());
-		if (ifPresent == null) {
-			return EditorGroup.EMPTY;
-		}
-		return ifPresent;
+	public boolean switching() {
+		return switching;
 	}
-
-//	public void setCurrentGroup(EditorGroup myGroup) {
-//		currentGroup = myGroup;
-//	}
 }

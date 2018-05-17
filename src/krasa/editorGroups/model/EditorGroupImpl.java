@@ -5,14 +5,16 @@ import krasa.editorGroups.support.Utils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class EditorGroupImpl implements EditorGroup {
-	
+
 	private List<String> paths;
 	private String ownerPath;
 	private String title = null;
+	private transient List<String> links;
 
 	public EditorGroupImpl(@NotNull List<String> paths, @NotNull String ownerPath, String title) {
 		this.paths = paths;
@@ -29,8 +31,8 @@ public class EditorGroupImpl implements EditorGroup {
 	}
 
 	@Override
-	public List<String> getPaths() {
-		return  paths.stream().distinct().collect(Collectors.toList());
+	public List<String> getRelatedPaths() {
+		return paths.stream().distinct().collect(Collectors.toList());
 	}
 
 	@Override
@@ -61,6 +63,17 @@ public class EditorGroupImpl implements EditorGroup {
 		return paths.contains(canonicalPath);
 	}
 
+	@Override
+	public List<String> getLinks() {
+		if (links == null) {
+			ArrayList<String> objects = new ArrayList<>(paths.size() + 1);
+			objects.add(ownerPath);
+			objects.addAll(paths);
+			links = objects.stream().distinct().collect(Collectors.toList());
+		}
+
+		return links;
+	}
 
 	public String toString() {
 		return new ToStringBuilder(this)

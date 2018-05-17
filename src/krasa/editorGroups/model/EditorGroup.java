@@ -6,11 +6,11 @@ import java.util.Collections;
 import java.util.List;
 
 public interface EditorGroup {
-	public static EditorGroup EMPTY = new EditorGroupImpl(Collections.emptyList(), "NOT_EXISTS",null);
+	public static EditorGroup EMPTY = new EditorGroupImpl(Collections.emptyList(), "NOT_EXISTS", null);
 
 	String getOwnerPath();
 
-	List<String> getPaths();
+	List<String> getRelatedPaths();
 
 	String getTitle();
 
@@ -25,4 +25,7 @@ public interface EditorGroup {
 	default boolean invalid() {
 		return !valid();
 	}
+
+	List<String> getLinks();
+
 }

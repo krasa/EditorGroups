@@ -29,7 +29,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 //				if (userData != null) {
 //					EditorGroupManager.getInstance(project).setCurrentGroup(userData);
 //				}
-				EditorGroupManager.getInstance(project).reparse(file);
+//				EditorGroupManager.getInstance(project).reparse(file);
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor instanceof TextEditorImpl) {
