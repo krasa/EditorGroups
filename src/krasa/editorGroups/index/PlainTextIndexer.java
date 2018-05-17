@@ -10,7 +10,6 @@ import com.intellij.util.indexing.FileContent;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,7 +44,7 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 					Matcher matcher = pattern.matcher(StringPattern.newBombedCharSequence(chars));
 					while (matcher.find()) {
 						if (matcher.start() != matcher.end()) {
-							value = consumer.consume(value, folder, matcher.group(1).trim());
+							value = consumer.consume(inputData, value, folder, matcher.group(1).trim());
 						}
 					}
 				}
@@ -83,12 +82,12 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 			return value;
 		}
 
-		abstract EditorGroupIndexValue consume(EditorGroupIndexValue object, File folder, String value);
+		abstract EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value);
 	}
 
 	static class TitleConsumer extends Consumer {
 		@Override
-		EditorGroupIndexValue consume(EditorGroupIndexValue object, File folder, String value) {
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
 			return init(object).setTitle(value);
 		}
 	}
@@ -96,23 +95,23 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 	static class RelatedFilesConsumer extends Consumer {
 
 		@Override
-		EditorGroupIndexValue consume(EditorGroupIndexValue object, File folder, String filePath) {
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String filePath) {
 			object = init(object);
 
 
 			//TODO patterns
-			if (FileUtil.isAbsolute(filePath)) {
-				object.addRelated(filePath.replace("\\", "/"));
-			} else {
-				try {
+			try {
+				if (FileUtil.isAbsolute(filePath)) {
+					object.addRelated(filePath.replace("\\", "/"));
+				} else {
 					File file = new File(folder, filePath);
 					object.addRelated(file.getCanonicalPath().replace("\\", "/"));
-				} catch (IOException e) {
-					throw new RuntimeException(e);
+
+
 				}
-
+			} catch (Exception e) {
+				LOG.warn("Failed to parse: '" + filePath + "' in " + inputData.getFile().getCanonicalPath());
 			}
-
 			return object;
 		}
 	}
