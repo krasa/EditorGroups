@@ -9,6 +9,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
@@ -17,6 +18,7 @@ import com.intellij.openapi.keymap.KeymapManager;
 import com.intellij.openapi.keymap.KeymapUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -116,7 +118,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private Component previousButton() {
 		JButton refresh = new JButton();
 		refresh.setToolTipText(getLabel("krasa.editorGroups.Previous", "Previous File"));
-		refresh.addActionListener(e -> previous(true));
+		refresh.addActionListener(e -> previous(BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK)));
 		refresh.setIcon(AllIcons.Actions.Back);
 		refresh.setPreferredSize(new JBDimension(AllIcons.Actions.Refresh.getIconWidth() + 10, refresh.getHeight()));
 		return refresh;
@@ -125,13 +127,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private Component nextButton() {
 		JButton refresh = new JButton();
 		refresh.setToolTipText(getLabel("krasa.editorGroups.Next", "Next File"));
-		refresh.addActionListener(e -> next(true));
+		refresh.addActionListener(e -> next(BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK)));
 		refresh.setIcon(AllIcons.Actions.Forward);
 		refresh.setPreferredSize(new JBDimension(AllIcons.Actions.Refresh.getIconWidth() + 10, refresh.getHeight()));
 		return refresh;
 	}
 
-	public void previous(boolean newTab) {
+	public void previous(boolean newTab, boolean newWindow) {
 		if (myGroup.invalid()) {
 			return;
 		}
@@ -150,11 +152,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 			fileByPath = Utils.getFileByPath(s);
 		}
-		openFile(newTab, fileByPath);
+		openFile(fileByPath, newTab, newWindow);
 
 	}
 
-	public void next(boolean newTab) {
+	public void next(boolean newTab, boolean newWindow) {
 		if (myGroup.invalid()) {
 			return;
 		}
@@ -170,21 +172,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			fileByPath = Utils.getFileByPath(s);
 		}
 
-		openFile(newTab, fileByPath);
+		openFile(fileByPath, newTab, newWindow);
 	}
 
-	private void openFile(boolean newTab, VirtualFile fileToOpen) {
+	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
 		if (fileToOpen == null || fileToOpen.equals(file)) {
 			return;
 		}
 
 		CommandProcessor.getInstance().executeCommand(project, () -> {
-			open(newTab, fileToOpen);
+			open(newTab, fileToOpen, newWindow);
 		}, null, null);
 
 	}
 
-	private void open(boolean newTab, VirtualFile fileToOpen) {
+	private void open(boolean newTab, VirtualFile fileToOpen, boolean newWindow) {
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
 		EditorWindow currentWindow = manager.getCurrentWindow();
@@ -194,16 +196,25 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
 //		manager.closeFile(fileToOpen, false, false);
 
+		if (newWindow) {
 
-		FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
-		for (FileEditor fileEditor : fileEditors) {
-			fileEditor.putUserData(EDITOR_GROUP, myGroup);
-		}
+			Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
+			for (FileEditor fileEditor : pair.first) {
+				fileEditor.putUserData(EDITOR_GROUP, myGroup);
+			}
+		} else {
+			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+			for (FileEditor fileEditor : fileEditors) {
+				fileEditor.putUserData(EDITOR_GROUP, myGroup);
+			}
 
-		//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
-		if (!newTab) {
-			manager.closeFile(selectedFile, currentWindow, false);
-		}
+			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
+			if (!newTab) {
+				manager.closeFile(selectedFile, currentWindow, false);
+			}
+
+		} 
+		
 	}
 
 	@NotNull
@@ -241,7 +252,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					openFile(BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), Utils.getFileByPath(path));
+					openFile(Utils.getFileByPath(path), BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
 				}
 			});
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {

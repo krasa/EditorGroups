@@ -1,11 +1,10 @@
 package krasa.editorGroups.actions;
 
-import krasa.editorGroups.EditorGroupPanel;
-
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.CommonDataKeys;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAwareAction;
+import krasa.editorGroups.EditorGroupPanel;
 
 public class PreviousInNewTabAction extends DumbAwareAction {
 	@Override
@@ -14,7 +13,7 @@ public class PreviousInNewTabAction extends DumbAwareAction {
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_GROUPS_PANEL);
 			if (panel != null) {
-				panel.previous(true);
+				panel.previous(true, false);
 			}
 		}
 	}

@@ -72,6 +72,19 @@
                 <keyboard-shortcut first-keystroke="ctrl alt BACK_SLASH" keymap="$default"/>
                 <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
             </action>
+
+
+            <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
+                    id="krasa.editorGroups.PreviousInNewWindow"
+                    text=" Open Previous File in Group in a New Tab">
+                <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>
+            </action>
+            <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
+                    text=" Open Next File in Group in a New Tab">
+                <keyboard-shortcut first-keystroke="ctrl alt shift BACK_SLASH" keymap="$default"/>
+                <mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>
+            </action>
         </group>
     </actions>
 

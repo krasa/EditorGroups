@@ -13,7 +13,7 @@ public class NextAction extends DumbAwareAction {
 		if (data != null) {
 			EditorGroupPanel panel = data	.getUserData(EditorGroupPanel.EDITOR_GROUPS_PANEL);
 			if (panel != null) {
-				panel.next(false);
+				panel.next(false, false);
 			}
 		}
 
