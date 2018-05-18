@@ -22,7 +22,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Weighted;
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.panels.HorizontalLayout;
@@ -124,13 +123,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		for (int i1 = 0; i1 < paths.size(); i1++) {
 			String path = paths.get(i1);
-			String name = path;
-			int i = StringUtil.lastIndexOfAny(path, "\\/");
-			if (i > 0) {
-				name = path.substring(i + 1);
-			}
 
-			JButton button = new JButton(name);
+			JButton button = new JButton(Utils.toPresentableName(path));
 			// BROKEN in IJ 2018
 			// button.setBorder(null);
 			// button.setContentAreaFilled(false);

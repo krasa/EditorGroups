@@ -6,6 +6,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import krasa.editorGroups.model.EditorGroup;
@@ -90,4 +91,13 @@ public class Utils {
 		return false;
 	}
 
+	@NotNull
+	public static String toPresentableName(String path) {
+		String name = path;
+		int i = StringUtil.lastIndexOfAny(path, "\\/");
+		if (i > 0) {
+			name = path.substring(i + 1);
+		}
+		return name;
+	}
 }
