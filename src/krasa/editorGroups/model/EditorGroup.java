@@ -2,11 +2,10 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.vfs.VirtualFile;
 
-import java.util.Collections;
 import java.util.List;
 
 public interface EditorGroup {
-	public static EditorGroup EMPTY = new EditorGroupImpl(Collections.emptyList(), "NOT_EXISTS", null);
+	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", null, false);
 
 	String getOwnerPath();
 
@@ -16,6 +15,8 @@ public interface EditorGroup {
 
 	boolean valid();
 
+	EditorGroupIndexValue invalidate();
+	
 	int size();
 
 	VirtualFile getOwnerVirtualFile();

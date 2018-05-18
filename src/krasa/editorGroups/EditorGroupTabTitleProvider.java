@@ -32,10 +32,12 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 
 		if (group!=null && group .valid()) {
 			int size = group.size();
-			if (group.getTitle() != null) {
-				return "[" + size + " "+group.getTitle()+ "] " + presentableNameForUI;
+			if (group.size() > 0 && group.getTitle() != null) {
+				return "[" + size + " " + group.getTitle() + "] " + presentableNameForUI;
 			}
-			return "[" + size + "] " + presentableNameForUI;
+			if (group.size() > 0) {
+				return "[" + size + "] " + presentableNameForUI;
+			}
 		}
 		return presentableNameForUI;
 	}

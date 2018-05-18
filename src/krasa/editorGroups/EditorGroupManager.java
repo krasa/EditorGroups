@@ -66,6 +66,7 @@ public class EditorGroupManager {
 		}
 
 		if (result.invalid()) {
+			cache.validate(project, lastGroup);
 			if (lastGroup.valid()) {
 				result = lastGroup;
 			}
@@ -80,9 +81,7 @@ public class EditorGroupManager {
 			List<EditorGroup> groupsAsSlave = cache.findGroupsAsSlave(project, currentFilePath);
 			//TODO union?
 			for (EditorGroup editorGroup : groupsAsSlave) {
-				if (editorGroup.valid()) {
-					result = editorGroup;
-				}
+				result = editorGroup;
 				break;
 			}
 		}

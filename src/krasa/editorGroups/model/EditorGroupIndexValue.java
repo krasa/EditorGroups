@@ -1,7 +1,6 @@
-package krasa.editorGroups.index;
+package krasa.editorGroups.model;
 
 import com.intellij.openapi.vfs.VirtualFile;
-import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.support.Utils;
 
 import java.util.ArrayList;
@@ -15,6 +14,16 @@ public class EditorGroupIndexValue implements EditorGroup {
 	private List<String> relatedPaths = new ArrayList<>();
 
 	private transient List<String> links;
+	private transient boolean valid = true;
+
+	public EditorGroupIndexValue() {
+	}
+
+	public EditorGroupIndexValue(String ownerPath, String title, boolean valid) {
+		this.ownerPath = ownerPath;
+		this.title = title;
+		this.valid = valid;
+	}
 
 	public EditorGroupIndexValue setTitle(String title) {
 		this.title = title;
@@ -39,7 +48,12 @@ public class EditorGroupIndexValue implements EditorGroup {
 
 	@Override
 	public boolean valid() {
-		return title != null || relatedPaths.size() > 1;
+		return valid;
+	}
+
+	public EditorGroupIndexValue invalidate() {
+		this.valid = false;
+		return this;
 	}
 
 	@Override
@@ -77,6 +91,9 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return this;
 	}
 
+	public boolean isOwner(String canonicalPath) {
+		return ownerPath.equals(canonicalPath);
+	}
 
 	@Override
 	public boolean equals(Object o) {
@@ -86,26 +103,25 @@ public class EditorGroupIndexValue implements EditorGroup {
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
 		if (ownerPath != null ? !ownerPath.equals(that.ownerPath) : that.ownerPath != null) return false;
-		if (!title.equals(that.title)) return false;
+		if (title != null ? !title.equals(that.title) : that.title != null) return false;
 		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = ownerPath != null ? ownerPath.hashCode() : 0;
-		result = 31 * result + title.hashCode();
+		result = 31 * result + (title != null ? title.hashCode() : 0);
 		result = 31 * result + (relatedPaths != null ? relatedPaths.hashCode() : 0);
 		return result;
 	}
 
-	public boolean isOwner(String canonicalPath) {
-		return ownerPath.equals(canonicalPath);
-	}
 
 	@Override
 	public String toString() {
 		return "EditorGroupIndexValue{" +
 			"title='" + title + '\'' +
+			"owner='" + ownerPath + '\'' +
+			"related='" + relatedPaths + '\'' +
 			'}';
 	}
 }

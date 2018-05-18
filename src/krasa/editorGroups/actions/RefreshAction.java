@@ -17,7 +17,7 @@ public class RefreshAction extends DumbAwareAction implements CustomComponentAct
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_GROUPS_PANEL);
 			if (panel != null) {
-				panel.refresh(true);
+				panel.refresh(true, null);
 			}
 		}
 	}

@@ -12,4 +12,7 @@ public interface Cache {
 	List<EditorGroup> findGroupsAsSlave(Project project, String currentFilePath);
 
 	void reindex(Project project, VirtualFile currentFile);
+
+	boolean validate(Project project, EditorGroup lastGroup);
+	
 }

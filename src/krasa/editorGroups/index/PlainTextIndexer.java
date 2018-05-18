@@ -7,6 +7,8 @@ import com.intellij.patterns.StringPattern;
 import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
+import krasa.editorGroups.model.EditorGroupIndexValue;
+import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -96,8 +98,10 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String filePath) {
+			if (StringUtils.isBlank(filePath)) {
+				return object;
+			}
 			object = init(object);
-
 
 			//TODO patterns
 			try {
@@ -106,8 +110,6 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 				} else {
 					File file = new File(folder, filePath);
 					object.addRelated(file.getCanonicalPath().replace("\\", "/"));
-
-
 				}
 			} catch (Exception e) {
 				LOG.warn("Failed to parse: '" + filePath + "' in " + inputData.getFile().getCanonicalPath());

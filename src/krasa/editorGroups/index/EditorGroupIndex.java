@@ -4,6 +4,7 @@ import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
+import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 
@@ -50,7 +51,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	@Override
 	public int getVersion() {
-		int version = 10;
+		int version = 11;
 		int versionFromIndexer = myIndexer instanceof PlainTextIndexer ? (((PlainTextIndexer) myIndexer).getVersion()) : 0xFF;
 		version = version * 31 + (versionFromIndexer ^ myIndexer.getClass().getName().hashCode());
 		return version;

@@ -54,7 +54,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private final VirtualFile file;
 	private int currentIndex;
 	@NotNull
-	private EditorGroup myGroup = EditorGroup.EMPTY;
+	private EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
 
@@ -63,7 +63,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		textEditor.getEditor().putUserData(EDITOR_GROUPS_PANEL, this);
 		System.out.println("new EditorGroupPanel");
 		if (userData != null) {
-			myGroup = userData;
+			displayedGroup = userData;
 		}
 		this.textEditor = textEditor;
 		this.project = project;
@@ -85,27 +85,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		fileFromTextEditor = Utils.getFileFromTextEditor(project, textEditor);
 		addButtons();
 
-		refresh(false);
+		refresh(false, null);
 		EditorGroupManager.getInstance(project).switching(false);
 	}
 
-	private void focusGained(@NotNull Editor editor) {
-		//important when switching to a file that has an exsting editor
-		EditorGroup userData1 = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-		System.out.println("focusGained " + file + " " + userData1);
-		if (userData1 != null && userData1.valid() && myGroup != userData1) {
-			reload = true;
-			myGroup = userData1;
-			refresh(false);
-		} else if (!myGroup.valid() && userData1 != null && !userData1.valid()) {
-			refresh(false);
-		}
-		EditorGroupManager.getInstance(project).switching(false);
-	}
 
 	private void init(EditorGroup group) {
-		this.myGroup = group;
-		textEditor.putUserData(EDITOR_GROUP, myGroup); // for titles
+		this.displayedGroup = group;
+		textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		setVisible(!group.getRelatedPaths().isEmpty());
 
 		addButtons();
@@ -126,14 +113,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	public void previous(boolean newTab, boolean newWindow) {
-		if (myGroup.invalid()) {
+		if (displayedGroup.invalid()) {
 			return;
 		}
 		if (!isVisible()) {
 			return;
 		}
 		int iterations = 0;
-		List<String> paths = myGroup.getLinks();
+		List<String> paths = displayedGroup.getLinks();
 		VirtualFile fileByPath = null;
 
 		while (fileByPath == null && iterations < paths.size()) {
@@ -152,7 +139,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void next(boolean newTab, boolean newWindow) {
-		if (myGroup.invalid()) {
+		if (displayedGroup.invalid()) {
 			return;
 		}
 		if (!isVisible()) {
@@ -160,7 +147,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		VirtualFile fileByPath = null;
 		int iterations = 0;
-		List<String> paths = myGroup.getLinks();
+		List<String> paths = displayedGroup.getLinks();
 
 		while (fileByPath == null && iterations < paths.size()) {
 			iterations++;
@@ -202,14 +189,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (newWindow) {
 			Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
 			for (FileEditor fileEditor : pair.first) {
-				fileEditor.putUserData(EDITOR_GROUP, myGroup);
+				fileEditor.putUserData(EDITOR_GROUP, displayedGroup);
 			}
 		} else {
 
 			EditorGroupManager.getInstance(project).switching(true);
 			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 			for (FileEditor fileEditor : fileEditors) {
-				fileEditor.putUserData(EDITOR_GROUP, myGroup);
+				fileEditor.putUserData(EDITOR_GROUP, displayedGroup);
 			}
 
 			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
@@ -223,7 +210,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	private void createLinks() {
-		List<String> paths = myGroup.getLinks();
+		List<String> paths = displayedGroup.getLinks();
 
 		for (int i1 = 0; i1 < paths.size(); i1++) {
 			String path = paths.get(i1);
@@ -268,18 +255,34 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		return -666;
 	}
 
-	public void refresh(boolean refresh) {
+	private void focusGained(@NotNull Editor editor) {
+		//important when switching to a file that has an exsting editor
+		EditorGroup userData1 = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		System.out.println("focusGained " + file + " " + userData1);
+		if (userData1 != null) {
+			if (userData1.valid() && displayedGroup != userData1) {
+				reload = true;
+				refresh(false, userData1);
+			} else if (!displayedGroup.valid()) {
+				refresh(false, null);
+			}
+		}
+		EditorGroupManager.getInstance(project).switching(false);
+	}
+
+	public void refresh(boolean refresh, EditorGroup newGroup) {
 		DumbService.getInstance(project).runWhenSmart(new Runnable() {
 			@Override
 			public void run() {
 				System.out.println("refresh");
 				try {
 
-					EditorGroup group = EditorGroupManager.getInstance(project).getGroup(project, textEditor, myGroup, refresh);
-					if (group == myGroup && !reload) {
+					EditorGroup lastGroup = newGroup == null ? displayedGroup : newGroup;
+					EditorGroup group = EditorGroupManager.getInstance(project).getGroup(project, textEditor, lastGroup, refresh);
+					if (group == displayedGroup && !reload && !refresh) {
 						return;
 					}
-					textEditor.putUserData(EDITOR_GROUP, myGroup); // for titles
+					textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 					removeAll();
 					init(group);
 					revalidate();
