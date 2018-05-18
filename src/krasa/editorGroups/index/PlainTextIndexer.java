@@ -53,15 +53,16 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 			}
 
 			HashMap<String, EditorGroupIndexValue> map = new HashMap<>();
-			String canonicalPath = inputData.getFile().getCanonicalPath();
+			String ownerPath = inputData.getFile().getCanonicalPath();
 			if (value != null) {
-				value.setOwnerPath(canonicalPath);
+				value.setOwnerPath(ownerPath);
 				for (String s : value.getRelatedPaths()) {
 					map.put(s, value);
 				}
-				map.put(canonicalPath, value);
+				map.put(ownerPath, value);
 
 			}
+			System.err.println("indexed: " + ownerPath);
 			return map;
 		} catch (com.intellij.openapi.progress.ProcessCanceledException e) {
 			throw e;

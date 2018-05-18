@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.support.Utils;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +31,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return this;
 	}
 
+	@NotNull
 	public String getOwnerPath() {
 		return ownerPath;
 	}
@@ -58,7 +60,10 @@ public class EditorGroupIndexValue implements EditorGroup {
 
 	@Override
 	public int size() {
-		return relatedPaths.size();
+		if (links == null) {
+			links = getLinks();
+		}
+		return links.size();
 	}
 
 	@Override

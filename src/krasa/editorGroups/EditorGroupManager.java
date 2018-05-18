@@ -1,9 +1,4 @@
-/*
- * @idea.title CORE
- * @idea.related EditorGroupPanel.java
- * @idea.related ProjectComponent.java
- * @idea.related EditorGroupTabTitleProvider.java
- */
+
 package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
@@ -19,6 +14,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
+/*
+ * @idea.title CORE
+ * @idea.related EditorGroupPanel.java
+ * @idea.related ProjectComponent.java
+ * @idea.related EditorGroupTabTitleProvider.java
+ */
 public class EditorGroupManager {
 
 

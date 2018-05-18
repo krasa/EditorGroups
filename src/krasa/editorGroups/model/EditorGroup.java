@@ -4,6 +4,8 @@ import com.intellij.openapi.vfs.VirtualFile;
 
 import java.util.List;
 
+// @idea.title EditorGroup
+// @idea.related EditorGroupIndexValue.java
 public interface EditorGroup {
 	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", null, false);
 
@@ -16,7 +18,7 @@ public interface EditorGroup {
 	boolean valid();
 
 	EditorGroupIndexValue invalidate();
-	
+
 	int size();
 
 	VirtualFile getOwnerVirtualFile();

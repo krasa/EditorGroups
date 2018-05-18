@@ -13,6 +13,8 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
+
 public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 
 	/**
@@ -30,13 +32,13 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 		}
 
 
-		if (group!=null && group .valid()) {
-			int size = group.size();
-			if (group.size() > 0 && group.getTitle() != null) {
-				return "[" + size + " " + group.getTitle() + "] " + presentableNameForUI;
+		if (group != null && group.valid()) {
+//			System.err.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
+			if (group.size() > 0 && isNotEmpty(group.getTitle())) {
+				return "[" + group.size() + " " + group.getTitle() + "] " + presentableNameForUI;
 			}
 			if (group.size() > 0) {
-				return "[" + size + "] " + presentableNameForUI;
+				return "[" + group.size() + "] " + presentableNameForUI;
 			}
 		}
 		return presentableNameForUI;

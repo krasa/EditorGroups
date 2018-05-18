@@ -14,6 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -111,7 +112,46 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(toolbar.getComponent());
 	}
 
+	private void createLinks() {
+		List<String> paths = displayedGroup.getLinks();
 
+		for (int i1 = 0; i1 < paths.size(); i1++) {
+			String path = paths.get(i1);
+			String name = path;
+			int i = StringUtil.lastIndexOfAny(path, "\\/");
+			if (i > 0) {
+				name = path.substring(i + 1);
+			}
+
+			JButton button = new JButton(name);
+			// BROKEN in IJ 2018
+			// button.setBorder(null);
+			// button.setContentAreaFilled(false);
+			// button.setOpaque(false);
+			// button.setBorderPainted(false);
+			button.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					openFile(Utils.getFileByPath(path), BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
+				}
+			});
+			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
+				Font font = button.getFont();
+				button.setFont(font.deriveFont(Font.BOLD));
+				if (UIUtil.isUnderDarcula()) {
+					button.setForeground(Color.WHITE);
+				} else {
+					button.setForeground(Color.BLACK);
+				}
+				currentIndex = i1;
+			}
+
+			if (!new File(path).exists()) {
+				button.setForeground(Color.red);
+			}
+			add(button);
+		}
+	}
 	public void previous(boolean newTab, boolean newWindow) {
 		if (displayedGroup.invalid()) {
 			return;
@@ -209,47 +249,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	private void createLinks() {
-		List<String> paths = displayedGroup.getLinks();
-
-		for (int i1 = 0; i1 < paths.size(); i1++) {
-			String path = paths.get(i1);
-			String name = path;
-			int i = StringUtil.lastIndexOfAny(path, "\\/");
-			if (i > 0) {
-				name = path.substring(i + 1);
-			}
-
-			JButton button = new JButton(name);
-			// BROKEN in IJ 2018
-			// button.setBorder(null);
-			// button.setContentAreaFilled(false);
-			// button.setOpaque(false);
-			// button.setBorderPainted(false);
-			button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					openFile(Utils.getFileByPath(path), BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
-				}
-			});
-			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
-				Font font = button.getFont();
-				button.setFont(font.deriveFont(Font.BOLD));
-				if (UIUtil.isUnderDarcula()) {
-					button.setForeground(Color.WHITE);
-				} else {
-					button.setForeground(Color.BLACK);
-				}
-				currentIndex = i1;
-			}
-
-			if (!new File(path).exists()) {
-				button.setForeground(Color.red);
-			}
-			add(button);
-		}
-	}
-
 	@Override
 	public double getWeight() {
 		return -666;
@@ -288,6 +287,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					revalidate();
 					repaint();
 					reload = false;
+					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
+
 				} catch (Exception e) {
 					LOG.error(e);
 					e.printStackTrace();
