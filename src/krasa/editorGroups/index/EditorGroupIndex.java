@@ -51,10 +51,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	@Override
 	public int getVersion() {
-		int version = 11;
-		int versionFromIndexer = myIndexer instanceof PlainTextIndexer ? (((PlainTextIndexer) myIndexer).getVersion()) : 0xFF;
-		version = version * 31 + (versionFromIndexer ^ myIndexer.getClass().getName().hashCode());
-		return version;
+		return 0;
 	}
 
 	@Override

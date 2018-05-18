@@ -71,10 +71,6 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 		}
 	}
 
-	public int getVersion() {
-		return 1;
-	}
-
 
 	static abstract class Consumer {
 		EditorGroupIndexValue init(EditorGroupIndexValue value) {
