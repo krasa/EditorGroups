@@ -14,6 +14,10 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
+/*
+ * @idea.related PlainTextIndexer.java
+ *
+ * */
 public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGroupIndexValue> {
 	@NonNls
 	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("EditorGroupIndex");
@@ -52,7 +56,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	@Override
 	public int getVersion() {
-		return 0;
+		return 1;
 	}
 
 	@Override
