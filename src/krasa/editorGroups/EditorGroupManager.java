@@ -41,7 +41,19 @@ public class EditorGroupManager {
 	public EditorGroupManager(Project project) {
 
 		this.project = project;
+
+		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
+			@Override
+			public void enteredDumbMode() {
+			}
+
+			@Override
+			public void exitDumbMode() {
+				onSmartMode();
+			}
+		});
 	}
+
 
 	public static EditorGroupManager getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, EditorGroupManager.class);
@@ -124,7 +136,24 @@ public class EditorGroupManager {
 			}
 		}
 
-
-		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + " " + Thread.currentThread().getName());
+		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 	}
+
+	/*hopefully it wont cause lags*/
+	private void onSmartMode() {
+		long start = System.currentTimeMillis();
+		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+		for (FileEditor selectedEditor : manager.getAllEditors()) {
+			if (selectedEditor instanceof TextEditor) {
+				Editor editor = ((TextEditor) selectedEditor).getEditor();
+				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+				if (panel != null) {
+					panel.refresh(false, null);
+				}
+			}
+		}
+
+		System.out.println("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+	}
+
 }
