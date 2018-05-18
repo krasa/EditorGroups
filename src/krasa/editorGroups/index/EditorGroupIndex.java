@@ -1,5 +1,6 @@
 package krasa.editorGroups.index;
 
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.EnumeratorStringDescriptor;
@@ -23,7 +24,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 		public void save(@NotNull DataOutput out, EditorGroupIndexValue value) throws IOException {
 			String title = value.getTitle();
 			out.writeUTF(value.getOwnerPath());
-			out.writeUTF(title == null ? "" : title);
+			out.writeUTF(StringUtil.notNullize(title));
 			out.writeInt(value.getRelatedPaths().size());
 			List<String> related = value.getRelatedPaths();
 			for (String s : related) {
@@ -98,8 +99,4 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 		return myInputFilter;
 	}
 
-	@Override
-	public boolean hasSnapshotMapping() {
-		return true;
-	}
 }
