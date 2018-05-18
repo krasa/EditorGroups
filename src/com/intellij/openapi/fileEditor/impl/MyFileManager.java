@@ -11,7 +11,7 @@ public class MyFileManager {
 	private static final Logger LOG = Logger.getInstance(MyFileManager.class);
 
 	public static void updateTitle(Project project, VirtualFile file) {
-//		System.err.println("updateTitle "+file.getName());
+//		System.out.println("updateTitle "+file.getName());
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
 		if (false) { //API watch

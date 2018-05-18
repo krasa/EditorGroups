@@ -1,23 +1,23 @@
 package krasa.editorGroups.support;
 
-import krasa.editorGroups.model.EditorGroup;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
+import krasa.editorGroups.model.EditorGroup;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
 
 public class Utils {
 
 	@Nullable
-	public static VirtualFile getFileFromTextEditor(Project project, TextEditorImpl textEditor) {
+	public static VirtualFile getFileFromTextEditor(Project project, FileEditor textEditor) {
 		return FileEditorManagerEx.getInstanceEx(project).getFile(textEditor);
 	}
 
@@ -43,6 +43,16 @@ public class Utils {
 		return null;
 	}
 
+	@Nullable
+	public static VirtualFile getVirtualFileByAbsolutePath(@NotNull String s) {
+		VirtualFile fileByPath = null;
+		if (new File(s).exists()) {
+			fileByPath = getFileByPath(s);
+		}
+		return fileByPath;
+	}
+	
+	
 	@Nullable
 	public static VirtualFile getFileByPath(@NotNull String path) {
 		return getFileByPath(path, (VirtualFile) null);

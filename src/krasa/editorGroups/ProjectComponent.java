@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
 
 public class ProjectComponent implements com.intellij.openapi.components.ProjectComponent {
@@ -34,12 +35,13 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor instanceof TextEditorImpl) {
 						Editor editor = ((TextEditorImpl) fileEditor).getEditor();
-						if (editor.getUserData(EditorGroupPanel.EDITOR_GROUPS_PANEL) != null) {
+						if (editor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 							continue;
 						}
 
 						FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
-						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP), file);
+						EditorGroup userData = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, userData, file);
 						manager.addTopComponent(fileEditor, panel);
 					}
 				}

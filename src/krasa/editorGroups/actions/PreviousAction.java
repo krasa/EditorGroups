@@ -19,7 +19,7 @@ public class PreviousAction extends DumbAwareAction implements CustomComponentAc
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		Editor data = anActionEvent.getData(CommonDataKeys.EDITOR);
 		if (data != null) {
-			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_GROUPS_PANEL);
+			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
 				InputEvent e = anActionEvent.getInputEvent();
 

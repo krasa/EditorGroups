@@ -96,7 +96,8 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return this;
 	}
 
-	public boolean isOwner(String canonicalPath) {
+	@Override
+	public boolean isOwner(@NotNull String canonicalPath) {
 		return ownerPath.equals(canonicalPath);
 	}
 

@@ -31,4 +31,5 @@ public interface EditorGroup {
 
 	List<String> getLinks();
 
+	boolean isOwner(String ownerPath);
 }

@@ -33,7 +33,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 
 
 		if (group != null && group.valid()) {
-//			System.err.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
+//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
 			if (group.size() > 0 && isNotEmpty(group.getTitle())) {
 				return "[" + group.size() + " " + group.getTitle() + "] " + presentableNameForUI;
 			}

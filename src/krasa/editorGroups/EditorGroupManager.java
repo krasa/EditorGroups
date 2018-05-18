@@ -2,11 +2,16 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.TextEditor;
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
+import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.support.Cache;
 import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
@@ -44,13 +49,13 @@ public class EditorGroupManager {
 
 
 	@NotNull
-	EditorGroup getGroup(Project project, TextEditorImpl fileEditor, @NotNull EditorGroup lastGroup, boolean refresh) {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup lastGroup, boolean force) {
 		if (DumbService.isDumb(project)) {
 			throw new RuntimeException("check for dumb");
 		}
 
 		EditorGroup result = EditorGroup.EMPTY;
-		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + refresh);
+		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + force);
 
 
 		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
@@ -59,8 +64,7 @@ public class EditorGroupManager {
 			return EditorGroup.EMPTY;
 		}
 		String currentFilePath = currentFile.getCanonicalPath();
-		if (refresh) {
-
+		if (force) {
 			if (result.invalid()) {
 				result = cache.getByOwner(project, currentFilePath);
 			}
@@ -101,5 +105,26 @@ public class EditorGroupManager {
 
 	public boolean switching() {
 		return switching;
+	}
+
+	public void onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
+		if (DumbService.isDumb(project)) { //optimization
+			return;
+		}
+
+		long start = System.currentTimeMillis();
+		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+		for (FileEditor selectedEditor : manager.getAllEditors()) {
+			if (selectedEditor instanceof TextEditor) {
+				Editor editor = ((TextEditor) selectedEditor).getEditor();
+				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+				if (panel != null) {
+					panel.onIndexingDone(ownerPath, group);
+				}
+			}
+		}
+
+
+		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + " " + Thread.currentThread().getName());
 	}
 }

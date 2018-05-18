@@ -7,6 +7,7 @@ import com.intellij.patterns.StringPattern;
 import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
+import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -22,8 +23,8 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 	private static final Logger LOG = Logger.getInstance(PlainTextIndexer.class);
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
-		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.title(.*)", false), new TitleConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.related(.*)", false), new RelatedFilesConsumer())
+		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.title\\s(.*)", false), new TitleConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.related\\s(.*)", false), new RelatedFilesConsumer())
 	};
 
 	@Override
@@ -59,10 +60,11 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 				for (String s : value.getRelatedPaths()) {
 					map.put(s, value);
 				}
+				EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
 				map.put(ownerPath, value);
 
 			}
-			System.err.println("indexed: " + ownerPath);
+			System.out.println("indexed: " + ownerPath);
 			return map;
 		} catch (com.intellij.openapi.progress.ProcessCanceledException e) {
 			throw e;

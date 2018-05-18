@@ -30,7 +30,7 @@
 //		
 //		List<Path> pathsList = paths.collect(Collectors.toList());
 //
-//		System.err.println(pathsList);
+//		System.out.println(pathsList);
 //		
 //		
 //		
@@ -42,7 +42,7 @@
 //		scanner.scan();
 //		String[] files = scanner.getIncludedFiles();
 //		
-//		System.err.println(Arrays.toString(files));
+//		System.out.println(Arrays.toString(files));
 //		    
 //		
 //		
