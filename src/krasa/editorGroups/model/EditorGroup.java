@@ -7,7 +7,7 @@ import java.util.List;
 // @idea.title EditorGroup
 // @idea.related EditorGroupIndexValue.java
 public interface EditorGroup {
-	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", null, false);
+	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false);
 
 	String getOwnerPath();
 

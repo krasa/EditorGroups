@@ -1,5 +1,6 @@
 package krasa.editorGroups.model;
 
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -10,8 +11,8 @@ import java.util.stream.Collectors;
 
 public class EditorGroupIndexValue implements EditorGroup {
 
-	private String ownerPath;
-	private String title;
+	private String ownerPath = "";
+	private String title = "";
 	private List<String> relatedPaths = new ArrayList<>();
 
 	private transient List<String> links;
@@ -27,7 +28,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	public EditorGroupIndexValue setTitle(String title) {
-		this.title = title;
+		this.title = StringUtil.notNullize(title);
 		return this;
 	}
 
@@ -108,19 +109,18 @@ public class EditorGroupIndexValue implements EditorGroup {
 
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
-		if (ownerPath != null ? !ownerPath.equals(that.ownerPath) : that.ownerPath != null) return false;
-		if (title != null ? !title.equals(that.title) : that.title != null) return false;
-		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
+		if (!ownerPath.equals(that.ownerPath)) return false;
+		if (!title.equals(that.title)) return false;
+		return relatedPaths.equals(that.relatedPaths);
 	}
 
 	@Override
 	public int hashCode() {
-		int result = ownerPath != null ? ownerPath.hashCode() : 0;
-		result = 31 * result + (title != null ? title.hashCode() : 0);
-		result = 31 * result + (relatedPaths != null ? relatedPaths.hashCode() : 0);
+		int result = ownerPath.hashCode();
+		result = 31 * result + title.hashCode();
+		result = 31 * result + relatedPaths.hashCode();
 		return result;
 	}
-
 
 	@Override
 	public String toString() {
