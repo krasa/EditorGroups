@@ -14,10 +14,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
-/*
- * @idea.related PlainTextIndexer.java
- *
- * */
+//@idea.title Index
+//@idea.related PlainTextIndexer.java
 public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGroupIndexValue> {
 	@NonNls
 	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("EditorGroupIndex");
@@ -91,7 +89,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 	private final FileBasedIndex.InputFilter myInputFilter = file -> {
 		if (!file.isInLocalFileSystem()  // skip library sources
 			|| file.getFileType().isBinary()
-			) {
+		) {
 			return false;
 		}
 		return true;
