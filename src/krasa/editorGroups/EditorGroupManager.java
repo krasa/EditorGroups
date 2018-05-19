@@ -7,23 +7,23 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.support.Cache;
 import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
 
 /*
  * @idea.title CORE
  * @idea.related EditorGroupPanel.java
  * @idea.related ProjectComponent.java
  * @idea.related EditorGroupTabTitleProvider.java
+ * @idea.related support/IndexCache.java
+ * @idea.related support/FileResolver.java
  */
 public class EditorGroupManager {
 
@@ -31,7 +31,7 @@ public class EditorGroupManager {
 	private final Project project;
 	//	@NotNull
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
-	Cache cache = new IndexCache();
+	IndexCache cache; 
 
 	/**
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
@@ -39,7 +39,7 @@ public class EditorGroupManager {
 	private boolean switching;
 
 	public EditorGroupManager(Project project) {
-
+		cache = IndexCache.getInstance(project);
 		this.project = project;
 
 		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
@@ -59,12 +59,15 @@ public class EditorGroupManager {
 		return ServiceManager.getService(project, EditorGroupManager.class);
 	}
 
-
+	/**
+	 * @param force if true - return this file's owned group instead of the last one
+	 */
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup lastGroup, boolean force) {
 		if (DumbService.isDumb(project)) {
 			throw new RuntimeException("check for dumb");
 		}
+		long start = System.currentTimeMillis();
 
 		EditorGroup result = EditorGroup.EMPTY;
 		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + force);
@@ -77,37 +80,35 @@ public class EditorGroupManager {
 		}
 		String currentFilePath = currentFile.getCanonicalPath();
 		if (force) {
-			if (result.invalid()) {
-				result = cache.getByOwner(project, currentFilePath);
+			if (result.isInvalid()) {
+				result = cache.getByOwner(currentFilePath);
 			}
 		}
 
-		if (result.invalid()) {
-			cache.validate(project, lastGroup);
-			if (lastGroup.valid()) {
+		if (result.isInvalid()) {
+			cache.validate(lastGroup);
+			if (lastGroup.isValid()) {
 				result = lastGroup;
 			}
 		}
 
-		if (result.invalid()) {
-			result = cache.getByOwner(project, currentFilePath);
-		}
-
-
-		if (result.invalid()) {
-			List<EditorGroup> groupsAsSlave = cache.findGroupsAsSlave(project, currentFilePath);
-			//TODO union?
-			for (EditorGroup editorGroup : groupsAsSlave) {
-				result = editorGroup;
-				break;
+		if (!force) {//already tried
+			if (result.isInvalid()) {
+				result = cache.getByOwner(currentFilePath);
 			}
 		}
 
 
-		if (result.invalid()) {
-			System.out.println("no group found");
+		if (result.isInvalid()) {
+			result = cache.getEditorGroupAsSlave(currentFilePath);
 		}
-		System.out.println("< getGroup " + fileEditor.getName() + " " + result.getTitle());
+
+
+//		if (result.invalid()) {
+//			result = new FolderGroup(currentFile);
+//		}
+		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + result.getTitle());
+		cache.setLast(currentFilePath, result);
 		return result;
 	}
 
@@ -120,6 +121,7 @@ public class EditorGroupManager {
 	}
 
 	public void onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
+		cache.initGroup(group);
 		if (DumbService.isDumb(project)) { //optimization
 			return;
 		}
@@ -141,6 +143,7 @@ public class EditorGroupManager {
 
 	/*hopefully it wont cause lags*/
 	private void onSmartMode() {
+
 		long start = System.currentTimeMillis();
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		for (FileEditor selectedEditor : manager.getAllEditors()) {
@@ -149,6 +152,8 @@ public class EditorGroupManager {
 				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 				if (panel != null) {
 					panel.refresh(false, null);
+					MyFileManager.updateTitle(project, selectedEditor.getFile());
+					
 				}
 			}
 		}

@@ -32,13 +32,13 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 		}
 
 
-		if (group != null && group.valid()) {
+		if (group != null && group.isValid()) {
 //			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
-			if (group.size() > 0 && isNotEmpty(group.getTitle())) {
-				return "[" + group.size() + " " + group.getTitle() + "] " + presentableNameForUI;
+			if (group.size(project) > 1 && isNotEmpty(group.getTitle())) {
+				return "[" + group.size(project) + " " + group.getTitle() + "] " + presentableNameForUI;
 			}
-			if (group.size() > 0) {
-				return "[" + group.size() + "] " + presentableNameForUI;
+			if (group.size(project) > 1) {
+				return "[" + group.size(project) + "] " + presentableNameForUI;
 			}
 		}
 		return presentableNameForUI;
@@ -62,4 +62,29 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 	}
 
 
+	/*not yet existing api*/
+	@Nullable
+	@Override
+	public String getEditorTabTitle(Project project, VirtualFile virtualFile, FileEditor textEditor) {
+		System.out.println("getEditorTabTitle project = [" + project + "], virtualFile = [" + virtualFile + "], textEditor = [" + textEditor + "]");
+		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
+		EditorGroup group = null;
+
+		if (textEditor != null) {
+			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		}
+
+
+		if (group != null && group.isValid()) {
+//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
+			int size = group.size(project);
+			if (size > 1 && isNotEmpty(group.getTitle())) {
+				return "[" + size + " " + group.getTitle() + "] " + presentableNameForUI;
+			}
+			if (size > 1) {
+				return "[" + size + "] " + presentableNameForUI;
+			}
+		}
+		return presentableNameForUI;
+	}
 }

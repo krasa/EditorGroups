@@ -6,21 +6,31 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.Processor;
+import com.intellij.util.indexing.FileBasedIndex;
+import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.support.IndexCache;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.List;
 
 public class ProjectComponent implements com.intellij.openapi.components.ProjectComponent {
 	private final Project project;
 
 	public ProjectComponent(Project project) {
-
 		this.project = project;
 	}
 
 	@Override
 	public void projectOpened() {
+		initCache();
+
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 			/**on EDT*/
 			@Override
@@ -52,5 +62,27 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			}
 		});
 
+	}
+
+	private void initCache() {
+
+		DumbService.getInstance(project).runWhenSmart(new Runnable() {
+			@Override
+			public void run() {
+				long start = System.currentTimeMillis();
+				FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
+				IndexCache instance = IndexCache.getInstance(project);
+				Processor<String> processor = new Processor<String>() {
+					@Override
+					public boolean process(String s) {
+						List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
+						instance.initCache(values);
+						return true;
+					}
+				};
+				fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, processor, project);
+				System.err.println("initCache " + (System.currentTimeMillis() - start));
+			}
+		});
 	}
 }

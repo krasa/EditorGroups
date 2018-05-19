@@ -2,7 +2,6 @@ package krasa.editorGroups.index;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Pair;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.patterns.StringPattern;
 import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
@@ -57,12 +56,8 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 			String ownerPath = inputData.getFile().getCanonicalPath();
 			if (value != null) {
 				value.setOwnerPath(ownerPath);
-				for (String s : value.getRelatedPaths()) {
-					map.put(s, value);
-				}
 				EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
 				map.put(ownerPath, value);
-
 			}
 			System.out.println("indexed: " + ownerPath);
 			return map;
@@ -101,18 +96,7 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 				return object;
 			}
 			object = init(object);
-
-			//TODO patterns
-			try {
-				if (FileUtil.isAbsolute(filePath)) {
-					object.addRelated(filePath.replace("\\", "/"));
-				} else {
-					File file = new File(folder, filePath);
-					object.addRelated(file.getCanonicalPath().replace("\\", "/"));
-				}
-			} catch (Exception e) {
-				LOG.warn("Failed to parse: '" + filePath + "' in " + inputData.getFile().getCanonicalPath());
-			}
+			object.addRelated(filePath);
 			return object;
 		}
 	}

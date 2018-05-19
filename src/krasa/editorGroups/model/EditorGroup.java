@@ -1,13 +1,14 @@
 package krasa.editorGroups.model;
 
-import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.project.Project;
 
+import java.util.Collections;
 import java.util.List;
 
 // @idea.title EditorGroup
 // @idea.related EditorGroupIndexValue.java
 public interface EditorGroup {
-	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false);
+	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
 	String getOwnerPath();
 
@@ -15,21 +16,17 @@ public interface EditorGroup {
 
 	String getTitle();
 
-	boolean valid();
+	boolean isValid();
 
 	EditorGroupIndexValue invalidate();
 
-	int size();
+	int size(Project project);
 
-	VirtualFile getOwnerVirtualFile();
-
-	boolean contains(String canonicalPath);
-
-	default boolean invalid() {
-		return !valid();
+	default boolean isInvalid() {
+		return !isValid();
 	}
 
-	List<String> getLinks();
+	List<String> getLinks(Project project);
 
 	boolean isOwner(String ownerPath);
 }

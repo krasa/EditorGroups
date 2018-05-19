@@ -8,7 +8,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupPanel;
-import org.w3c.dom.events.KeyboardEvent;
 
 import javax.swing.*;
 import java.awt.event.InputEvent;
@@ -24,9 +23,8 @@ public class PreviousAction extends DumbAwareAction implements CustomComponentAc
 				InputEvent e = anActionEvent.getInputEvent();
 
 				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && !(e instanceof MouseEvent);
-				newTab |= BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof KeyboardEvent);
-
-
+				newTab |= BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
+			
 				panel.previous(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
 			}
 		}

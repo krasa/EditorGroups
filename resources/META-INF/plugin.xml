@@ -8,9 +8,9 @@
     <description><![CDATA[
         Implementation of <a href="https://github.com/SomewhatCloudy/phpstorm-related-proposal"/>
      <ul>
-     <li>      - Use [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  to switch files (closing the previous one)           </li>
-     <li> - Use [Ctrl + Alt + Mouse Wheel] or [Ctrl Alt + \ or ' ] to switch files (leaving the previous one opened)</li>
-     <li> - Ctrl + Alt + Shift + E - reload the group                                                               </li>
+     <li>- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  to switch files (closing the previous one)           </li>
+     <li>- [Ctrl + Alt + Mouse Wheel] or [Ctrl Alt + \ or ' ] to switch files (leaving the previous one opened)</li>
+     <li>- Ctrl + Alt + Shift + E - reload the group                                                               </li>
      </ul> 
          
     ]]></description>
@@ -31,6 +31,7 @@
         <editorNotificationProvider implementation="krasa.editorGroups.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
         <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>
+        <projectService serviceImplementation="krasa.editorGroups.support.IndexCache"/>
         <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
@@ -88,8 +89,13 @@
         </action>
 
 
-        <action id="ReindexAction" class="krasa.editorGroups.index.ReindexAction" text="ReindexAction">
-            <keyboard-shortcut keymap="$default" first-keystroke="shift ctrl alt Y"/>
+        <action id="krasa.editorGroups.Reindex" class="krasa.editorGroups.index.ReindexAction"
+                text="Reindex Editor Groups">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F3"/>
+        </action>
+
+        <action id="krasa.editorGroups.ReindexThisFile" class="krasa.editorGroups.index.ReindexThisFileAction"
+                text="Reindex This File">
         </action>
     </actions>
 

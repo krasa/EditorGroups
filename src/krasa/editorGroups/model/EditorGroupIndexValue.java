@@ -1,20 +1,23 @@
 package krasa.editorGroups.model;
 
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class EditorGroupIndexValue implements EditorGroup {
 
+	/*definitions*/
 	private String ownerPath = "";
 	private String title = "";
 	private List<String> relatedPaths = new ArrayList<>();
 
+	/*runtime data*/
 	private transient List<String> links;
 	private transient boolean valid = true;
 
@@ -50,7 +53,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	@Override
-	public boolean valid() {
+	public boolean isValid() {
 		return valid;
 	}
 
@@ -60,14 +63,10 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	@Override
-	public int size() {
-		if (links == null) {
-			links = getLinks();
-		}
-		return links.size();
+	public int size(Project project) {
+		return getLinks(project).size();
 	}
 
-	@Override
 	public VirtualFile getOwnerVirtualFile() {
 		if (ownerPath == null) {
 			return null;
@@ -76,17 +75,10 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	@Override
-	public boolean contains(String canonicalPath) {
-		return relatedPaths.contains(canonicalPath);
-	}
-
-	@Override
-	public List<String> getLinks() {
+	@NotNull
+	public List<String> getLinks(Project project) {
 		if (links == null) {
-			ArrayList<String> objects = new ArrayList<>(relatedPaths.size() + 1);
-			objects.add(ownerPath);
-			objects.addAll(relatedPaths);
-			links = objects.stream().distinct().collect(Collectors.toList());
+			IndexCache.getInstance(project).initGroup(this);
 		}
 
 		return links;
@@ -102,6 +94,11 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return ownerPath.equals(canonicalPath);
 	}
 
+	public EditorGroupIndexValue setLinks(List<String> links) {
+		this.links = links;
+		return this;
+	}           
+	
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -130,4 +127,5 @@ public class EditorGroupIndexValue implements EditorGroup {
 			"related='" + relatedPaths + '\'' +
 			'}';
 	}
+
 }
