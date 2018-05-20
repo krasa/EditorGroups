@@ -14,8 +14,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
-import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
-
 public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 
 	/**
@@ -65,18 +63,10 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
 		}
 
-
 		if (group != null && group.isValid() && !(group instanceof FolderGroup)) {
-
-//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
-			int size = group.size(project);
-			if (size > 1 && isNotEmpty(group.getTitle())) {
-				return "[" + size + " " + group.getTitle() + "] " + presentableNameForUI;
-			}
-			if (size > 1) {
-				return "[" + size + "] " + presentableNameForUI;
-			}
+			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI);
 		}
 		return presentableNameForUI;
 	}
+
 }

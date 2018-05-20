@@ -76,7 +76,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					@Override
 					public boolean process(String s) {
 						List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-						instance.initCache(values);
+						for (EditorGroupIndexValue value : values) {
+							instance.initGroup(value);
+						}
 						return true;
 					}
 				};

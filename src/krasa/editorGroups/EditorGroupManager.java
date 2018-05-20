@@ -13,17 +13,16 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.EditorGroups;
 import krasa.editorGroups.model.FolderGroup;
 import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+
 /*
  * @idea.title CORE
- * @idea.related EditorGroupPanel.java
- * @idea.related ProjectComponent.java
- * @idea.related EditorGroupTabTitleProvider.java
+ * @idea.related ./*
  * @idea.related support/IndexCache.java
  * @idea.related support/FileResolver.java
  */
@@ -106,21 +105,18 @@ public class EditorGroupManager {
 		if (result.isInvalid() || (force && !(result instanceof EditorGroupIndexValue))) {
 			result = cache.getEditorGroupAsSlave(currentFilePath);
 
-			if (result instanceof EditorGroups) {
-				result = EditorGroup.EMPTY; //TODO
-			}
 
 			if (applicationConfiguration.getState().autoFolders) {
 				if (result.isInvalid() || result instanceof FolderGroup) {  //create or refresh
-					result = cache.getFolderGroup(currentFile);
+					result = cache.getFolderGroup(currentFile, result);
 				}
 			} else if (result instanceof FolderGroup) {
 				result = EditorGroup.EMPTY;
 			}
 		}
-		
-		
-		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + result.getTitle());
+
+
+		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
 	}
@@ -133,10 +129,10 @@ public class EditorGroupManager {
 		return switching;
 	}
 
-	public void onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
-		cache.initGroup(group);
+	public EditorGroupIndexValue onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
+		group = cache.onIndexingDone(group);
 		if (DumbService.isDumb(project)) { //optimization
-			return;
+			return group;
 		}
 
 		long start = System.currentTimeMillis();
@@ -152,6 +148,7 @@ public class EditorGroupManager {
 		}
 
 		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+		return group;
 	}
 
 	/*hopefully it wont cause lags*/
@@ -174,4 +171,7 @@ public class EditorGroupManager {
 		System.out.println("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 	}
 
+	public Collection<EditorGroup> getGroups(VirtualFile file) {
+		return cache.getGroups(file.getCanonicalPath());
+	}
 }

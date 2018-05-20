@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -10,11 +11,17 @@ public class FolderGroup implements EditorGroup {
 	private final String currentFilePath;
 	private final List<String> links;
 	private boolean valid;
+	private final Collection<EditorGroup> groups;
 
-	public FolderGroup(String currentFilePath, List<String> links) {
+	public FolderGroup(String currentFilePath, List<String> links, Collection<EditorGroup> groups) {
 		this.currentFilePath = currentFilePath;
 		this.links = links;
 		valid = !links.isEmpty();
+		this.groups = groups;
+	}
+
+	public Collection<EditorGroup> getGroups() {
+		return groups;
 	}
 
 	@Override

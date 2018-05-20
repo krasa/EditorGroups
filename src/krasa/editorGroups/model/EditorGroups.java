@@ -1,14 +1,14 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
-import gnu.trove.THashMap;
 import krasa.editorGroups.support.IndexCache;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class EditorGroups implements EditorGroup {
 
-	Map<String, EditorGroup> map = new THashMap<>();
+	private Map<String, EditorGroup> map = new ConcurrentHashMap<>();
 	private String last;
 
 	public EditorGroups(EditorGroup editorGroup) {
@@ -92,5 +92,12 @@ public class EditorGroups implements EditorGroup {
 		}
 		return EMPTY;
 	}
-		
+
+	public EditorGroup getByOwner(String ownerPath) {
+		EditorGroup editorGroup = map.get(ownerPath);
+		if (editorGroup == null) {
+			editorGroup = EMPTY;
+		}
+		return editorGroup;
+	}
 }

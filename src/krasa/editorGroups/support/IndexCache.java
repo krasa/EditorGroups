@@ -7,7 +7,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.indexing.FileBasedIndex;
-import gnu.trove.THashMap;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
@@ -15,15 +14,10 @@ import krasa.editorGroups.model.EditorGroups;
 import krasa.editorGroups.model.FolderGroup;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 
-/**
- * TODO synchronization
- */
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
 
@@ -31,11 +25,11 @@ public class IndexCache {
 		return ServiceManager.getService(project, IndexCache.class);
 	}
 
-	FileResolver fileResolver;
-	THashMap<String, EditorGroups> groupsByLinks = new THashMap<>();
-
 	@NotNull
-	private final Project project;
+	private Project project;
+	private FileResolver fileResolver;
+	private Map<String, EditorGroups> groupsByLinks = new ConcurrentHashMap<>();
+
 
 	public IndexCache(@NotNull Project project) {
 		this.project = project;
@@ -60,13 +54,8 @@ public class IndexCache {
 		return result;
 	}
 
-	public void reindex(VirtualFile currentFile) {
-		FileBasedIndex.getInstance().requestReindex(currentFile);
-	}
-
-	public void reindex() {
+	public void clear() {
 		groupsByLinks.clear();
-		FileBasedIndex.getInstance().requestRebuild(EditorGroupIndex.NAME);
 	}
 
 	public boolean validate(EditorGroup lastGroup) {
@@ -95,10 +84,30 @@ public class IndexCache {
 	}
 
 
-	public void initCache(List<EditorGroupIndexValue> values) {
-		for (EditorGroupIndexValue value : values) {
-			initGroup(value);
+	private void addToCache(List<String> links, EditorGroupIndexValue group) {
+		for (String link : links) {
+			EditorGroups editorGroups = groupsByLinks.get(link);
+			if (editorGroups == null) {
+				groupsByLinks.put(link, new EditorGroups(group));
+			} else {
+				editorGroups.add(group);
+			}
 		}
+	}
+
+	public EditorGroupIndexValue onIndexingDone(EditorGroupIndexValue group) {
+		//return cached group
+		EditorGroups editorGroups = groupsByLinks.get(group.getOwnerPath());
+		if (editorGroups != null) {
+			EditorGroup editorGroup = editorGroups.getByOwner(group.getOwnerPath());
+			if (group.equals(editorGroup)) {
+				return (EditorGroupIndexValue) editorGroup;
+			}
+		}
+
+
+		initGroup(group);
+		return group;
 	}
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
@@ -113,16 +122,6 @@ public class IndexCache {
 		addToCache(links, group);
 	}
 
-	private void addToCache(List<String> links, EditorGroupIndexValue group) {
-		for (String link : links) {
-			EditorGroups editorGroups = groupsByLinks.get(link);
-			if (editorGroups == null) {
-				groupsByLinks.put(link, new EditorGroups(group));
-			} else {
-				editorGroups.add(group);
-			}
-		}
-	}
 
 	public EditorGroup getEditorGroupAsSlave(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
@@ -162,10 +161,25 @@ public class IndexCache {
 		editorGroups.setLast(result.getOwnerPath());
 	}
 
-	public EditorGroup getFolderGroup(VirtualFile file) {
+	public EditorGroup getFolderGroup(VirtualFile file, EditorGroup result) {
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
-		return new FolderGroup(folder, links);
+		Collection<EditorGroup> groups = Collections.emptyList();
+		if (result instanceof EditorGroups) {
+			groups = ((EditorGroups) result).getAll();
+		}
+		return new FolderGroup(folder, links, groups);
+	}
+
+
+	public Collection<EditorGroup> getGroups(String canonicalPath) {
+		Collection<EditorGroup> result = Collections.emptyList();
+		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
+		if (editorGroups != null) {
+			editorGroups.validate(this);
+			result = editorGroups.getAll();
+		}
+		return result;
 	}
 }

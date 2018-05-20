@@ -67,7 +67,7 @@ public class FileResolver {
 				LOG.warn("filePath='" + filePath + "'; owner=" + ownerPath, e);
 			}
 		}
-		System.err.println("resolveLinks " + (System.currentTimeMillis() - start) + "ms");
+		System.err.println("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
 		return new ArrayList<>(links);
 	}
 

@@ -5,6 +5,8 @@ import com.intellij.openapi.project.Project;
 import java.util.Collections;
 import java.util.List;
 
+import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
+
 // @idea.title EditorGroup
 // @idea.related EditorGroupIndexValue.java
 public interface EditorGroup {
@@ -29,4 +31,15 @@ public interface EditorGroup {
 	List<String> getLinks(Project project);
 
 	boolean isOwner(String ownerPath);
+
+	default String getPresentableTitle(Project project, String presentableNameForUI) {
+		//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
+		int size = size(project);
+		if (size > 1 && isNotEmpty(getTitle())) {
+			presentableNameForUI = "[" + size + " " + getTitle() + "] " + presentableNameForUI;
+		} else if (size > 1) {
+			presentableNameForUI = "[" + size + "] " + presentableNameForUI;
+		}
+		return presentableNameForUI;
+	}
 }

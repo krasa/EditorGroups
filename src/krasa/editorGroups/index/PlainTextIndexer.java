@@ -56,7 +56,7 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 			String ownerPath = inputData.getFile().getCanonicalPath();
 			if (value != null) {
 				value.setOwnerPath(ownerPath);
-				EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
+				value = EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
 				map.put(ownerPath, value);
 			}
 			System.out.println("indexed: " + ownerPath);
