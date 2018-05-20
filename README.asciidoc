@@ -1,3 +1,45 @@
 ====  Implementation of https://github.com/SomewhatCloudy/phpstorm-related-proposal  ==== 
 
+
+=== Definitions
+Add anywhere in the file:
+
+- @idea.title yourTitle 
+                  
+=== Relative paths to the current file
+- @idea.related file.txt
+- @idea.related ../file.txt
+
+=== Absolute paths
+- @idea.related C:/file.txt
+- @idea.related /file.txt
+
+=== Macros
+- @idea.related MODULE/src/file.txt
+- @idea.related PROJECT/myModule/src/file.txt
+
+=== Wildcards
+- @idea.related ./*
+- @idea.related *.txt
+- @idea.related file.*
+- @idea.related f??e.txt
+
+=== Exact filename anywhere in the project
+- @idea.related */file.txt
+
+
+=== Shortcuts 
+- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  - switch files (closing the previous one)           
+- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch files (leaving the previous one opened)
+- Shift + R - refresh                                                           
+
+=== Buttons
+- Next/Previous button + ctrl + click - open a file in a new tab
+- Next/Previous button + shift + click - open a file in a new window
+- Refresh button - use right click to advanced option
+
+=== Advanced actions and settings
+- right click on the refresh button or an empty place on the panel 
+
+
 image::example.gif[]

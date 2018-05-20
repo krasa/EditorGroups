@@ -13,6 +13,8 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.EditorGroups;
+import krasa.editorGroups.model.FolderGroup;
 import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -37,9 +39,11 @@ public class EditorGroupManager {
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
 	 */
 	private boolean switching;
+	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
+
 		this.project = project;
 
 		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
@@ -99,14 +103,23 @@ public class EditorGroupManager {
 		}
 
 
-		if (result.isInvalid()) {
+		if (result.isInvalid() || (force && !(result instanceof EditorGroupIndexValue))) {
 			result = cache.getEditorGroupAsSlave(currentFilePath);
+
+			if (result instanceof EditorGroups) {
+				result = EditorGroup.EMPTY; //TODO
+			}
+
+			if (applicationConfiguration.getState().autoFolders) {
+				if (result.isInvalid() || result instanceof FolderGroup) {  //create or refresh
+					result = cache.getFolderGroup(currentFile);
+				}
+			} else if (result instanceof FolderGroup) {
+				result = EditorGroup.EMPTY;
+			}
 		}
-
-
-//		if (result.invalid()) {
-//			result = new FolderGroup(currentFile);
-//		}
+		
+		
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + result.getTitle());
 		cache.setLast(currentFilePath, result);
 		return result;

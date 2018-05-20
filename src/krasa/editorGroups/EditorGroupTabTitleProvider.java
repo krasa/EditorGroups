@@ -8,6 +8,7 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.FolderGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,22 +27,8 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
 
 		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(virtualFile);
-		EditorGroup group = null;
-		if (textEditor != null) {
-			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-		}
 
-
-		if (group != null && group.isValid()) {
-//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
-			if (group.size(project) > 1 && isNotEmpty(group.getTitle())) {
-				return "[" + group.size(project) + " " + group.getTitle() + "] " + presentableNameForUI;
-			}
-			if (group.size(project) > 1) {
-				return "[" + group.size(project) + "] " + presentableNameForUI;
-			}
-		}
-		return presentableNameForUI;
+		return getTitle(project, textEditor, presentableNameForUI);
 	}
 
 	@NotNull
@@ -68,14 +55,19 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 	public String getEditorTabTitle(Project project, VirtualFile virtualFile, FileEditor textEditor) {
 		System.out.println("getEditorTabTitle project = [" + project + "], virtualFile = [" + virtualFile + "], textEditor = [" + textEditor + "]");
 		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
-		EditorGroup group = null;
 
+		return getTitle(project, textEditor, presentableNameForUI);
+	}
+
+	private String getTitle(Project project, FileEditor textEditor, String presentableNameForUI) {
+		EditorGroup group = null;
 		if (textEditor != null) {
 			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
 		}
 
 
-		if (group != null && group.isValid()) {
+		if (group != null && group.isValid() && !(group instanceof FolderGroup)) {
+
 //			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
 			int size = group.size(project);
 			if (size > 1 && isNotEmpty(group.getTitle())) {

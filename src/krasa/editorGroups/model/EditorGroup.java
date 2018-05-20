@@ -18,7 +18,7 @@ public interface EditorGroup {
 
 	boolean isValid();
 
-	EditorGroupIndexValue invalidate();
+	void invalidate();
 
 	int size(Project project);
 

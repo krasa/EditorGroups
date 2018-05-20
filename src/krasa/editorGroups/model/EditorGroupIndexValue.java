@@ -54,12 +54,11 @@ public class EditorGroupIndexValue implements EditorGroup {
 
 	@Override
 	public boolean isValid() {
-		return valid;
+		return (valid && links != null) && links.size() > 1;
 	}
 
-	public EditorGroupIndexValue invalidate() {
+	public void invalidate() {
 		this.valid = false;
-		return this;
 	}
 
 	@Override

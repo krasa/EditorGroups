@@ -1,17 +1,15 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.5</version>
+    <version>0.6</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
         Implementation of <a href="https://github.com/SomewhatCloudy/phpstorm-related-proposal"/>
-     <ul>
-     <li>- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  to switch files (closing the previous one)           </li>
-     <li>- [Ctrl + Alt + Mouse Wheel] or [Ctrl Alt + \ or ' ] to switch files (leaving the previous one opened)</li>
-     <li>- Ctrl + Alt + Shift + E - reload the group                                                               </li>
-     </ul> 
+        <br/>
+        Usage: of <a href="https://github.com/krasa/EditorGroups"/>
+    
          
     ]]></description>
 
@@ -36,6 +34,7 @@
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
 
+        <applicationService serviceImplementation="krasa.editorGroups.ApplicationConfiguration"/>
         <fileBasedIndex implementation="krasa.editorGroups.index.EditorGroupIndex"/>
     </extensions>
 
@@ -74,7 +73,7 @@
 
         <action class="krasa.editorGroups.actions.RefreshAction" id="krasa.editorGroups.Refresh"
                 text="Refresh Editor Groups">
-            <keyboard-shortcut first-keystroke="ctrl alt shift E" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="shift R" keymap="$default"/>
         </action>
 
         <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
@@ -90,13 +89,17 @@
 
 
         <action id="krasa.editorGroups.Reindex" class="krasa.editorGroups.index.ReindexAction"
-                text="Reindex Editor Groups">
+                text="Reindex This Project">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F3"/>
         </action>
 
         <action id="krasa.editorGroups.ReindexThisFile" class="krasa.editorGroups.index.ReindexThisFileAction"
                 text="Reindex This File">
         </action>
+
+        <action id="krasa.editorGroups.ToggleFolderEditorGroups"
+                class="krasa.editorGroups.actions.ToggleFolderEditorGroupsAction"
+                text="Toggle Automatic Editor Groups by a Current Folder"/>
     </actions>
 
 </idea-plugin>

@@ -23,12 +23,16 @@ import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.UIUtil;
+import krasa.editorGroups.actions.RefreshAction;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.EditorGroups;
+import krasa.editorGroups.model.FolderGroup;
 import krasa.editorGroups.support.Utils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -94,6 +98,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(links);
 		refresh(false, null);
 		EditorGroupManager.getInstance(project).switching(false);
+
+
+		addMouseListener(new PopupHandler() {
+			@Override
+			public void invokePopup(Component comp, int x, int y) {
+				RefreshAction.popupInvoked(comp, x, y);
+			}
+		});
 	}
 
 
@@ -105,12 +117,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		createLinks();
 	}
 
+	private void reloadGroupLinks(EditorGroup group) {
+		links.removeAll();
+
+	}
+		
 	private void addButtons() {
 		DefaultActionGroup actionGroup = new DefaultActionGroup();
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Previous"));
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));
 
+
+		DefaultActionGroup action = new DefaultActionGroup();
+		actionGroup.add(action);
+		
 		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
 		add(toolbar.getComponent());
@@ -135,16 +156,26 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 			});
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
-				Font font = button.getFont();
-				button.setFont(font.deriveFont(Font.BOLD));
+				button.setFont(button.getFont().deriveFont(Font.BOLD));
 				if (UIUtil.isUnderDarcula()) {
 					button.setForeground(Color.WHITE);
 				} else {
 					button.setForeground(Color.BLACK);
 				}
 				currentIndex = i1;
-			}
-
+			} else {
+				if (displayedGroup instanceof FolderGroup) {
+					if (UIUtil.isUnderDarcula()) {
+						button.setForeground(Color.orange);
+						button.setFont(button.getFont().deriveFont(Font.ITALIC));
+					} else {
+//						Color fg = new Color(253, 255, 29, 220);
+						button.setFont(button.getFont().deriveFont(Font.ITALIC));
+					}
+				}
+			}  
+			
+			
 			if (!new File(path).exists()) {
 				button.setEnabled(false);
 			}
@@ -333,7 +364,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					if (group == displayedGroup && !reload && !force) {
 						return;
 					}
-					reloadLinks(group);
+
+					if (group instanceof EditorGroups) {
+						reloadGroupLinks(group);
+					} else {
+						reloadLinks(group);
+					} 
 					revalidate();
 					repaint();
 					reload = false;
@@ -349,6 +385,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 		});
 	}
+
 
 	@Override
 	public void dispose() {

@@ -37,10 +37,14 @@ public class RefreshAction extends DumbAwareAction implements CustomComponentAct
 		return refresh;
 	}
 
-	private void popupInvoked(Component component, int x, int y) {
+	public static void popupInvoked(Component component, int x, int y) {
 		DefaultActionGroup group = new DefaultActionGroup();
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Reindex"));
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
+		group.add(new Separator());
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ReindexThisFile"));
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Reindex"));
+		group.add(new Separator());
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleFolderEditorGroups"));
 		ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
 		menu.getComponent().show(component, x, y);
 	}

@@ -10,7 +10,6 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -28,11 +27,11 @@ public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
 	@NotNull
-	List<String> resolveLinks(Project project, EditorGroupIndexValue group) {
+	List<String> resolveLinks(Project project, String ownerPath, List<String> relatedPaths) {
 		long start = System.currentTimeMillis();
-		List<String> relatedPaths = group.getRelatedPaths();
-		String ownerPath = group.getOwnerPath();
-		String folder = new File(ownerPath).getParent();
+		File file1 = new File(ownerPath);
+		String folder = file1.isFile() ? file1.getParent() : ownerPath;
+		
 		VirtualFile virtualFile = Utils.getFileByPath(ownerPath);
 
 		Set<String> links = new LinkedHashSet<String>() {
@@ -44,7 +43,7 @@ public class FileResolver {
 
 
 		try {
-			add(links, group.getOwnerPath());
+			add(links, ownerPath);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

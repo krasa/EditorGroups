@@ -12,11 +12,18 @@ import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.EditorGroups;
+import krasa.editorGroups.model.FolderGroup;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Predicate;
 
+/**
+ * TODO synchronization
+ */
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
 
@@ -26,8 +33,6 @@ public class IndexCache {
 
 	FileResolver fileResolver;
 	THashMap<String, EditorGroups> groupsByLinks = new THashMap<>();
-	//TODO persist?
-	Map<String, String> slaveFileByLastGroupOwner = new THashMap<>();
 
 	@NotNull
 	private final Project project;
@@ -48,6 +53,8 @@ public class IndexCache {
 				break;
 			}
 		}
+		//init
+		result.getLinks(project);
 
 		System.out.println("< getByOwner " + canonicalPath + " result=" + result);
 		return result;
@@ -66,6 +73,10 @@ public class IndexCache {
 		if (lastGroup.isInvalid()) {
 			return false;
 		}
+		if (lastGroup instanceof FolderGroup) {
+			return lastGroup.isValid();
+		}
+
 		String ownerPath = lastGroup.getOwnerPath();
 		List<EditorGroupIndexValue> values = null;
 		try {
@@ -92,9 +103,10 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		System.out.println("initGroup = [" + group + "]");
-		List<String> links = fileResolver.resolveLinks(project, group);
-		if (links.size() > 100) {
-			LOG.error("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
+		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRelatedPaths());
+		if (links.size() > 20) {
+			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
+			links = new ArrayList<>(links.subList(0, 20));
 		}
 		group.setLinks(links);
 
@@ -114,45 +126,46 @@ public class IndexCache {
 
 	public EditorGroup getEditorGroupAsSlave(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
-		String s = slaveFileByLastGroupOwner.get(currentFilePath);
-		if (s != null) {
-			result = getByOwner(s);
+		EditorGroups s = groupsByLinks.get(currentFilePath);
+		if (s != null && s.getLast() != null) {
+			result = getByOwner(s.getLast());
 		}
 
 		if (result.isInvalid()) {
-			Collection<EditorGroup> groupsAsSlave = findGroupsAsSlave(currentFilePath);
-			//TODO union?
-			for (EditorGroup editorGroup : groupsAsSlave) {
-				if (validate(editorGroup)) {
-					result = editorGroup;
-					break;
-				} else {
-					evict(currentFilePath, editorGroup);
+			EditorGroups editorGroups = groupsByLinks.get(currentFilePath);
+			if (editorGroups != null) {
+				editorGroups.validate(this);
+
+				int size = editorGroups.size(project);
+
+				if (size == 1) {
+					result = editorGroups.first();
+				} else if (size > 1) {
+					result = editorGroups;
 				}
 			}
 		}
 		return result;
 	}
 
-	private Collection<EditorGroup> findGroupsAsSlave(String currentFilePath) {
-		Collection<EditorGroup> result = Collections.emptyList();
-		EditorGroups editorGroups = groupsByLinks.get(currentFilePath);
-		if (editorGroups != null) {
-			result = editorGroups.getAll();
-		}
-		return result;
-	}
-
-	private void evict(String currentFilePath, EditorGroup editorGroup) {
-		EditorGroups editorGroups = groupsByLinks.get(currentFilePath);
-		if (editorGroups != null) {
-			editorGroups.remove(editorGroup);
-		}
-	}
 
 	public void setLast(String currentFile, EditorGroup result) {
-		if (result.isValid()) {
-			slaveFileByLastGroupOwner.put(currentFile, result.getOwnerPath());
+		if (!result.isValid()) {
+			return;
 		}
+
+		EditorGroups editorGroups = groupsByLinks.get(currentFile);
+		if (editorGroups == null) {
+			editorGroups = new EditorGroups(result);
+			groupsByLinks.put(currentFile, editorGroups);
+		}
+		editorGroups.setLast(result.getOwnerPath());
+	}
+
+	public EditorGroup getFolderGroup(VirtualFile file) {
+		VirtualFile parent = file.getParent();
+		String folder = parent.getCanonicalPath();
+		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
+		return new FolderGroup(folder, links);
 	}
 }
