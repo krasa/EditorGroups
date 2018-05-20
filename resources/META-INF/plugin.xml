@@ -99,12 +99,12 @@
 
         <action id="krasa.editorGroups.ToggleFolderEditorGroups"
                 class="krasa.editorGroups.actions.ToggleFolderEditorGroupsAction"
-                text="Toggle Automatic Editor Groups by a Current Folder"/>
+                text="Automatic Editor Groups by a Current Folder"/>
 
 
         <action id="krasa.editorGroups.ToggleForce"
                 class="krasa.editorGroups.actions.ToggleForceAction"
-                text="Toggle Automatic Switching of Groups on Manual Refresh"/>
+                text="Automatic Switching of Groups on Manual Refresh"/>
 
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"

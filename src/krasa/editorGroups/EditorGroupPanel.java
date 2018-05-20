@@ -19,13 +19,13 @@ import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.roots.ui.componentsList.components.ScrollablePanel;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBPanel;
+import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.UIUtil;
@@ -41,9 +41,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
+import java.awt.event.*;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
@@ -68,9 +66,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
-	private ScrollablePanel links = new ScrollablePanel();
-	private JPanel groupsPanel = new JPanel();
+	private JBPanel links = new JBPanel();
+	private JBPanel groupsPanel = new JBPanel();
 	private PopupHandler popupHandler;
+	private JBScrollPane scrollPane;
+	private JButton currentButton;
 
 	public EditorGroupPanel(@NotNull TextEditorImpl textEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new HorizontalLayout(0));
@@ -157,7 +157,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 			});
 			button.setFont(newFont);
-			buttonRendering(button);
+			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 5));
 			button.addMouseListener(popupHandler);
 			if (UIUtil.isUnderDarcula()) {
 				button.setBorder(new LineBorder(Color.lightGray));
@@ -195,7 +195,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			String path = paths.get(i1);
 
 			JButton button = new JButton(Utils.toPresentableName(path));
-			buttonRendering(button);
+			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 5));
 			// BROKEN in IJ 2018
 			// button.setBorder(null);
 			// button.setContentAreaFilled(false);
@@ -216,6 +216,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					button.setForeground(Color.BLACK);
 				}
 				currentIndex = i1;
+				currentButton = button;
 			} else {
 				if (displayedGroup instanceof FolderGroup) {
 					if (UIUtil.isUnderDarcula()) {
@@ -236,10 +237,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 			links.add(button);
 		}
-	}
-
-	private void buttonRendering(JButton button) {
-		button.setPreferredSize(new Dimension(button.getPreferredSize().width - 5, button.getPreferredSize().height - 5));
 	}
 
 	public void previous(boolean newTab, boolean newWindow) {
@@ -358,6 +355,17 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroupManager.getInstance(project).switching(false);
 	}
 
+	public void setScrollPane(JBScrollPane scrollPane) {
+		this.scrollPane = scrollPane;
+		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				adjustScrollPane();
+			}
+		});
+	}
+
 	static class RefreshRequest {
 		final boolean force;
 		final EditorGroup requestedGroup;
@@ -430,10 +438,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					}
 
 					reloadLinks(group);
+					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
 					revalidate();
+					adjustScrollPane();
 					repaint();
 					reload = false;
-					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
 
 				} catch (Exception e) {
 					LOG.error(e);
@@ -447,6 +456,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
+	private void adjustScrollPane() {
+		if (scrollPane != null) {
+
+//			scrollPane.getHorizontalScrollBar().setValue(100);
+//			
+//			System.err.println("adjustScrollPane");
+//			Rectangle bounds = scrollPane.getViewport().getViewRect();
+//			Dimension size = scrollPane.getViewport().getViewSize();
+//			int x = (size.width - bounds.width) / 2;
+//			int y = (size.height - bounds.height) / 2;
+//			scrollPane.getViewport().setViewPosition(new Point(x, y));
+//			ScrollUtil.center(scrollPane, new Rectangle(5,5));
+		}
+	}
+	
 	@Override
 	public void dispose() {
 	}
