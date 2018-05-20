@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.7</version>
+    <version>0.8</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -47,12 +47,12 @@
 
 
         <action class="krasa.editorGroups.actions.PreviousInNewTabAction" id="krasa.editorGroups.PreviousInNewTab"
-                text=" Open Previous File in Group in a New Tab">
+                text="Open Previous File in Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button143" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
-                text=" Open Next File in Group in a New Tab">
+                text="Open Next File in Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt BACK_SLASH" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
         </action>
@@ -60,12 +60,12 @@
 
         <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
                 id="krasa.editorGroups.PreviousInNewWindow"
-                text=" Open Previous File in Group in a New Tab">
+                text="Open Previous File in Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
-                text=" Open Next File in Group in a New Tab">
+                text="Open Next File in Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt shift BACK_SLASH" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>
         </action>
@@ -77,12 +77,12 @@
         </action>
 
         <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
-                text=" Open Previous File in Group">
+                text="Open Previous File in Group">
             <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
-                text=" Open Next File in Group">
+                text="Open Next File in Group">
             <keyboard-shortcut first-keystroke="ctrl  BACK_SLASH" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
@@ -100,6 +100,13 @@
         <action id="krasa.editorGroups.ToggleFolderEditorGroups"
                 class="krasa.editorGroups.actions.ToggleFolderEditorGroupsAction"
                 text="Toggle Automatic Editor Groups by a Current Folder"/>
+
+
+        <action id="krasa.editorGroups.ToggleForce"
+                class="krasa.editorGroups.actions.ToggleForceAction"
+                text="Toggle Automatic Switching of Groups on Manual Refresh"/>
+
+
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"
                 text="Switch Editor Group">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>

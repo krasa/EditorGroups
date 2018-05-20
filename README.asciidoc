@@ -34,11 +34,6 @@ Add anywhere in the file:
 - [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch files (leaving the previous one opened)
 - Alt + Shift + Q - refresh                                                           
 
-=== Buttons
-- Next/Previous button + ctrl + click - open a file in a new tab
-- Next/Previous button + shift + click - open a file in a new window
-- Refresh button - use right click to advanced option
-
 === Advanced actions and settings
-- right click on the refresh button or an empty place on the panel 
+- right click on the panel
 

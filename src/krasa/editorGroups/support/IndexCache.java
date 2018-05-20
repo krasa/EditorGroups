@@ -161,14 +161,11 @@ public class IndexCache {
 		editorGroups.setLast(result.getOwnerPath());
 	}
 
-	public EditorGroup getFolderGroup(VirtualFile file, EditorGroup result) {
+	public EditorGroup getFolderGroup(VirtualFile file) {
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
-		Collection<EditorGroup> groups = Collections.emptyList();
-		if (result instanceof EditorGroups) {
-			groups = ((EditorGroups) result).getAll();
-		}
+		Collection<EditorGroup> groups = getGroups(file.getCanonicalPath());
 		return new FolderGroup(folder, links, groups);
 	}
 
@@ -181,5 +178,9 @@ public class IndexCache {
 			result = editorGroups.getAll();
 		}
 		return result;
+	}
+
+	public boolean hasGroups(String canonicalPath) {
+		return false;
 	}
 }

@@ -39,6 +39,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -68,8 +69,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
 	private ScrollablePanel links = new ScrollablePanel();
-	private JPanel groupsPanel = new JPanel(); 
-	
+	private JPanel groupsPanel = new JPanel();
+	private PopupHandler popupHandler;
+
 	public EditorGroupPanel(@NotNull TextEditorImpl textEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new HorizontalLayout(0));
 		System.out.println("EditorGroupPanel " + "textEditor = [" + textEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
@@ -109,12 +111,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroupManager.getInstance(project).switching(false);
 
 
-		addMouseListener(new PopupHandler() {
+		popupHandler = new PopupHandler() {
 			@Override
 			public void invokePopup(Component comp, int x, int y) {
 				RefreshAction.popupInvoked(comp, x, y);
 			}
-		});
+		};
+		addMouseListener(popupHandler);
+		links.addMouseListener(popupHandler);
+		groupsPanel.addMouseListener(popupHandler);
 	}
 
 
@@ -122,7 +127,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		links.removeAll();
 		this.displayedGroup = group;
 		textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
-		setVisible(group.getLinks(project).size() > 1);
+		setVisible(group.getLinks(project).size() > 0);
 		createLinks();
 	}
 
@@ -153,7 +158,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			});
 			button.setFont(newFont);
 			buttonRendering(button);
-
+			button.addMouseListener(popupHandler);
+			if (UIUtil.isUnderDarcula()) {
+				button.setBorder(new LineBorder(Color.lightGray));
+			} else {
+				button.setBorder(new LineBorder(Color.BLACK));
+			}
+			button.setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath()));
 			this.groupsPanel.add(button);
 		}
 		this.groupsPanel.setVisible(added);
@@ -162,8 +173,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void addButtons() {
 		DefaultActionGroup actionGroup = new DefaultActionGroup();
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
-		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Previous"));
-		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));
+//		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Previous"));
+//		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.SwitchGroup"));
 
 
@@ -172,6 +183,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		
 		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
+		toolbar.getComponent().addMouseListener(popupHandler);
+		    
 		add(toolbar.getComponent());
 	}
 
@@ -188,6 +201,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			// button.setContentAreaFilled(false);
 			// button.setOpaque(false);
 			// button.setBorderPainted(false);
+			button.addMouseListener(popupHandler);
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -208,12 +222,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						button.setForeground(Color.orange);
 						button.setFont(button.getFont().deriveFont(Font.ITALIC));
 					} else {
-//						Color fg = new Color(253, 255, 29, 220);
+//						Color fg = new Color(0, 23, 3, 255);
+//						button.setForeground(fg);
 						button.setFont(button.getFont().deriveFont(Font.ITALIC));
 					}
 				}
-			}  
-			
+			}
+
+			button.setToolTipText(path);
 			
 			if (!new File(path).exists()) {
 				button.setEnabled(false);
@@ -344,17 +360,17 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	static class RefreshRequest {
 		final boolean force;
-		final EditorGroup newGroup;
+		final EditorGroup requestedGroup;
 
-		public RefreshRequest(boolean force, EditorGroup newGroup) {
+		public RefreshRequest(boolean force, EditorGroup requestedGroup) {
 			this.force = force;
-			this.newGroup = newGroup;
+			this.requestedGroup = requestedGroup;
 		}
 
 		public String toString() {
 			return new ToStringBuilder(this)
 				.append("force", force)
-				.append("newGroup", newGroup)
+				.append("newGroup", requestedGroup)
 				.toString();
 		}
 	}
@@ -397,13 +413,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 				System.out.println("refresh " + request);
 
-				EditorGroup newGroup = request.newGroup;
+				EditorGroup requestedGroup = request.requestedGroup;
 				boolean force = request.force;
 
 				try {
 
-					EditorGroup lastGroup = newGroup == null ? displayedGroup : newGroup;
-					EditorGroup group = EditorGroupManager.getInstance(project).getGroup(project, textEditor, lastGroup, force);
+					EditorGroup group = EditorGroupManager.getInstance(project).getGroup(project, textEditor, displayedGroup, requestedGroup, force);
 					if (group == displayedGroup && !reload && !force) {
 						return;
 					}

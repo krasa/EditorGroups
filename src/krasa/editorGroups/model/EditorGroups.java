@@ -78,8 +78,8 @@ public class EditorGroups implements EditorGroup {
 		Iterator<EditorGroup> iterator = map.values().iterator();
 		while (iterator.hasNext()) {
 			EditorGroup next = iterator.next();
-			boolean validate = indexCache.validate(next);
-			if (!validate) {
+			boolean valid = indexCache.validate(next);
+			if (!valid) {
 				iterator.remove();
 			}
 		}

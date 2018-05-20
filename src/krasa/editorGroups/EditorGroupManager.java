@@ -17,6 +17,7 @@ import krasa.editorGroups.model.FolderGroup;
 import krasa.editorGroups.support.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
@@ -63,58 +64,69 @@ public class EditorGroupManager {
 	}
 
 	/**
+	 * @param displayedGroup
 	 * @param force if true - return this file's owned group instead of the last one
 	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup lastGroup, boolean force) {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean force) {
 		if (DumbService.isDumb(project)) {
 			throw new RuntimeException("check for dumb");
 		}
+		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + force + "]");
+
 		long start = System.currentTimeMillis();
 
 		EditorGroup result = EditorGroup.EMPTY;
-		System.out.println("getGroup: " + fileEditor + " lastGroup:" + lastGroup.getTitle() + " reparse:" + force);
-
-
+		if (requestedGroup == null) {
+			requestedGroup = displayedGroup;
+		}
+		force = force && ApplicationConfiguration.getInstance().getState().forceSwitch;
+		                     
 		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
 		if (currentFile == null) {
 			System.out.println("< getGroup - currentFile is null for " + fileEditor);
-			return EditorGroup.EMPTY;
+			return result;
 		}
+		
 		String currentFilePath = currentFile.getCanonicalPath();
+
+
 		if (force) {
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
+			if (result.isInvalid()) {
+				result = cache.getEditorGroupAsSlave(currentFilePath);
+			}
 		}
 
 		if (result.isInvalid()) {
-			cache.validate(lastGroup);
-			if (lastGroup.isValid()) {
-				result = lastGroup;
+			cache.validate(requestedGroup);
+			if (requestedGroup.isValid()) {
+				result = requestedGroup;
 			}
 		}
 
-		if (!force) {//already tried
+		if (!force) {//already tried             
+			if (requestedGroup instanceof FolderGroup) {
+				result = cache.getFolderGroup(currentFile);
+			}
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
+
+			if (result.isInvalid()) {
+				result = cache.getEditorGroupAsSlave(currentFilePath);
+			}
 		}
+		if (result.isInvalid()) {
 
-
-		if (result.isInvalid() || (force && !(result instanceof EditorGroupIndexValue))) {
-			result = cache.getEditorGroupAsSlave(currentFilePath);
-
-
-			if (applicationConfiguration.getState().autoFolders) {
-				if (result.isInvalid() || result instanceof FolderGroup) {  //create or refresh
-					result = cache.getFolderGroup(currentFile, result);
-				}
-			} else if (result instanceof FolderGroup) {
+			if (applicationConfiguration.getState().autoFolders || requestedGroup instanceof FolderGroup) {
+				result = cache.getFolderGroup(currentFile);
+			} else if (result.isInvalid()) {
 				result = EditorGroup.EMPTY;
 			}
 		}
-
 
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
@@ -174,4 +186,5 @@ public class EditorGroupManager {
 	public Collection<EditorGroup> getGroups(VirtualFile file) {
 		return cache.getGroups(file.getCanonicalPath());
 	}
+
 }

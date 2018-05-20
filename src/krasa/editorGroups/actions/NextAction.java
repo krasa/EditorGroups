@@ -6,12 +6,16 @@ import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.ui.PopupHandler;
 import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupPanel;
 
 import javax.swing.*;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
+
+import static krasa.editorGroups.actions.RefreshAction.popupInvoked;
 
 public class NextAction extends DumbAwareAction implements CustomComponentAction {
 	@Override
@@ -32,8 +36,14 @@ public class NextAction extends DumbAwareAction implements CustomComponentAction
 
 	@Override
 	public JComponent createCustomComponent(Presentation presentation) {
-		ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
+		ActionButton button = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
 		presentation.setIcon(AllIcons.Actions.Forward);
-		return refresh;
+		button.addMouseListener(new PopupHandler() {
+			public void invokePopup(Component comp, int x, int y) {
+				popupInvoked(comp, x, y);
+			}
+		});
+
+		return button;
 	}
 }

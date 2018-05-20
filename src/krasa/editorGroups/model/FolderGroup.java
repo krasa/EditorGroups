@@ -2,19 +2,20 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 
+import java.io.File;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 public class FolderGroup implements EditorGroup {
 
-	private final String currentFilePath;
+	private final String folderPath;
 	private final List<String> links;
 	private boolean valid;
 	private final Collection<EditorGroup> groups;
 
-	public FolderGroup(String currentFilePath, List<String> links, Collection<EditorGroup> groups) {
-		this.currentFilePath = currentFilePath;
+	public FolderGroup(String folderPath, List<String> links, Collection<EditorGroup> groups) {
+		this.folderPath = folderPath;
 		this.links = links;
 		valid = !links.isEmpty();
 		this.groups = groups;
@@ -26,7 +27,7 @@ public class FolderGroup implements EditorGroup {
 
 	@Override
 	public String getOwnerPath() {
-		return currentFilePath;
+		return folderPath;
 	}
 
 	@Override
@@ -41,7 +42,7 @@ public class FolderGroup implements EditorGroup {
 
 	@Override
 	public boolean isValid() {
-		return valid;
+		return valid && new File(folderPath).isDirectory();
 	}
 
 	@Override
