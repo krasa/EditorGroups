@@ -31,7 +31,7 @@ Add anywhere in the file:
 === Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  - switch files (closing the previous one)           
 - [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch files (leaving the previous one opened)
-- Shift + R - refresh                                                           
+- Alt + Shift + Q - refresh                                                           
 
 === Buttons
 - Next/Previous button + ctrl + click - open a file in a new tab
