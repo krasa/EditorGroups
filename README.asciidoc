@@ -1,5 +1,6 @@
 ====  Implementation of https://github.com/SomewhatCloudy/phpstorm-related-proposal  ==== 
 
+image::example.gif[]
 
 === Definitions
 Add anywhere in the file:
@@ -41,5 +42,3 @@ Add anywhere in the file:
 === Advanced actions and settings
 - right click on the refresh button or an empty place on the panel 
 
-
-image::example.gif[]
