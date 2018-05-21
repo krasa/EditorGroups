@@ -18,8 +18,8 @@ public class EditorGroupIndexValue implements EditorGroup {
 	private List<String> relatedPaths = new ArrayList<>();
 
 	/*runtime data*/
-	private transient List<String> links;
-	private transient boolean valid = true;
+	private transient volatile List<String> links;
+	private transient volatile boolean valid = true;
 
 	public EditorGroupIndexValue() {
 	}
