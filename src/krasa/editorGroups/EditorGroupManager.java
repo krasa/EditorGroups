@@ -24,7 +24,6 @@ import java.util.Collection;
 /*
  * @idea.title CORE
  * @idea.related ./*
- * @idea.related support/IndexCache.java
  * @idea.related support/FileResolver.java
  */
 public class EditorGroupManager {
@@ -129,6 +128,8 @@ public class EditorGroupManager {
 			}
 		}
 
+		//TODO initalize autogroups on background
+		
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
