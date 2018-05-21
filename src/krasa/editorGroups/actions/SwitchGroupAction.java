@@ -63,8 +63,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		VirtualFile file = panel.getFile();
 		Collection<EditorGroup> groups = EditorGroupManager.getInstance(project).getGroups(file);
 
-		actionGroup.add(createAction(panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project));
 		actionGroup.add(createAction(panel, displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project));
+		actionGroup.add(createAction(panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project));
 		for (EditorGroup group : groups) {
 			if (group instanceof AutoGroup) {
 				continue;
