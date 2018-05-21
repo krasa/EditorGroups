@@ -6,6 +6,7 @@ import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.openapi.project.Project;
@@ -15,10 +16,7 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
-import krasa.editorGroups.model.AutoGroup;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.FolderGroup;
-import krasa.editorGroups.model.SameNameGroup;
+import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +26,7 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
 
@@ -61,20 +60,60 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	private void fillGroup(DefaultActionGroup actionGroup, EditorGroupPanel panel, Project project) {
 		EditorGroup displayedGroup = panel.getDisplayedGroup();
 		VirtualFile file = panel.getFile();
-		Collection<EditorGroup> groups = EditorGroupManager.getInstance(project).getGroups(file);
+		EditorGroupManager instance = EditorGroupManager.getInstance(project);
+		Collection<EditorGroup> groups = instance.getGroups(file);
 
-		actionGroup.add(createAction(panel, displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project));
-		actionGroup.add(createAction(panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project));
-		for (EditorGroup group : groups) {
-			if (group instanceof AutoGroup) {
+		Handler refresh = refreshHandler(panel);
+
+		actionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project, refresh));
+		actionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project, refresh));
+		for (EditorGroup g : groups) {
+			if (g instanceof AutoGroup) {
 				continue;
 			}
-			actionGroup.add(createAction(panel, displayedGroup, group, project));
+			actionGroup.add(createAction(displayedGroup, g, project, refresh));
 		}
+
+
+		try {
+			List<EditorGroupIndexValue> allGroups = instance.getAllGroups();
+			actionGroup.add(new Separator("Other groups"));
+			for (EditorGroupIndexValue g : allGroups) {
+				if (!groups.contains(g)) {
+					actionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(panel)));
+				}
+			}
+		} catch (ProcessCanceledException e) {
+		}
+
 	}
 
 	@NotNull
-	private DumbAwareAction createAction(EditorGroupPanel panel, EditorGroup displayedGroup, EditorGroup groupLink, Project project) {
+	private Handler refreshHandler(EditorGroupPanel panel) {
+		return new Handler() {
+			@Override
+			void run(EditorGroup groupLink) {
+				panel.refresh(false, groupLink);
+			}
+		};
+	}
+
+	@NotNull
+	private Handler otherGroupHandler(EditorGroupPanel panel) {
+		return new Handler() {
+			@Override
+			void run(EditorGroup editorGroup) {
+				String ownerPath = editorGroup.getOwnerPath();
+				VirtualFile fileByPath = Utils.getFileByPath(ownerPath);
+				if (fileByPath != null) {
+					panel.open(fileByPath, editorGroup, false, false);
+				}
+			}
+		};
+	}
+
+	@NotNull
+	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler) {
 		boolean isSelected = displayedGroup.equals(groupLink);
 		String description = null;
 		String title;
@@ -90,9 +129,13 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : null) {
 			@Override
 			public void actionPerformed(AnActionEvent e1) {
-				panel.refresh(false, groupLink);
+				actionHandler.run(groupLink);
 			}
 		};
+	}
+
+	abstract class Handler {
+		abstract void run(EditorGroup groupLink);
 	}
 
 	@Override

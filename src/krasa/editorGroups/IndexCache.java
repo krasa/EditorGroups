@@ -222,5 +222,23 @@ public class IndexCache {
 
 		return new SameNameGroup(nameWithoutExtension, paths, getGroups(currentFile.getCanonicalPath()));
 	}
-	
+
+	public List<EditorGroupIndexValue> getAllGroups() {
+		FileBasedIndex instance = FileBasedIndex.getInstance();
+		Collection<String> allKeys = instance.getAllKeys(EditorGroupIndex.NAME, project);
+		GlobalSearchScope scope = GlobalSearchScope.projectScope(project);
+
+		List<EditorGroupIndexValue> all = new ArrayList<>(allKeys.size());
+
+		for (String allKey : allKeys) {
+			instance.processValues(EditorGroupIndex.NAME, allKey, null, new FileBasedIndex.ValueProcessor<EditorGroupIndexValue>() {
+				@Override
+				public boolean process(@NotNull VirtualFile file, EditorGroupIndexValue value) {
+					all.add(value);
+					return true;
+				}
+			}, scope);
+		}
+		return all;
+	}
 }

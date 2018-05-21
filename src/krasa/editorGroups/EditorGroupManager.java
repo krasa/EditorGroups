@@ -20,6 +20,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 /*
  * @idea.title CORE
@@ -32,7 +35,7 @@ public class EditorGroupManager {
 	private final Project project;
 	//	@NotNull
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
-	IndexCache cache; 
+	IndexCache cache;
 
 	/**
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
@@ -64,7 +67,7 @@ public class EditorGroupManager {
 
 	/**
 	 * @param displayedGroup
-	 * @param force if true - return this file's owned group instead of the last one, or anything closest
+	 * @param force          if true - return this file's owned group instead of the last one, or anything closest
 	 */
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean force) {
@@ -80,13 +83,13 @@ public class EditorGroupManager {
 			requestedGroup = displayedGroup;
 		}
 		force = force && ApplicationConfiguration.state().forceSwitch;
-		                     
+
 		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
 		if (currentFile == null) {
 			System.out.println("< getGroup - currentFile is null for " + fileEditor);
 			return result;
 		}
-		
+
 		String currentFilePath = currentFile.getCanonicalPath();
 
 
@@ -129,7 +132,7 @@ public class EditorGroupManager {
 		}
 
 		//TODO initalize autogroups on background
-		
+
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
@@ -177,7 +180,6 @@ public class EditorGroupManager {
 				if (panel != null) {
 					panel.refresh(false, null);
 					MyFileManager.updateTitle(project, selectedEditor.getFile());
-					
 				}
 			}
 		}
@@ -189,4 +191,16 @@ public class EditorGroupManager {
 		return cache.getGroups(file.getCanonicalPath());
 	}
 
+	public List<EditorGroupIndexValue> getAllGroups() {
+		long start = System.currentTimeMillis();
+		List<EditorGroupIndexValue> allGroups = cache.getAllGroups();
+		Collections.sort(allGroups, new Comparator<EditorGroupIndexValue>() {
+			@Override
+			public int compare(EditorGroupIndexValue o1, EditorGroupIndexValue o2) {
+				return o1.getTitle().compareTo(o2.getTitle());
+			}
+		});
+		System.err.println("getAllGroups " + (System.currentTimeMillis() - start));
+		return allGroups;
+	}
 }

@@ -341,12 +341,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 
 		CommandProcessor.getInstance().executeCommand(project, () -> {
-			open(newTab, fileToOpen, newWindow);
+			open(fileToOpen, displayedGroup, newWindow, newTab);
 		}, null, null);
 
 	}
 
-	private void open(boolean newTab, VirtualFile fileToOpen, boolean newWindow) {
+	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab) {
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
 		EditorWindow currentWindow = manager.getCurrentWindow();
@@ -359,14 +359,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (newWindow) {
 			Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
 			for (FileEditor fileEditor : pair.first) {
-				fileEditor.putUserData(EDITOR_GROUP, displayedGroup);
+				fileEditor.putUserData(EDITOR_GROUP, group);
 			}
 		} else {
 
 			EditorGroupManager.getInstance(project).switching(true);
 			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 			for (FileEditor fileEditor : fileEditors) {
-				fileEditor.putUserData(EDITOR_GROUP, displayedGroup);
+				fileEditor.putUserData(EDITOR_GROUP, group);
 			}
 
 			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
@@ -402,6 +402,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public JComponent getRoot() {
 		return scrollPane;
 	}
+
 
 	static class RefreshRequest {
 		final boolean force;
@@ -478,10 +479,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					reloadLinks(group);
 					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
 					scrollPane.revalidate();
-					adjustScrollPane();
 					scrollPane.repaint();
 					reload = false;
-					failed = 0;
+					failed = 0;         
+					
 				} catch (ProcessCanceledException e) {
 					if (++failed > 5) {
 						LOG.error(e);
