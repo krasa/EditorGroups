@@ -25,7 +25,7 @@ public class SameNameGroup extends AutoGroup {
 	}
 
 	@Override
-	public String getPresentableTitle(Project project, String presentableNameForUI) {
+	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		return "By file name";
 	}
 

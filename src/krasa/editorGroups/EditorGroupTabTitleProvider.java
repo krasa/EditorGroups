@@ -48,14 +48,14 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 
 
 	/*not yet existing api*/
-	@Nullable
-	@Override
-	public String getEditorTabTitle(Project project, VirtualFile virtualFile, FileEditor textEditor) {
-		System.out.println("getEditorTabTitle project = [" + project + "], virtualFile = [" + virtualFile + "], textEditor = [" + textEditor + "]");
-		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
-
-		return getTitle(project, textEditor, presentableNameForUI);
-	}
+//	@Nullable
+//	@Override
+//	public String getEditorTabTitle(Project project, VirtualFile virtualFile, FileEditor textEditor) {
+//		System.out.println("getEditorTabTitle project = [" + project + "], virtualFile = [" + virtualFile + "], textEditor = [" + textEditor + "]");
+//		String presentableNameForUI = getPresentableNameForUI(project, virtualFile);
+//
+//		return getTitle(project, textEditor, presentableNameForUI);
+//	}
 
 	private String getTitle(Project project, FileEditor textEditor, String presentableNameForUI) {
 		EditorGroup group = null;
@@ -64,7 +64,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 		}
 
 		if (group != null && group.isValid() && !(group instanceof AutoGroup)) {
-			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI);
+			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI, ApplicationConfiguration.state().showSize);
 		}
 		return presentableNameForUI;
 	}

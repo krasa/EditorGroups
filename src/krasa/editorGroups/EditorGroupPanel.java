@@ -11,7 +11,6 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
@@ -21,7 +20,6 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
@@ -124,7 +122,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(groupsPanel);
 		refresh(false, null);
 
-		EditorGroupManager.getInstance(project).switching(false);
+		EditorGroupManager.getInstance(project).switching(false, null);
 
 
 		addMouseListener(getPopupHandler());
@@ -147,7 +145,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void reloadLinks(EditorGroup group) {
 		links.removeAll();
 		this.displayedGroup = group;
-		textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		if (ApplicationConfiguration.state().hideEmpty) {
 			scrollPane.setVisible(group.getLinks(project).size() > 1);
 		} else {
@@ -189,7 +186,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			} else {
 				button.setBorder(new LineBorder(Color.BLACK));
 			}
-			button.setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath()));
+			button.setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath(), true));
 			this.groupsPanel.add(button);
 		}
 		this.groupsPanel.setVisible(added);
@@ -356,18 +353,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
 //		manager.closeFile(fileToOpen, false, false);
 
+		EditorGroupManager.getInstance(project).switching(true, group);
 		if (newWindow) {
-			Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
-			for (FileEditor fileEditor : pair.first) {
-				fileEditor.putUserData(EDITOR_GROUP, group);
-			}
+			manager.openFileInNewWindow(fileToOpen);
 		} else {
-
-			EditorGroupManager.getInstance(project).switching(true);
-			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
-			for (FileEditor fileEditor : fileEditors) {
-				fileEditor.putUserData(EDITOR_GROUP, group);
-			}
+			manager.openFile(fileToOpen, true);
 
 			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 			if (!newTab) {
@@ -387,15 +377,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void focusGained(@NotNull Editor editor) {
 		//important when switching to a file that has an exsting editor
-		EditorGroup userData1 = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-		System.out.println("focusGained " + file + " " + userData1);
-		if (userData1 != null && userData1.isValid() && displayedGroup != userData1) {
+
+		EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+		System.out.println("focusGained " + file + " " + switchingGroup);
+		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			reload = true;
-			refresh(false, userData1);
+			refresh(false, switchingGroup);
 		} else {
 			refresh(false, null);
 		}
-		EditorGroupManager.getInstance(project).switching(false);
+		EditorGroupManager.getInstance(project).switching(false, null);
 	}
 
 
@@ -469,7 +460,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					if (group == displayedGroup && !reload && !force) {
 						return;
 					}
-
+					textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
+				 
 					if (group instanceof AutoGroup) {           
 						reloadGroupLinks(((AutoGroup) group).getGroups());
 					} else {

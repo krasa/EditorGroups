@@ -1,7 +1,6 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
-import krasa.editorGroups.ApplicationConfiguration;
 
 import java.util.Collections;
 import java.util.List;
@@ -34,11 +33,11 @@ public interface EditorGroup {
 
 	boolean isOwner(String ownerPath);
 
-	default String getPresentableTitle(Project project, String presentableNameForUI) {
+	default String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
 		int size = size(project);
 
-		if (ApplicationConfiguration.state().showSize) {
+		if (showSize) {
 			if (isNotEmpty(getTitle())) {
 				String title = getTitle() + ":" + size;
 				presentableNameForUI = "[" + title + "] " + presentableNameForUI;

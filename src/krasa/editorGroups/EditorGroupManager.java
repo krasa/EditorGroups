@@ -42,6 +42,7 @@ public class EditorGroupManager {
 	 */
 	private boolean switching;
 	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
+	private EditorGroup switchingGroup;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
@@ -138,8 +139,13 @@ public class EditorGroupManager {
 		return result;
 	}
 
-	public void switching(boolean b) {
+	public void switching(boolean b, EditorGroup group) {
 		switching = b;
+		switchingGroup = group;
+	}
+
+	public EditorGroup getSwitchingGroup() {
+		return switchingGroup;
 	}
 
 	public boolean switching() {

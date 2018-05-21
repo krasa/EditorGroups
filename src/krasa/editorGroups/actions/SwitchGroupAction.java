@@ -79,6 +79,9 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			List<EditorGroupIndexValue> allGroups = instance.getAllGroups();
 			actionGroup.add(new Separator("Other groups"));
 			for (EditorGroupIndexValue g : allGroups) {
+				if (g.getOwnerPath().equals(file.getCanonicalPath())) {
+					continue;
+				}
 				if (!groups.contains(g)) {
 					actionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(panel)));
 				}
@@ -122,7 +125,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		String ownerPath = groupLink.getOwnerPath();
 		String name = Utils.toPresentableName(ownerPath);
 
-		title = groupLink.getPresentableTitle(project, name);
+		title = groupLink.getPresentableTitle(project, name, true);
 		description = "Owner:" + ownerPath;
 
 

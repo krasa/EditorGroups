@@ -49,9 +49,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 						}
 
 						FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
-						EditorGroup userData = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-
-						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, userData, file);
+						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, switchingGroup, file);
 
 						manager.addTopComponent(fileEditor, panel.getRoot());
 					}

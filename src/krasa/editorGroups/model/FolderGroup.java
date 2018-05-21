@@ -21,7 +21,7 @@ public class FolderGroup extends AutoGroup {
 	}
 
 	@Override
-	public String getPresentableTitle(Project project, String presentableNameForUI) {
+	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		return "Current folder";
 	}
 
