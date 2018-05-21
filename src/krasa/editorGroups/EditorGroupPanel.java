@@ -427,7 +427,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	int failed = 0;
+	volatile int failed = 0;
 	private void refreshSmart() {
 		DumbService.getInstance(project).runWhenSmart(new Runnable() {
 			@Override
