@@ -58,26 +58,26 @@ public class IndexCache {
 		groupsByLinks.clear();
 	}
 
-	public boolean validate(EditorGroup lastGroup) {
-		if (lastGroup.isInvalid()) {
+	public boolean validate(EditorGroup group) {
+		if (group.isInvalid()) {
 			return false;
 		}
-		if (lastGroup instanceof FolderGroup) {
-			return lastGroup.isValid();
+		if (group instanceof FolderGroup) {
+			return group.isValid();
 		}
 
-		String ownerPath = lastGroup.getOwnerPath();
-		List<EditorGroupIndexValue> values = null;
+		String ownerPath = group.getOwnerPath();
+		List<EditorGroupIndexValue> groups = null;
 		try {
-			values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+			groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
 		} catch (ProcessCanceledException e) {
 			return true;
 		}
 
-		Optional<EditorGroupIndexValue> first = values.stream().filter(Predicate.isEqual(lastGroup)).findFirst();
+		Optional<EditorGroupIndexValue> first = groups.stream().filter(Predicate.isEqual(group)).findFirst();
 		EditorGroupIndexValue editorGroupIndexValue = first.orElse(null);
-		if (!lastGroup.equals(editorGroupIndexValue)) {
-			lastGroup.invalidate();
+		if (!group.equals(editorGroupIndexValue)) {
+			group.invalidate();
 			return false;
 		}
 		return true;
@@ -113,9 +113,9 @@ public class IndexCache {
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		System.out.println("initGroup = [" + group + "]");
 		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRelatedPaths());
-		if (links.size() > 20) {
+		if (links.size() > 100) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
-			links = new ArrayList<>(links.subList(0, 20));
+			links = new ArrayList<>(links.subList(0, 100));
 		}
 		group.setLinks(links);
 
@@ -125,22 +125,22 @@ public class IndexCache {
 
 	public EditorGroup getEditorGroupAsSlave(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
-		EditorGroups s = groupsByLinks.get(currentFilePath);
-		if (s != null && s.getLast() != null) {
-			result = getByOwner(s.getLast());
+		EditorGroups groups = groupsByLinks.get(currentFilePath);
+
+		if (groups != null && groups.getLast() != null) {
+			result = getByOwner(groups.getLast());
 		}
 
 		if (result.isInvalid()) {
-			EditorGroups editorGroups = groupsByLinks.get(currentFilePath);
-			if (editorGroups != null) {
-				editorGroups.validate(this);
+			if (groups != null) {
+				groups.validate(this);
 
-				int size = editorGroups.size(project);
+				int size = groups.size(project);
 
 				if (size == 1) {
-					result = editorGroups.first();
+					result = groups.first();
 				} else if (size > 1) {
-					result = editorGroups;
+					result = groups;
 				}
 			}
 		}
@@ -180,7 +180,4 @@ public class IndexCache {
 		return result;
 	}
 
-	public boolean hasGroups(String canonicalPath) {
-		return false;
-	}
 }
