@@ -41,6 +41,6 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean autoSameName = true;
 		public boolean forceSwitch = true;
 		public boolean hideEmpty = true;
-		
+		public boolean showSize = false;
 	}
 }
