@@ -4,6 +4,7 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFileSystemItem;
 import com.intellij.psi.search.FilenameIndex;
@@ -199,6 +200,9 @@ public class IndexCache {
 		List<String> paths = new ArrayList<>();
 		Collection<PsiFileSystemItem> results = processor.getResults();
 		for (PsiFileSystemItem result : results) {
+			if (ProjectCoreUtil.isProjectOrWorkspaceFile(result.getVirtualFile())) {
+				continue;
+			}
 			paths.add(result.getVirtualFile().getCanonicalPath());
 		}
 		Collections.sort(paths);
