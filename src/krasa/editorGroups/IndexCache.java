@@ -202,7 +202,12 @@ public class IndexCache {
 			paths.add(result.getVirtualFile().getCanonicalPath());
 		}
 		Collections.sort(paths);
-		System.err.println("getSameNameGroup " + (System.currentTimeMillis() - start) + "ms");
+
+		long t0 = System.currentTimeMillis() - start;
+		if (t0 > 100) {
+			LOG.warn("getSameNameGroup took " + t0 + "ms");
+		}
+		System.err.println("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
 		return new SameNameGroup(nameWithoutExtension, paths, getGroups(currentFile.getCanonicalPath()));
 	}
