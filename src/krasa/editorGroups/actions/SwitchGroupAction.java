@@ -98,7 +98,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	@Override
 	public JComponent createCustomComponent(Presentation presentation) {
 		ActionButton button = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		presentation.setIcon(AllIcons.Actions.Module);
+		presentation.setIcon(AllIcons.Actions.GroupByModule);
 		button.addMouseListener(new PopupHandler() {
 			public void invokePopup(Component comp, int x, int y) {
 				popupInvoked(comp, x, y);
@@ -107,4 +107,24 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return button;
 	}
 
+	@Override
+	public void update(@NotNull AnActionEvent e) {
+		super.update(e);
+		Presentation presentation = e.getPresentation();
+		Editor data = e.getData(CommonDataKeys.EDITOR);
+		if (data != null) {
+			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				EditorGroup displayedGroup = panel.getDisplayedGroup();
+				if (displayedGroup instanceof FolderGroup) {
+					presentation.setIcon(AllIcons.Nodes.Folder);
+				} else if (displayedGroup instanceof SameNameGroup) {
+					presentation.setIcon(AllIcons.Actions.Copy);
+				} else {
+					presentation.setIcon(AllIcons.Actions.GroupByModule);
+				}
+			}
+		}
+
+	}
 }
