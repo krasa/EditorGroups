@@ -111,6 +111,10 @@
                 class="krasa.editorGroups.actions.ToggleForceAction"
                 text="Automatic Switching of Groups on Manual Refresh"/>
 
+        <action id="krasa.editorGroups.ToggleHideEmpty"
+                class="krasa.editorGroups.actions.ToggleHideEmptyAction"
+                text="Hide the panel when the group is empty"/>
+
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"
                 text="Switch Editor Group">

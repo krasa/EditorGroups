@@ -36,6 +36,7 @@ import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.support.HackedJBScrollPane;
 import krasa.editorGroups.support.Utils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.NotNull;
@@ -71,15 +72,25 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	boolean reload = true;
 	private JBPanel links = new JBPanel();
 	private JBPanel groupsPanel = new JBPanel();
-	private PopupHandler popupHandler;
 	private JBScrollPane scrollPane;
 	private JButton currentButton;
 
 	public EditorGroupPanel(@NotNull TextEditorImpl textEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new HorizontalLayout(0));
 		System.out.println("EditorGroupPanel " + "textEditor = [" + textEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
+		scrollPane = new HackedJBScrollPane(this);
 
+		scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
+		scrollPane.setViewportBorder(JBUI.Borders.empty());
+		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
+			@Override
+			public void adjustmentValueChanged(AdjustmentEvent e) {
+				adjustScrollPane();
+			}
+		});
+		
+		
 		Editor editor = textEditor.getEditor();
 		editor.putUserData(EDITOR_PANEL, this);
 		if (userData != null) {
@@ -116,15 +127,20 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroupManager.getInstance(project).switching(false);
 
 
-		popupHandler = new PopupHandler() {
+		addMouseListener(getPopupHandler());
+		links.addMouseListener(getPopupHandler());
+		groupsPanel.addMouseListener(getPopupHandler());
+		scrollPane.addMouseListener(getPopupHandler());
+	}
+
+	@NotNull
+	private PopupHandler getPopupHandler() {
+		return new PopupHandler() {
 			@Override
 			public void invokePopup(Component comp, int x, int y) {
 				PopupMenu.popupInvoked(comp, x, y);
 			}
 		};
-		addMouseListener(popupHandler);
-		links.addMouseListener(popupHandler);
-		groupsPanel.addMouseListener(popupHandler);
 	}
 
 
@@ -132,7 +148,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		links.removeAll();
 		this.displayedGroup = group;
 		textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
-		setVisible(group.getLinks(project).size() > 0);
+		if (ApplicationConfiguration.state().hideEmpty) {
+			scrollPane.setVisible(group.getLinks(project).size() > 1);
+		} else {
+			scrollPane.setVisible(true);
+		} 
 		createLinks();
 	}
 
@@ -163,7 +183,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			});
 			button.setFont(newFont);
 			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 5));
-			button.addMouseListener(popupHandler);
+			button.addMouseListener(getPopupHandler());
 			if (UIUtil.isUnderDarcula()) {
 				button.setBorder(new LineBorder(Color.lightGray));
 			} else {
@@ -189,7 +209,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
 		JComponent component = toolbar.getComponent();
-		component.addMouseListener(popupHandler);
+		component.addMouseListener(getPopupHandler());
 		component.setBorder(JBUI.Borders.empty());
 		add(component);
 	}
@@ -207,7 +227,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			// button.setContentAreaFilled(false);
 			// button.setOpaque(false);
 			// button.setBorderPainted(false);
-			button.addMouseListener(popupHandler);
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -247,7 +266,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 			}
 
+
 			button.setToolTipText(path);
+			button.addMouseListener(getPopupHandler());
 			
 			if (!new File(path).exists()) {
 				button.setEnabled(false);
@@ -360,7 +381,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	@Override
 	public double getWeight() {
-		return -666;
+		return Integer.MIN_VALUE;
 	}
 
 
@@ -377,15 +398,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroupManager.getInstance(project).switching(false);
 	}
 
-	public void setScrollPane(JBScrollPane scrollPane) {
-		this.scrollPane = scrollPane;
-		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
 
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				adjustScrollPane();
-			}
-		});
+	public JComponent getRoot() {
+		return scrollPane;
 	}
 
 	static class RefreshRequest {
@@ -454,7 +469,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						return;
 					}
 
-					if (group instanceof AutoGroup) {
+					if (group instanceof AutoGroup) {           
 						reloadGroupLinks(((AutoGroup) group).getGroups());
 					} else {
 						groupsPanel.setVisible(false);
@@ -462,9 +477,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 					reloadLinks(group);
 					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
-					revalidate();
+					scrollPane.revalidate();
 					adjustScrollPane();
-					repaint();
+					scrollPane.repaint();
 					reload = false;
 					failed = 0;
 				} catch (ProcessCanceledException e) {

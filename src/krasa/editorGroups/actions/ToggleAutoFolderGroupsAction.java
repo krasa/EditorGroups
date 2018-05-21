@@ -9,11 +9,11 @@ public class ToggleAutoFolderGroupsAction extends ToggleAction implements DumbAw
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.getInstance().getState().autoFolders;
+		return ApplicationConfiguration.state().autoFolders;
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.getInstance().getState().autoFolders = state;
+		ApplicationConfiguration.state().autoFolders = state;
 	}
 }

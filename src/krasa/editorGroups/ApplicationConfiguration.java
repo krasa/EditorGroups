@@ -19,6 +19,10 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		return ServiceManager.getService(ApplicationConfiguration.class);
 	}
 
+	public static State state() {
+		return getInstance().getState();
+	}
+
 	@NotNull
 	@Override
 	public State getState() {
@@ -36,6 +40,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean autoFolders = true;
 		public boolean autoSameName = true;
 		public boolean forceSwitch = true;
+		public boolean hideEmpty = true;
 		
 	}
 }

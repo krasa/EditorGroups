@@ -18,6 +18,7 @@ public class PopupMenu {
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleAutoSameNameGroups"));
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleFolderEditorGroups"));
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleForce"));
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleHideEmpty"));
 		ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
 		menu.getComponent().show(component, x, y);
 	}

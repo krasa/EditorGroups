@@ -5,15 +5,15 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.DumbAware;
 import krasa.editorGroups.ApplicationConfiguration;
 
-public class ToggleForceAction extends ToggleAction implements DumbAware {
+public class ToggleHideEmptyAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.state().forceSwitch;
+		return ApplicationConfiguration.state().hideEmpty;
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.state().forceSwitch = state;
+		ApplicationConfiguration.state().hideEmpty = state;
 	}
 }

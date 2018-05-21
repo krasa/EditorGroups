@@ -79,7 +79,7 @@ public class EditorGroupManager {
 		if (requestedGroup == null) {
 			requestedGroup = displayedGroup;
 		}
-		force = force && ApplicationConfiguration.getInstance().getState().forceSwitch;
+		force = force && ApplicationConfiguration.state().forceSwitch;
 		                     
 		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
 		if (currentFile == null) {
