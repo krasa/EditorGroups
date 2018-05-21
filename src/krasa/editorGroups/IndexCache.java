@@ -165,6 +165,10 @@ public class IndexCache {
 	}
 
 	public EditorGroup getFolderGroup(VirtualFile file) {
+		if (!file.isInLocalFileSystem()) {
+			return EditorGroup.EMPTY;
+		}
+		
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
@@ -183,6 +187,9 @@ public class IndexCache {
 	}
 
 	public EditorGroup getSameNameGroup(VirtualFile currentFile) {
+		if (!currentFile.isInLocalFileSystem()) {
+			return EditorGroup.EMPTY;
+		}
 		String nameWithoutExtension = currentFile.getNameWithoutExtension();
 		long start = System.currentTimeMillis();
 
