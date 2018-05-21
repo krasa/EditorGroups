@@ -218,9 +218,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					boolean alt = BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK);
 					boolean shift = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
 
-					if (fileByPath.equals(file) && !shift) {
-						return;
-					}
 					openFile(fileByPath, ctrl || alt, shift);
 				}
 			});
@@ -306,6 +303,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
+		if (fileToOpen.equals(file) && !newWindow) {
+			return;
+		}
+		
+		
 		if (EditorGroupManager.getInstance(project).switching()) {
 			System.out.println("openFile fail - switching");
 			return;
