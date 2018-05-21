@@ -3,7 +3,7 @@ package krasa.editorGroups.model;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import krasa.editorGroups.support.IndexCache;
+import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 

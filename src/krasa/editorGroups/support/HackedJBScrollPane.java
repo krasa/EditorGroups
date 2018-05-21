@@ -2,7 +2,6 @@ package krasa.editorGroups.support;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.components.JBScrollPane;
-import com.intellij.util.ui.JBUI;
 import krasa.editorGroups.EditorGroupPanel;
 
 import javax.swing.plaf.ScrollPaneUI;
@@ -16,8 +15,6 @@ public class HackedJBScrollPane extends JBScrollPane {
 
 	public HackedJBScrollPane(EditorGroupPanel panel) {
 		super(panel);
-		setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
-		setViewportBorder(JBUI.Borders.empty());
 	}
 
 	@Override

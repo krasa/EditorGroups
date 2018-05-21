@@ -12,8 +12,10 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
+import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -24,7 +26,7 @@ import java.awt.event.MouseEvent;
 import java.util.Collection;
 import java.util.Collections;
 
-import static krasa.editorGroups.actions.RefreshAction.popupInvoked;
+import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
 
 public class SwitchGroupAction extends AnAction implements DumbAware, CustomComponentAction {
 
@@ -36,17 +38,7 @@ public class SwitchGroupAction extends AnAction implements DumbAware, CustomComp
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
-				EditorGroup displayedGroup = panel.getDisplayedGroup();
-				VirtualFile file = panel.getFile();
-
-				Collection<EditorGroup> groups = EditorGroupManager.getInstance(e.getProject()).getGroups(file);
-				actionGroup.add(createAction(e, panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList())));
-				for (EditorGroup group : groups) {
-					if (group instanceof FolderGroup) {
-						continue;
-					}
-					actionGroup.add(createAction(e, panel, displayedGroup, group));
-				}
+				fillGroup(e, actionGroup, panel);
 			}
 
 		}
@@ -62,22 +54,33 @@ public class SwitchGroupAction extends AnAction implements DumbAware, CustomComp
 		ActionManager.getInstance().createActionPopupMenu("", actionGroup).getComponent().show(inputEvent.getComponent(), x, y);
 	}
 
+	private void fillGroup(AnActionEvent e, DefaultActionGroup actionGroup, EditorGroupPanel panel) {
+		EditorGroup displayedGroup = panel.getDisplayedGroup();
+		VirtualFile file = panel.getFile();
+		Collection<EditorGroup> groups = EditorGroupManager.getInstance(e.getProject()).getGroups(file);
+
+		actionGroup.add(createAction(e, panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList())));
+		actionGroup.add(createAction(e, panel, displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList())));
+		for (EditorGroup group : groups) {
+			if (group instanceof AutoGroup) {
+				continue;
+			}
+			actionGroup.add(createAction(e, panel, displayedGroup, group));
+		}
+	}
+
 	@NotNull
 	private DumbAwareAction createAction(AnActionEvent e, EditorGroupPanel panel, EditorGroup displayedGroup, EditorGroup groupLink) {
-		boolean isSelected = displayedGroup.equals(groupLink) || (displayedGroup instanceof FolderGroup && groupLink instanceof FolderGroup);
+		boolean isSelected = displayedGroup.equals(groupLink); 
 		String description = null;
 		String title;
 
 
-		if (groupLink instanceof FolderGroup) {
-			title = "Current folder";
-		} else {
 			String ownerPath = groupLink.getOwnerPath();
 			String name = Utils.toPresentableName(ownerPath);
 
 			title = groupLink.getPresentableTitle(e.getProject(), name);
 			description = "Owner:" + ownerPath;
-		}
 
 
 		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : null) {

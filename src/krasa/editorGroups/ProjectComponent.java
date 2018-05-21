@@ -13,11 +13,11 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.util.Processor;
 import com.intellij.util.indexing.FileBasedIndex;
+import com.intellij.util.ui.JBUI;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.support.HackedJBScrollPane;
-import krasa.editorGroups.support.IndexCache;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -58,7 +58,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, userData, file);
 						JScrollPane scrollPane = new HackedJBScrollPane(panel);
 
-
+						scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
+						scrollPane.setViewportBorder(JBUI.Borders.empty());
+					
 						panel.setScrollPane((JBScrollPane) scrollPane);
 						manager.addTopComponent(fileEditor, scrollPane);
 					}

@@ -2,6 +2,11 @@
 
 image::example.gif[]
 
+=== Type of gropus
+- by folder
+- by file name without extension
+- manually defined
+
 === Definitions
 Add anywhere in the file:
 

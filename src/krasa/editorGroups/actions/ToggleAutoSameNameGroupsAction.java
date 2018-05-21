@@ -5,15 +5,15 @@ import com.intellij.openapi.actionSystem.ToggleAction;
 import com.intellij.openapi.project.DumbAware;
 import krasa.editorGroups.ApplicationConfiguration;
 
-public class ToggleFolderEditorGroupsAction extends ToggleAction implements DumbAware {
+public class ToggleAutoSameNameGroupsAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.getInstance().getState().autoFolders;
+		return ApplicationConfiguration.getInstance().getState().autoSameName;
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.getInstance().getState().autoFolders = state;
+		ApplicationConfiguration.getInstance().getState().autoSameName = state;
 	}
 }

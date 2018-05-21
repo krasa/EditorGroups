@@ -29,7 +29,8 @@ import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.UIUtil;
-import krasa.editorGroups.actions.RefreshAction;
+import krasa.editorGroups.actions.PopupMenu;
+import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.FolderGroup;
@@ -101,20 +102,22 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		fileFromTextEditor = Utils.getFileFromTextEditor(project, textEditor);
 		addButtons();
-		add(groupsPanel);
-		add(links);
+
 		groupsPanel.setLayout(new HorizontalLayout(0));
 		links.setLayout(new HorizontalLayout(0));
-		
-		
+
+
+		add(links);
+		add(groupsPanel);
 		refresh(false, null);
+
 		EditorGroupManager.getInstance(project).switching(false);
 
 
 		popupHandler = new PopupHandler() {
 			@Override
 			public void invokePopup(Component comp, int x, int y) {
-				RefreshAction.popupInvoked(comp, x, y);
+				PopupMenu.popupInvoked(comp, x, y);
 			}
 		};
 		addMouseListener(popupHandler);
@@ -140,7 +143,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		this.groupsPanel.removeAll();
 		boolean added = false;
 		for (EditorGroup editorGroup : groups) {
-			if (editorGroup instanceof FolderGroup) {
+			if (editorGroup instanceof AutoGroup) {
 				continue;
 			}
 			added = true;
@@ -230,9 +233,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				currentIndex = i1;
 				currentButton = button;
 			} else {
-				if (displayedGroup instanceof FolderGroup) {
+				if (displayedGroup instanceof AutoGroup) {
 					if (UIUtil.isUnderDarcula()) {
-						button.setForeground(Color.orange);
+						if (displayedGroup instanceof FolderGroup) {
+							button.setForeground(Color.orange);
+						}
 						button.setFont(button.getFont().deriveFont(Font.ITALIC));
 					} else {
 //						Color fg = new Color(0, 23, 3, 255);
@@ -443,8 +448,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						return;
 					}
 
-					if (group instanceof FolderGroup) {
-						reloadGroupLinks(((FolderGroup) group).getGroups());
+					if (group instanceof AutoGroup) {
+						reloadGroupLinks(((AutoGroup) group).getGroups());
 					} else {
 						groupsPanel.setVisible(false);
 					}

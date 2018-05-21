@@ -1,7 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
-import krasa.editorGroups.support.IndexCache;
+import krasa.editorGroups.IndexCache;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;

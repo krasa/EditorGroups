@@ -29,7 +29,7 @@
         <editorNotificationProvider implementation="krasa.editorGroups.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
         <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>
-        <projectService serviceImplementation="krasa.editorGroups.support.IndexCache"/>
+        <projectService serviceImplementation="krasa.editorGroups.IndexCache"/>
         <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
@@ -97,8 +97,13 @@
                 text="Reindex This File">
         </action>
 
+
+        <action id="krasa.editorGroups.ToggleAutoSameNameGroups"
+                class="krasa.editorGroups.actions.ToggleAutoSameNameGroupsAction"
+                text="Automatic Editor Groups by a Current File Name (without extension)"/>
+
         <action id="krasa.editorGroups.ToggleFolderEditorGroups"
-                class="krasa.editorGroups.actions.ToggleFolderEditorGroupsAction"
+                class="krasa.editorGroups.actions.ToggleAutoFolderGroupsAction"
                 text="Automatic Editor Groups by a Current Folder"/>
 
 

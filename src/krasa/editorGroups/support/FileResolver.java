@@ -27,7 +27,7 @@ public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
 	@NotNull
-	List<String> resolveLinks(Project project, String ownerPath, List<String> relatedPaths) {
+	public List<String> resolveLinks(Project project, String ownerPath, List<String> relatedPaths) {
 		long start = System.currentTimeMillis();
 		File file1 = new File(ownerPath);
 		String folder = file1.isFile() ? file1.getParent() : ownerPath;

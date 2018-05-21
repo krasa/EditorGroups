@@ -7,8 +7,8 @@ import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.FolderGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -63,7 +63,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
 		}
 
-		if (group != null && group.isValid() && !(group instanceof FolderGroup)) {
+		if (group != null && group.isValid() && !(group instanceof AutoGroup)) {
 			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI);
 		}
 		return presentableNameForUI;

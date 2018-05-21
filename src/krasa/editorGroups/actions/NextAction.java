@@ -15,7 +15,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
-import static krasa.editorGroups.actions.RefreshAction.popupInvoked;
+import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
 
 public class NextAction extends DumbAwareAction implements CustomComponentAction {
 	@Override

@@ -3,7 +3,7 @@ package krasa.editorGroups.index;
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.util.indexing.FileBasedIndex;
-import krasa.editorGroups.support.IndexCache;
+import krasa.editorGroups.IndexCache;
 
 public class ReindexAction extends AnAction {
 

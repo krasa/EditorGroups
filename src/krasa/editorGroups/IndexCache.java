@@ -1,17 +1,19 @@
-package krasa.editorGroups.support;
+package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFileSystemItem;
+import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.CommonProcessors;
+import com.intellij.util.FilteringProcessor;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.EditorGroups;
-import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.FileResolver;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -62,7 +64,7 @@ public class IndexCache {
 		if (group.isInvalid()) {
 			return false;
 		}
-		if (group instanceof FolderGroup) {
+		if (group instanceof AutoGroup) {
 			return group.isValid();
 		}
 
@@ -165,8 +167,7 @@ public class IndexCache {
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
-		Collection<EditorGroup> groups = getGroups(file.getCanonicalPath());
-		return new FolderGroup(folder, links, groups);
+		return new FolderGroup(folder, links, getGroups(file.getCanonicalPath()));
 	}
 
 
@@ -180,4 +181,30 @@ public class IndexCache {
 		return result;
 	}
 
+	public EditorGroup getSameNameGroup(VirtualFile currentFile) {
+		String nameWithoutExtension = currentFile.getNameWithoutExtension();
+		long start = System.currentTimeMillis();
+
+		CommonProcessors.CollectProcessor<String> matchingNamesProc = new CommonProcessors.CollectProcessor<>();
+		FilenameIndex.processAllFileNames(new FilteringProcessor<>(s -> s.equals(nameWithoutExtension) || s.startsWith(nameWithoutExtension + "."), matchingNamesProc), GlobalSearchScope.projectScope(project), null);
+		Collection<String> matchingNames = matchingNamesProc.getResults();
+
+		CommonProcessors.CollectProcessor<PsiFileSystemItem> processor = new CommonProcessors.CollectProcessor<>();
+		for (String matchingName : matchingNames) {
+			FilenameIndex.processFilesByName(
+				matchingName, false, false, processor, GlobalSearchScope.projectScope(project), project, null);
+
+		}
+
+		List<String> paths = new ArrayList<>();
+		Collection<PsiFileSystemItem> results = processor.getResults();
+		for (PsiFileSystemItem result : results) {
+			paths.add(result.getVirtualFile().getCanonicalPath());
+		}
+		Collections.sort(paths);
+		System.err.println("getSameNameGroup " + (System.currentTimeMillis() - start) + "ms");
+
+		return new SameNameGroup(nameWithoutExtension, paths, getGroups(currentFile.getCanonicalPath()));
+	}
+	
 }

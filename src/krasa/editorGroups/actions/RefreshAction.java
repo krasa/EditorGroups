@@ -29,7 +29,7 @@ public class RefreshAction extends DumbAwareAction implements CustomComponentAct
 		ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
 		refresh.addMouseListener(new PopupHandler() {
 			public void invokePopup(Component comp, int x, int y) {
-				popupInvoked(comp, x, y);
+				PopupMenu.popupInvoked(comp, x, y);
 			}
 		});
 		presentation.setIcon(AllIcons.Actions.Refresh);
@@ -37,19 +37,4 @@ public class RefreshAction extends DumbAwareAction implements CustomComponentAct
 		return refresh;
 	}
 
-	public static void popupInvoked(Component component, int x, int y) {
-		DefaultActionGroup group = new DefaultActionGroup();
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Previous"));
-		group.add(new Separator());
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
-		group.add(new Separator());
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ReindexThisFile"));
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Reindex"));
-		group.add(new Separator());
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleFolderEditorGroups"));
-		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleForce"));
-		ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
-		menu.getComponent().show(component, x, y);
-	}
 }

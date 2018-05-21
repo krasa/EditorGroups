@@ -34,6 +34,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 
 	public static class State {
 		public boolean autoFolders = true;
+		public boolean autoSameName = true;
 		public boolean forceSwitch = true;
 		
 	}

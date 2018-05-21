@@ -14,7 +14,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.FolderGroup;
-import krasa.editorGroups.support.IndexCache;
+import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -65,7 +65,7 @@ public class EditorGroupManager {
 
 	/**
 	 * @param displayedGroup
-	 * @param force if true - return this file's owned group instead of the last one
+	 * @param force if true - return this file's owned group instead of the last one, or anything closest
 	 */
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean force) {
@@ -107,8 +107,10 @@ public class EditorGroupManager {
 			}
 		}
 
-		if (!force) {//already tried             
-			if (requestedGroup instanceof FolderGroup) {
+		if (!force) {
+			if (requestedGroup instanceof SameNameGroup) {
+				result = cache.getSameNameGroup(currentFile);
+			} else if (requestedGroup instanceof FolderGroup) {
 				result = cache.getFolderGroup(currentFile);
 			}
 			if (result.isInvalid()) {
@@ -120,11 +122,10 @@ public class EditorGroupManager {
 			}
 		}
 		if (result.isInvalid()) {
-
-			if (applicationConfiguration.getState().autoFolders || requestedGroup instanceof FolderGroup) {
+			if (applicationConfiguration.getState().autoSameName || requestedGroup instanceof SameNameGroup) {
+				result = cache.getSameNameGroup(currentFile);
+			} else if (applicationConfiguration.getState().autoFolders || requestedGroup instanceof FolderGroup) {
 				result = cache.getFolderGroup(currentFile);
-			} else if (result.isInvalid()) {
-				result = EditorGroup.EMPTY;
 			}
 		}
 
