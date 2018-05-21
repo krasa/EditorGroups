@@ -17,6 +17,7 @@ import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -426,6 +427,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
+	int failed = 0;
 	private void refreshSmart() {
 		DumbService.getInstance(project).runWhenSmart(new Runnable() {
 			@Override
@@ -460,7 +462,19 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					adjustScrollPane();
 					repaint();
 					reload = false;
-
+					failed = 0;
+				} catch (ProcessCanceledException e) {
+					if (++failed > 5) {
+						LOG.error(e);
+						return;
+					}
+					ApplicationManager.getApplication().invokeLater(new Runnable() {
+						@Override
+						public void run() {
+							atomicReference.set(request);
+							refreshSmart();
+						}
+					});
 				} catch (Exception e) {
 					LOG.error(e);
 					e.printStackTrace();
