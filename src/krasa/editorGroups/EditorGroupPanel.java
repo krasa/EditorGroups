@@ -29,6 +29,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
+import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.model.AutoGroup;
@@ -187,9 +188,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		
 		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
-		toolbar.getComponent().addMouseListener(popupHandler);
-		    
-		add(toolbar.getComponent());
+		JComponent component = toolbar.getComponent();
+		component.addMouseListener(popupHandler);
+		component.setBorder(JBUI.Borders.empty());
+		add(component);
 	}
 
 	private void createLinks() {
