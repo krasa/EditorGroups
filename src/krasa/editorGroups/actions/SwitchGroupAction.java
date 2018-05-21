@@ -1,12 +1,15 @@
 package krasa.editorGroups.actions;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.actions.QuickSwitchSchemeAction;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.Project;
+import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
@@ -28,59 +31,60 @@ import java.util.Collections;
 
 import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
 
-public class SwitchGroupAction extends AnAction implements DumbAware, CustomComponentAction {
+public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAware, CustomComponentAction {
+
+	protected void showPopup(AnActionEvent e, ListPopup popup) {
+		Project project = e.getProject();
+		if (project != null) {
+			InputEvent inputEvent = e.getInputEvent();
+			if (inputEvent instanceof MouseEvent) {
+				popup.showUnderneathOf(inputEvent.getComponent());
+			} else {
+				popup.showCenteredInCurrentWindow(project);
+			}
+		} else {
+			popup.showInBestPositionFor(e.getDataContext());
+		}
+	}
 
 	@Override
-	public void actionPerformed(AnActionEvent e) {
-		final DefaultActionGroup actionGroup = new DefaultActionGroup();
-
-		Editor data = e.getData(CommonDataKeys.EDITOR);
+	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
+		Editor data = dataContext.getData(CommonDataKeys.EDITOR);
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
-				fillGroup(e, actionGroup, panel);
+				fillGroup(defaultActionGroup, panel, project);
 			}
-
 		}
-
-		InputEvent inputEvent = e.getInputEvent();
-		int x = 0;
-		int y = 0;
-		if (inputEvent instanceof MouseEvent) {
-			x = ((MouseEvent) inputEvent).getX();
-			y = ((MouseEvent) inputEvent).getY();
-		}
-
-		ActionManager.getInstance().createActionPopupMenu("", actionGroup).getComponent().show(inputEvent.getComponent(), x, y);
 	}
 
-	private void fillGroup(AnActionEvent e, DefaultActionGroup actionGroup, EditorGroupPanel panel) {
+	private void fillGroup(DefaultActionGroup actionGroup, EditorGroupPanel panel, Project project) {
 		EditorGroup displayedGroup = panel.getDisplayedGroup();
 		VirtualFile file = panel.getFile();
-		Collection<EditorGroup> groups = EditorGroupManager.getInstance(e.getProject()).getGroups(file);
+		Collection<EditorGroup> groups = EditorGroupManager.getInstance(project).getGroups(file);
 
-		actionGroup.add(createAction(e, panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList())));
-		actionGroup.add(createAction(e, panel, displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList())));
+		actionGroup.add(createAction(panel, displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project));
+		actionGroup.add(createAction(panel, displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project));
 		for (EditorGroup group : groups) {
 			if (group instanceof AutoGroup) {
 				continue;
 			}
-			actionGroup.add(createAction(e, panel, displayedGroup, group));
+			actionGroup.add(createAction(panel, displayedGroup, group, project));
 		}
 	}
 
 	@NotNull
-	private DumbAwareAction createAction(AnActionEvent e, EditorGroupPanel panel, EditorGroup displayedGroup, EditorGroup groupLink) {
-		boolean isSelected = displayedGroup.equals(groupLink); 
+	private DumbAwareAction createAction(EditorGroupPanel panel, EditorGroup displayedGroup, EditorGroup groupLink, Project project) {
+		boolean isSelected = displayedGroup.equals(groupLink);
 		String description = null;
 		String title;
 
 
-			String ownerPath = groupLink.getOwnerPath();
-			String name = Utils.toPresentableName(ownerPath);
+		String ownerPath = groupLink.getOwnerPath();
+		String name = Utils.toPresentableName(ownerPath);
 
-			title = groupLink.getPresentableTitle(e.getProject(), name);
-			description = "Owner:" + ownerPath;
+		title = groupLink.getPresentableTitle(project, name);
+		description = "Owner:" + ownerPath;
 
 
 		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : null) {
