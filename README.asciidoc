@@ -30,9 +30,14 @@ Add anywhere in the file:
 
 
 === Shortcuts 
-- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  - switch files (closing the previous one)           
-- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch files (leaving the previous one opened)
+- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  - switch file (closing the previous one)           
+- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch file (leaving the previous one opened)
+- [Ctrl + Alt + Shift + Mouse Wheel] or [Ctrl + Alt + Shift + \ or ' ] - switch file into a new window
 - Alt + Shift + Q - refresh                                                           
+              
+=== Buttons modifiers
+- Next/Previous button + [Ctrl/Alt + click] - open a file in a new tab
+- Next/Previous button + [Shift + click] - open a file in a new window
 
 === Advanced actions and settings
 - right click on the panel

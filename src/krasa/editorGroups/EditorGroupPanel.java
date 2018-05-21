@@ -205,7 +205,19 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					openFile(Utils.getFileByPath(path), BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
+					VirtualFile fileByPath = Utils.getFileByPath(path);
+					if (fileByPath == null) {
+						setEnabled(false);
+						return;
+					}
+					boolean ctrl = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
+					boolean alt = BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK);
+					boolean shift = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
+
+					if (fileByPath.equals(file) && !shift) {
+						return;
+					}
+					openFile(fileByPath, ctrl || alt, shift);
 				}
 			});
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
@@ -293,7 +305,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		if (fileToOpen == null || fileToOpen.equals(file)) {
+		if (fileToOpen == null) {
 			return;
 		}
 
