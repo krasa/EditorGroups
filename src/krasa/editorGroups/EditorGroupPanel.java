@@ -33,7 +33,6 @@ import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.HackedJBScrollPane;
 import krasa.editorGroups.support.Utils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -117,7 +116,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		add(links);
 		add(groupsPanel);
-		refresh(false, null);
+		refresh(false, null, false);
 
 		EditorGroupManager.getInstance(project).switching(false, null);
 
@@ -165,7 +164,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					refresh(false, editorGroup);
+					refresh(false, editorGroup, false);
 				}
 			});
 			button.setFont(newFont);
@@ -374,9 +373,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		System.out.println("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			reload = true;
-			refresh(false, switchingGroup);
+			refresh(false, switchingGroup, false);
 		} else {
-			refresh(false, null);
+			refresh(false, null, false);
 		}
 		EditorGroupManager.getInstance(project).switching(false, null);
 	}
@@ -396,11 +395,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			this.requestedGroup = requestedGroup;
 		}
 
+
 		public String toString() {
-			return new ToStringBuilder(this)
-				.append("refresh", refresh)
-				.append("newGroup", requestedGroup)
-				.toString();
+			return "RefreshRequest{" +
+				"refresh=" + refresh +
+				", requestedGroup=" + requestedGroup +
+				'}';
 		}
 	}
 
@@ -409,7 +409,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	/**
 	 * call from any thread
 	 */
-	public void refresh(boolean refresh, EditorGroup newGroup) {
+	public void refresh(boolean refresh, EditorGroup newGroup, boolean alwaysInvokeLater) {
 		if (!refresh && newGroup == null) { //unnecessary refresh
 			atomicReference.compareAndSet(null, new RefreshRequest(refresh, newGroup));
 		} else {
@@ -417,8 +417,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 
 		com.intellij.openapi.application.Application application = ApplicationManager.getApplication();
-		boolean dispatchThread = application.isDispatchThread();
-		if (!dispatchThread) {
+		if (alwaysInvokeLater || !application.isDispatchThread()) {
 			application.invokeLater(new Runnable() {
 				@Override
 				public void run() {
@@ -430,7 +429,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	volatile int failed = 0;
+	private int failed = 0;
 
 	private void refreshSmart() {
 		DumbService.getInstance(project).runWhenSmart(new Runnable() {
@@ -525,7 +524,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			System.out.println("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
 			//concurrency is a bitch, do not alter data
 //			displayedGroup.invalid();
-			refresh(false, null);
+			refresh(false, null, false);
 		}
 	}
 

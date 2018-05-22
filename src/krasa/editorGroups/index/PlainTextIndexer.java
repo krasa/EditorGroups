@@ -59,7 +59,7 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 				value = EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
 				map.put(ownerPath, value);
 			}
-//			System.out.println("indexed: " + ownerPath);
+			System.out.println("indexed: " + ownerPath);
 			return map;
 		} catch (com.intellij.openapi.progress.ProcessCanceledException e) {
 			throw e;

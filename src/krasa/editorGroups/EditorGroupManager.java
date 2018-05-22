@@ -192,7 +192,11 @@ public class EditorGroupManager {
 				Editor editor = ((TextEditor) selectedEditor).getEditor();
 				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 				if (panel != null) {
-					panel.refresh(false, null);
+					EditorGroup displayedGroup = panel.getDisplayedGroup();
+					if (displayedGroup instanceof FolderGroup) {
+						continue;
+					}
+					panel.refresh(false, null, true);
 					MyFileManager.updateTitle(project, selectedEditor.getFile());
 				}
 			}

@@ -259,4 +259,37 @@ public class IndexCache {
 		return null;
 	}
 
+	public void loadState(ProjectComponent.State state) {
+		if (groupsByLinks.size() > 0) {
+			LOG.error("groupsByLinks.size()=" + groupsByLinks.size());
+		}
+		for (ProjectComponent.StringPair stringStringPair : state.lastGroup) {
+			EditorGroups editorGroups = new EditorGroups();
+			groupsByLinks.put(stringStringPair.key, editorGroups);
+			editorGroups.setLast(stringStringPair.value);
+		}
+	}
+
+	public ProjectComponent.State getState() {
+		ProjectComponent.State state = new ProjectComponent.State();
+		Set<Map.Entry<String, EditorGroups>> entries = groupsByLinks.entrySet();
+		boolean autoSameName = ApplicationConfiguration.state().autoSameName;
+		boolean autoFolders = ApplicationConfiguration.state().autoFolders;
+
+		for (Map.Entry<String, EditorGroups> entry : entries) {
+			String last = entry.getValue().getLast();
+			if (last == null) {
+				continue;
+			} else if (autoSameName && AutoGroup.SAME_FILE_NAME.equals(last)) {
+				continue;
+			} else if (autoFolders && AutoGroup.DIRECTORY.equals(last)) {
+				continue;
+			}
+			if (state.lastGroup.size() > 1000) {  //TODO config
+				break;
+			}
+			state.lastGroup.add(new ProjectComponent.StringPair(entry.getKey(), last));
+		}
+		return state;
+	}
 }

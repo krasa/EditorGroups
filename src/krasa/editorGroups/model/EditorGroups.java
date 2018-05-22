@@ -11,6 +11,9 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 	private Map<String, EditorGroup> map = new ConcurrentHashMap<>();
 	private String last;
 
+	public EditorGroups() {
+	}
+
 	public EditorGroups(EditorGroup editorGroup) {
 		if (editorGroup instanceof AutoGroup) {
 			return;
