@@ -485,7 +485,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					ApplicationManager.getApplication().invokeLater(new Runnable() {
 						@Override
 						public void run() {
-							atomicReference.set(request);
+							atomicReference.compareAndSet(null, request);
 							refreshSmart();
 						}
 					});
