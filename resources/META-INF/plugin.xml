@@ -45,46 +45,44 @@
     </project-components>
     <actions>
 
-
+        <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
+                text="Open Previous File in Group">
+            <keyboard-shortcut first-keystroke="ctrl  SEMICOLON" keymap="$default"/>
+            <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
+        </action>
         <action class="krasa.editorGroups.actions.PreviousInNewTabAction" id="krasa.editorGroups.PreviousInNewTab"
                 text="Open Previous File in Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt QUOTE" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button143" keymap="$default"/>
         </action>
-        <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
-                text="Open Next File in Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt BACK_SLASH" keymap="$default"/>
-            <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
-        </action>
-
-
         <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
                 id="krasa.editorGroups.PreviousInNewWindow"
                 text="Open Previous File in Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl alt shift SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>
+        </action>
+
+
+        <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
+                text="Open Next File in Group">
+            <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
+            <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
                 text="Open Next File in Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt shift BACK_SLASH" keymap="$default"/>
+            <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>
+        </action>
+        <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
+                text="Open Next File in Group in a New Tab">
+            <keyboard-shortcut first-keystroke="ctrl alt QUOTE" keymap="$default"/>
+            <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
         </action>
 
 
         <action class="krasa.editorGroups.actions.RefreshAction" id="krasa.editorGroups.Refresh"
                 text="Refresh Editor Groups">
             <keyboard-shortcut first-keystroke="ctrl alt Q" keymap="$default"/>
-        </action>
-
-        <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
-                text="Open Previous File in Group">
-            <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
-            <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
-        </action>
-        <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
-                text="Open Next File in Group">
-            <keyboard-shortcut first-keystroke="ctrl  BACK_SLASH" keymap="$default"/>
-            <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
 
 

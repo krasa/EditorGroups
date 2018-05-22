@@ -1,10 +1,10 @@
 ====  Implementation of https://github.com/SomewhatCloudy/phpstorm-related-proposal  ==== 
 
-image::example.gif[]
+image::example.jpg[]
 
 === Type of gropus
+- by file name without extension anywhere in the project
 - by folder
-- by file name without extension
 - manually defined
 
 === Definitions
@@ -35,9 +35,9 @@ Add anywhere in the file:
 
 
 === Shortcuts 
-- [Ctrl + Mouse Wheel] or [Ctrl + \ or ' ]  - switch file (closing the previous one)           
-- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + \ or ' ] - switch file (leaving the previous one opened)
-- [Ctrl + Alt + Shift + Mouse Wheel] or [Ctrl + Alt + Shift + \ or ' ] - switch file into a new window
+- [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           
+- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + ; or ' ] - switch file (leaving the previous one opened)
+- [Ctrl + Alt + Shift + Mouse Wheel] or [Ctrl + Alt + Shift + ; or ' ] - switch file into a new window
 - Alt + Shift + Q - refresh                                                           
               
 === Buttons modifiers
