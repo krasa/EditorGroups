@@ -506,7 +506,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 //			scrollPane.getHorizontalScrollBar().setValue(100);
 //			
-//			System.err.println("adjustScrollPane");
+//			System.out.println("adjustScrollPane");
 //			Rectangle bounds = scrollPane.getViewport().getViewRect();
 //			Dimension size = scrollPane.getViewport().getViewSize();
 //			int x = (size.width - bounds.width) / 2;

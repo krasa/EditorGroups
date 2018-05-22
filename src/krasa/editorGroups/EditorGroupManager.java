@@ -214,7 +214,7 @@ public class EditorGroupManager {
 				return o1.getTitle().compareTo(o2.getTitle());
 			}
 		});
-		System.err.println("getAllGroups " + (System.currentTimeMillis() - start));
+		System.out.println("getAllGroups " + (System.currentTimeMillis() - start));
 		return allGroups;
 	}
 }

@@ -225,7 +225,7 @@ public class IndexCache {
 		if (t0 > 100) {
 			LOG.warn("getSameNameGroup took " + t0 + "ms");
 		}
-		System.err.println("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
+		System.out.println("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
 		return new SameNameGroup(nameWithoutExtension, paths, getGroups(currentFile.getCanonicalPath()));
 	}

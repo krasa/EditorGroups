@@ -83,7 +83,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					}
 				};
 				fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, processor, project);
-				System.err.println("initCache " + (System.currentTimeMillis() - start));
+				System.out.println("initCache " + (System.currentTimeMillis() - start));
 			}
 		});
 	}
