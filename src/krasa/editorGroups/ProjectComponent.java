@@ -62,7 +62,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	}
 
 	private void initCache() {
-
+		//TODO run it on background?
 		DumbService.getInstance(project).runWhenSmart(new Runnable() {
 			@Override
 			public void run() {
