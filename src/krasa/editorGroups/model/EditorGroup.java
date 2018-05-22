@@ -47,7 +47,7 @@ public interface EditorGroup {
 		} else {
 			boolean empty = isEmpty(getTitle());
 			if (empty) {
-				presentableNameForUI = "[" + presentableNameForUI + "]";
+//				presentableNameForUI = "[" + presentableNameForUI + "]";
 			} else {
 				presentableNameForUI = "[" + getTitle() + "] " + presentableNameForUI;
 			}
