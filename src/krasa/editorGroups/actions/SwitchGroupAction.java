@@ -5,7 +5,7 @@ import com.intellij.ide.actions.QuickSwitchSchemeAction;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
-import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.DumbAwareAction;
@@ -51,7 +51,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 	@Override
 	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
-		Editor data = dataContext.getData(CommonDataKeys.EDITOR);
+		FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
@@ -157,7 +157,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	public void update(@NotNull AnActionEvent e) {
 		super.update(e);
 		Presentation presentation = e.getPresentation();
-		Editor data = e.getData(CommonDataKeys.EDITOR);
+		FileEditor data = e.getData(PlatformDataKeys.FILE_EDITOR);
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {

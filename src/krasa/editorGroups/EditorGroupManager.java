@@ -1,9 +1,7 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.TextEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.MyFileManager;
@@ -169,12 +167,9 @@ public class EditorGroupManager {
 		long start = System.currentTimeMillis();
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		for (FileEditor selectedEditor : manager.getAllEditors()) {
-			if (selectedEditor instanceof TextEditor) {
-				Editor editor = ((TextEditor) selectedEditor).getEditor();
-				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-				if (panel != null) {
-					panel.onIndexingDone(ownerPath, group);
-				}
+			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				panel.onIndexingDone(ownerPath, group);
 			}
 		}
 
@@ -188,17 +183,14 @@ public class EditorGroupManager {
 		long start = System.currentTimeMillis();
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		for (FileEditor selectedEditor : manager.getAllEditors()) {
-			if (selectedEditor instanceof TextEditor) {
-				Editor editor = ((TextEditor) selectedEditor).getEditor();
-				EditorGroupPanel panel = editor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-				if (panel != null) {
-					EditorGroup displayedGroup = panel.getDisplayedGroup();
-					if (displayedGroup instanceof FolderGroup) {
-						continue;
-					}
-					panel.refresh(false, null, true);
-					MyFileManager.updateTitle(project, selectedEditor.getFile());
+			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				EditorGroup displayedGroup = panel.getDisplayedGroup();
+				if (displayedGroup instanceof FolderGroup) {
+					continue;
 				}
+				panel.refresh(false, null, true);
+				MyFileManager.updateTitle(project, selectedEditor.getFile());
 			}
 		}
 

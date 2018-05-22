@@ -3,12 +3,9 @@ package krasa.editorGroups;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -51,18 +48,14 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 //				EditorGroupManager.getInstance(project).reparse(file);
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 				for (final FileEditor fileEditor : fileEditors) {
-					if (fileEditor instanceof TextEditorImpl) {
-						Editor editor = ((TextEditorImpl) fileEditor).getEditor();
-						if (editor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
+					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 							continue;
 						}
 
-						FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
 						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
-						EditorGroupPanel panel = new EditorGroupPanel((TextEditorImpl) fileEditor, project, switchingGroup, file);
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
 						manager.addTopComponent(fileEditor, panel.getRoot());
-					}
 				}
 			}
 

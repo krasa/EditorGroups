@@ -69,9 +69,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private JBScrollPane scrollPane;
 	private JButton currentButton;
 
-	public EditorGroupPanel(@NotNull TextEditorImpl textEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
+	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new HorizontalLayout(0));
-		System.out.println("EditorGroupPanel " + "textEditor = [" + textEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
+		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
 		scrollPane = new HackedJBScrollPane(this);
 
 		scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
@@ -85,29 +85,33 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		});
 
 
-		Editor editor = textEditor.getEditor();
-		editor.putUserData(EDITOR_PANEL, this);
+		fileEditor.putUserData(EDITOR_PANEL, this);
 		if (userData != null) {
 			displayedGroup = userData;
 		}
-		this.textEditor = textEditor;
+		this.textEditor = fileEditor;
 		this.project = project;
 		this.file = file;
-		if (editor instanceof EditorImpl) {
-			EditorImpl editorImpl = (EditorImpl) editor;
-			editorImpl.addFocusListener(new FocusChangeListener() {
-				@Override
-				public void focusGained(Editor editor) {
-					EditorGroupPanel.this.focusGained(editor);
-				}
 
-				@Override
-				public void focusLost(Editor editor) {
+		if (fileEditor instanceof TextEditorImpl) {
+			Editor editor = ((TextEditorImpl) fileEditor).getEditor();
+			if (editor instanceof EditorImpl) {
+				EditorImpl editorImpl = (EditorImpl) editor;
+				editorImpl.addFocusListener(new FocusChangeListener() {
+					@Override
+					public void focusGained(Editor editor) {
+						EditorGroupPanel.this.focusGained(editor);
+					}
 
-				}
-			});
+					@Override
+					public void focusLost(Editor editor) {
+
+					}
+				});
+			}
 		}
-		fileFromTextEditor = Utils.getFileFromTextEditor(project, textEditor);
+
+		fileFromTextEditor = Utils.getFileFromTextEditor(project, fileEditor);
 		addButtons();
 
 		groupsPanel.setLayout(new HorizontalLayout(0));
