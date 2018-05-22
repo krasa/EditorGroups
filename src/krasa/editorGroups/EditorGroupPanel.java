@@ -315,6 +315,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
+		if (fileToOpen == null) {
+			return;
+		}
+	
 		if (fileToOpen.equals(file) && !newWindow) {
 			return;
 		}
@@ -322,10 +326,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		if (EditorGroupManager.getInstance(project).switching()) {
 			System.out.println("openFile fail - switching");
-			return;
-		}
-
-		if (fileToOpen == null) {
 			return;
 		}
 
