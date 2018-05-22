@@ -1,4 +1,3 @@
-
 package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
@@ -11,10 +10,7 @@ import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.FolderGroup;
-import krasa.editorGroups.model.SameNameGroup;
+import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -68,14 +64,13 @@ public class EditorGroupManager {
 
 	/**
 	 * @param displayedGroup
-	 * @param force          if true - return this file's owned group instead of the last one, or anything closest
 	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean force) {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh) {
 		if (DumbService.isDumb(project)) {
 			throw new RuntimeException("check for dumb");
 		}
-		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + force + "]");
+		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
 
@@ -83,7 +78,6 @@ public class EditorGroupManager {
 		if (requestedGroup == null) {
 			requestedGroup = displayedGroup;
 		}
-		force = force && ApplicationConfiguration.state().forceSwitch;
 
 		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
 		if (currentFile == null) {
@@ -94,12 +88,13 @@ public class EditorGroupManager {
 		String currentFilePath = currentFile.getCanonicalPath();
 
 
+		boolean force = refresh && ApplicationConfiguration.state().forceSwitch;
 		if (force) {
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath);
+				result = cache.getEditorGroupAsSlave(currentFilePath, true);
 			}
 		}
 
@@ -111,23 +106,36 @@ public class EditorGroupManager {
 		}
 
 		if (!force) {
-			if (requestedGroup instanceof SameNameGroup) {
-				result = cache.getSameNameGroup(currentFile);
-			} else if (requestedGroup instanceof FolderGroup) {
-				result = cache.getFolderGroup(currentFile);
-			}
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
 
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath);
+				result = cache.getEditorGroupAsSlave(currentFilePath, false);
 			}
 		}
+
+
 		if (result.isInvalid()) {
-			if (applicationConfiguration.getState().autoSameName || requestedGroup instanceof SameNameGroup) {
+			if (applicationConfiguration.getState().autoSameName) {
+				result = AutoGroup.SAME_NAME_INSTANCE;
+			} else if (applicationConfiguration.getState().autoFolders) {
+				result = AutoGroup.DIRECTORY_INSTANCE;
+			}
+		}
+
+		if (refresh || result instanceof AutoGroup && result.size(project) == 0) {
+			//refresh
+			if (result instanceof SameNameGroup) {
 				result = cache.getSameNameGroup(currentFile);
-			} else if (applicationConfiguration.getState().autoFolders || requestedGroup instanceof FolderGroup) {
+			} else if (result instanceof FolderGroup) {
+				result = cache.getFolderGroup(currentFile);
+			}
+
+			if (applicationConfiguration.getState().autoFolders
+				&& result instanceof SameNameGroup && result.size(project) <= 1
+				&& !(requestedGroup instanceof SameNameGroup)
+				&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 				result = cache.getFolderGroup(currentFile);
 			}
 		}

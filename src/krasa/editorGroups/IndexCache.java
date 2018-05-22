@@ -126,16 +126,23 @@ public class IndexCache {
 	}
 
 
-	public EditorGroup getEditorGroupAsSlave(String currentFilePath) {
+	public EditorGroup getEditorGroupAsSlave(String currentFilePath, boolean force) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
 
-		if (groups != null && groups.getLast() != null) {
-			result = getByOwner(groups.getLast());
-		}
+		if (groups != null) {
+			String last = groups.getLast();
+			if (last != null) {
+				if (!force && AutoGroup.SAME_FILE_NAME.equals(last)) {
+					result = AutoGroup.SAME_NAME_INSTANCE;
+				} else if (!force && AutoGroup.DIRECTORY.equals(last)) {
+					result = AutoGroup.DIRECTORY_INSTANCE;
+				} else {
+					result = getByOwner(last);
+				}
+			}
 
-		if (result.isInvalid()) {
-			if (groups != null) {
+			if (result.isInvalid()) {
 				groups.validate(this);
 
 				int size = groups.size(project);
@@ -168,7 +175,7 @@ public class IndexCache {
 		if (!file.isInLocalFileSystem()) {
 			return EditorGroup.EMPTY;
 		}
-		
+
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
@@ -241,4 +248,15 @@ public class IndexCache {
 		}
 		return all;
 	}
+
+	public String getLast(String currentFilePath) {
+		EditorGroups groups = groupsByLinks.get(currentFilePath);
+
+		if (groups != null) {
+			return groups.getLast();
+
+		}
+		return null;
+	}
+
 }

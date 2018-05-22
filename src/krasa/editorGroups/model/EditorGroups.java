@@ -6,12 +6,15 @@ import krasa.editorGroups.IndexCache;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EditorGroups implements EditorGroup {
+public class EditorGroups implements EditorGroup, GroupsHolder {
 
 	private Map<String, EditorGroup> map = new ConcurrentHashMap<>();
 	private String last;
 
 	public EditorGroups(EditorGroup editorGroup) {
+		if (editorGroup instanceof AutoGroup) {
+			return;
+		}
 		add(editorGroup);
 	}
 
@@ -44,7 +47,7 @@ public class EditorGroups implements EditorGroup {
 
 	@Override
 	public boolean isValid() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -99,5 +102,10 @@ public class EditorGroups implements EditorGroup {
 			editorGroup = EMPTY;
 		}
 		return editorGroup;
+	}
+
+	@Override
+	public Collection<EditorGroup> getGroups() {
+		return map.values();
 	}
 }

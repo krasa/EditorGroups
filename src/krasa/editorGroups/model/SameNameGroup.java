@@ -16,17 +16,17 @@ public class SameNameGroup extends AutoGroup {
 
 	@Override
 	public String getOwnerPath() {
-		return fileNameWithoutExtension;
+		return SAME_FILE_NAME;
 	}
 
 	@Override
 	public String getTitle() {
-		return "FILE_NAME";
+		return SAME_FILE_NAME;
 	}
 
 	@Override
 	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
-		return "By file name";
+		return "By same file name";
 	}
 
 }

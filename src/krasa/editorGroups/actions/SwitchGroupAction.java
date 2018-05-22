@@ -16,7 +16,10 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
-import krasa.editorGroups.model.*;
+import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -68,9 +71,6 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		actionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project, refresh));
 		actionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project, refresh));
 		for (EditorGroup g : groups) {
-			if (g instanceof AutoGroup) {
-				continue;
-			}
 			actionGroup.add(createAction(displayedGroup, g, project, refresh));
 		}
 
@@ -125,7 +125,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		String ownerPath = groupLink.getOwnerPath();
 		String name = Utils.toPresentableName(ownerPath);
 
-		title = groupLink.getPresentableTitle(project, name, true);
+		title = groupLink.getPresentableTitle(project, name, false);
 		description = "Owner:" + ownerPath;
 
 

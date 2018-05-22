@@ -27,12 +27,12 @@ public class FolderGroup extends AutoGroup {
 
 	@Override
 	public String getOwnerPath() {
-		return folderPath;
+		return DIRECTORY;
 	}
 
 	@Override
 	public String getTitle() {
-		return "DIRECTORY";
+		return DIRECTORY;
 	}
 
 }

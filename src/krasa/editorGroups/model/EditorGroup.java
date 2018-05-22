@@ -35,9 +35,9 @@ public interface EditorGroup {
 
 	default String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
-		int size = size(project);
 
 		if (showSize) {
+			int size = size(project);
 			if (isNotEmpty(getTitle())) {
 				String title = getTitle() + ":" + size;
 				presentableNameForUI = "[" + title + "] " + presentableNameForUI;
@@ -45,7 +45,12 @@ public interface EditorGroup {
 				presentableNameForUI = "[" + size + "] " + presentableNameForUI;
 			}
 		} else {
-			presentableNameForUI = "[" + (isEmpty(getTitle()) ? String.valueOf(size) : getTitle()) + "] " + presentableNameForUI;
+			boolean empty = isEmpty(getTitle());
+			if (empty) {
+				presentableNameForUI = "[" + presentableNameForUI + "]";
+			} else {
+				presentableNameForUI = "[" + getTitle() + "] " + presentableNameForUI;
+			}
 		}
 		return presentableNameForUI;
 	}
