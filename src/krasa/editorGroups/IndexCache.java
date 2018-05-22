@@ -138,7 +138,10 @@ public class IndexCache {
 				} else if (!force && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				} else {
-					result = getByOwner(last);
+					EditorGroup lastGroup = getByOwner(last);
+					if (lastGroup.getLinks(project).contains(currentFilePath)) {
+						result = lastGroup;
+					}
 				}
 			}
 
