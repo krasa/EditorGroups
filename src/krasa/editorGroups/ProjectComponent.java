@@ -41,21 +41,16 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
 				System.out.println("fileOpened " + file);
-//				EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
-//				if (userData != null) {
-//					EditorGroupManager.getInstance(project).setCurrentGroup(userData);
-//				}
-//				EditorGroupManager.getInstance(project).reparse(file);
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
-							continue;
-						}
+						continue;
+					}
 
-						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
 					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
-						manager.addTopComponent(fileEditor, panel.getRoot());
+					manager.addTopComponent(fileEditor, panel.getRoot());
 				}
 			}
 
