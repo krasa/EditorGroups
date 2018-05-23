@@ -4,7 +4,6 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
@@ -419,8 +418,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			atomicReference.set(new RefreshRequest(refresh, newGroup));
 		}
 
-		com.intellij.openapi.application.Application application = ApplicationManager.getApplication();
-		if (alwaysInvokeLater || !application.isDispatchThread()) {
+		if (alwaysInvokeLater || !SwingUtilities.isEventDispatchThread()) {
 			//this one is better than   Application.invokeLater
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
@@ -485,7 +483,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						LOG.error(e);
 						return;
 					}
-					ApplicationManager.getApplication().invokeLater(new Runnable() {
+					SwingUtilities.invokeLater(new Runnable() {
 						@Override
 						public void run() {
 							atomicReference.compareAndSet(null, request);
