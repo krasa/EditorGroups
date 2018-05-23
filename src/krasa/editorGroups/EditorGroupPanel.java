@@ -120,7 +120,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(groupsPanel);
 		refresh(false, null, true);
 
-		EditorGroupManager.getInstance(project).switching(false, null);
 
 
 		addMouseListener(getPopupHandler());
@@ -477,7 +476,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					scrollPane.repaint();
 					reload = false;
 					failed = 0;
-
+					EditorGroupManager.getInstance(project).switching(false, null);
 				} catch (ProcessCanceledException e) {
 					if (++failed > 5) {
 						LOG.error(e);
