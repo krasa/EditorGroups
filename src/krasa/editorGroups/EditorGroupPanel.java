@@ -52,7 +52,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	public static final Key<EditorGroupPanel> EDITOR_PANEL = Key.create("EDITOR_GROUPS_PANEL");
 	public static final Key<EditorGroup> EDITOR_GROUP = Key.create("EDITOR_GROUP");
-	public static final Key<Object> EDITOR_GROUP_PARSED = Key.create("EDITOR_GROUP_PARSED");
 
 	@NotNull
 	private final FileEditor textEditor;
@@ -120,7 +119,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		add(links);
 		add(groupsPanel);
-		refresh(false, null, false);
+		refresh(false, null, true);
 
 		EditorGroupManager.getInstance(project).switching(false, null);
 
@@ -422,7 +421,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		com.intellij.openapi.application.Application application = ApplicationManager.getApplication();
 		if (alwaysInvokeLater || !application.isDispatchThread()) {
-			application.invokeLater(new Runnable() {
+			//this one is better than   Application.invokeLater
+			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					refreshSmart();
