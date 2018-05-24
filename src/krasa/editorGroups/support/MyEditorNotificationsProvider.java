@@ -1,10 +1,11 @@
-package krasa.editorGroups;
+package krasa.editorGroups.support;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.EditorNotifications;
+import krasa.editorGroups.EditorGroupPanel;
 import org.jetbrains.annotations.NotNull;
 
 public class MyEditorNotificationsProvider extends EditorNotifications.Provider<EditorGroupPanel> implements DumbAware {

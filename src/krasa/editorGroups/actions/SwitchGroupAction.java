@@ -96,7 +96,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return new Handler() {
 			@Override
 			void run(EditorGroup groupLink) {
-				panel.refresh(false, groupLink, false);
+				panel.refresh(false, groupLink);
 			}
 		};
 	}

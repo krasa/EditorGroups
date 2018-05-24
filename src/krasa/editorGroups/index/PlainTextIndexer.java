@@ -6,7 +6,7 @@ import com.intellij.patterns.StringPattern;
 import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
-import krasa.editorGroups.EditorGroupManager;
+import krasa.editorGroups.PanelRefresher;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -56,7 +56,7 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 			String ownerPath = inputData.getFile().getCanonicalPath();
 			if (value != null) {
 				value.setOwnerPath(ownerPath);
-				value = EditorGroupManager.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
+				value = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
 				map.put(ownerPath, value);
 			}
 			System.out.println("indexed: " + ownerPath);

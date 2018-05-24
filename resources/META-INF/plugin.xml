@@ -26,7 +26,7 @@
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
-        <editorNotificationProvider implementation="krasa.editorGroups.MyEditorNotificationsProvider"/>
+        <editorNotificationProvider implementation="krasa.editorGroups.support.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
         <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>
         <projectService serviceImplementation="krasa.editorGroups.IndexCache"/>
@@ -36,6 +36,7 @@
 
         <applicationService serviceImplementation="krasa.editorGroups.ApplicationConfiguration"/>
         <fileBasedIndex implementation="krasa.editorGroups.index.EditorGroupIndex"/>
+        <projectService serviceImplementation="krasa.editorGroups.PanelRefresher"/>
     </extensions>
 
     <project-components>

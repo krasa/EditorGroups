@@ -226,7 +226,7 @@ public class IndexCache {
 
 		long t0 = System.currentTimeMillis() - start;
 		if (t0 > 100) {
-			LOG.warn("getSameNameGroup took " + t0 + "ms");
+			LOG.warn("getSameNameGroup took " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 		}
 		System.out.println("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 

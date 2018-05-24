@@ -2,10 +2,6 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
-import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
-import com.intellij.openapi.fileEditor.impl.MyFileManager;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.*;
@@ -37,22 +33,14 @@ public class EditorGroupManager {
 	private boolean switching;
 	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 	private EditorGroup switchingGroup;
+	private PanelRefresher panelRefresher;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
+		panelRefresher = PanelRefresher.getInstance(project);
 
 		this.project = project;
 
-		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
-			@Override
-			public void enteredDumbMode() {
-			}
-
-			@Override
-			public void exitDumbMode() {
-				onSmartMode();
-			}
-		});
 	}
 
 
@@ -65,9 +53,6 @@ public class EditorGroupManager {
 	 */
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh) {
-		if (DumbService.isDumb(project)) {
-			throw new RuntimeException("check for dumb");
-		}
 		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
@@ -138,15 +123,14 @@ public class EditorGroupManager {
 			}
 		}
 
-		//TODO initalize autogroups on background
-
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
 	}
 
-	public void switching(boolean b, EditorGroup group) {
-		switching = b;
+	public void switching(boolean switching, EditorGroup group) {
+		System.out.println("switching " + "[" + switching + "], group = [" + group + "]");
+		this.switching = switching;
 		switchingGroup = group;
 	}
 
@@ -156,45 +140,6 @@ public class EditorGroupManager {
 
 	public boolean switching() {
 		return switching;
-	}
-
-	public EditorGroupIndexValue onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
-		group = cache.onIndexingDone(group);
-		if (DumbService.isDumb(project)) { //optimization
-			return group;
-		}
-
-		long start = System.currentTimeMillis();
-		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		for (FileEditor selectedEditor : manager.getAllEditors()) {
-			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-			if (panel != null) {
-				panel.onIndexingDone(ownerPath, group);
-			}
-		}
-
-		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
-		return group;
-	}
-
-	/*hopefully it wont cause lags*/
-	private void onSmartMode() {
-
-		long start = System.currentTimeMillis();
-		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		for (FileEditor selectedEditor : manager.getAllEditors()) {
-			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-			if (panel != null) {
-				EditorGroup displayedGroup = panel.getDisplayedGroup();
-				if (displayedGroup instanceof FolderGroup) {
-					continue;
-				}
-				panel.refresh(false, null, true);
-				MyFileManager.updateTitle(project, selectedEditor.getFile());
-			}
-		}
-
-		System.out.println("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 	}
 
 	public Collection<EditorGroup> getGroups(VirtualFile file) {
@@ -212,5 +157,9 @@ public class EditorGroupManager {
 		});
 		System.out.println("getAllGroups " + (System.currentTimeMillis() - start));
 		return allGroups;
+	}
+
+	public void initCache() {
+		panelRefresher.initCache();
 	}
 }

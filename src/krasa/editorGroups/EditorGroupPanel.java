@@ -4,6 +4,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
@@ -17,7 +18,9 @@ import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -118,8 +121,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		add(links);
 		add(groupsPanel);
-		refresh(false, null, true);
-
+		refresh(false, null);
 
 
 		addMouseListener(getPopupHandler());
@@ -165,7 +167,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			button.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					refresh(false, editorGroup, false);
+					refresh(false, editorGroup);
 				}
 			});
 			button.setFont(newFont);
@@ -318,7 +320,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (fileToOpen == null) {
 			return;
 		}
-	
+
 		if (fileToOpen.equals(file) && !newWindow) {
 			return;
 		}
@@ -374,9 +376,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		System.out.println("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			reload = true;
-			refresh(false, switchingGroup, false);
+			refresh(false, switchingGroup);
 		} else {
-			refresh(false, null, false);
+			refresh(false, null);
 		}
 		EditorGroupManager.getInstance(project).switching(false, null);
 	}
@@ -410,49 +412,59 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	/**
 	 * call from any thread
 	 */
-	public void refresh(boolean refresh, EditorGroup newGroup, boolean alwaysInvokeLater) {
+	public void refresh(boolean refresh, EditorGroup newGroup) {
 		if (!refresh && newGroup == null) { //unnecessary refresh
 			atomicReference.compareAndSet(null, new RefreshRequest(refresh, newGroup));
 		} else {
 			atomicReference.set(new RefreshRequest(refresh, newGroup));
 		}
+		refresh2();
 
-		if (alwaysInvokeLater || !SwingUtilities.isEventDispatchThread()) {
-			//this one is better than   Application.invokeLater
+	}
+
+	private void refresh2() {
+		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
+			@Override
+			public void run() {
+				DumbService.getInstance(project).waitForSmartMode();
+				refresh3();
+			}
+		});
+	}
+
+	private volatile int failed = 0;
+
+	private void refresh3() {
+		if (SwingUtilities.isEventDispatchThread()) {
+			LOG.error("do not execute it on EDT");
+		}
+
+		long start = System.currentTimeMillis();
+		RefreshRequest request = atomicReference.getAndSet(null);
+		if (request == null) {
+			System.out.println("nothing to refresh");
+			return;
+		}
+		System.out.println(">refreshSmart " + request);
+
+		EditorGroup requestedGroup = request.requestedGroup;
+		boolean refresh = request.refresh;
+
+		try {
+			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
+				@Override
+				public EditorGroup compute() {
+					return EditorGroupManager.getInstance(project).getGroup(project, textEditor, displayedGroup, requestedGroup, refresh);
+				}
+			});
+			if (group == displayedGroup && !reload && !refresh) {
+				return;
+			}
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					refreshSmart();
-				}
-			});
-		} else {
-			refreshSmart();
-		}
-	}
 
-	private int failed = 0;
-
-	private void refreshSmart() {
-		DumbService.getInstance(project).runWhenSmart(new Runnable() {
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-				RefreshRequest request = atomicReference.getAndSet(null);
-				if (request == null) {
-					System.out.println("nothing to refresh");
-					return;
-				}
-				System.out.println("refresh " + request);
-
-				EditorGroup requestedGroup = request.requestedGroup;
-				boolean refresh = request.refresh;
-
-				try {
-
-					EditorGroup group = EditorGroupManager.getInstance(project).getGroup(project, textEditor, displayedGroup, requestedGroup, refresh);
-					if (group == displayedGroup && !reload && !refresh) {
-						return;
-					}
+					long start = System.currentTimeMillis();
 					textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 
 					int groupsCount = 0;
@@ -470,34 +482,29 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						scrollPane.setVisible(true);
 					}
 
-
 					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
 					scrollPane.revalidate();
 					scrollPane.repaint();
 					reload = false;
 					failed = 0;
 					EditorGroupManager.getInstance(project).switching(false, null);
-				} catch (ProcessCanceledException e) {
-					if (++failed > 5) {
-						LOG.error(e);
-						return;
-					}
-					SwingUtilities.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							atomicReference.compareAndSet(null, request);
-							refreshSmart();
-						}
-					});
-				} catch (Exception e) {
-					LOG.error(e);
-					e.printStackTrace();
-				} finally {
-					System.out.println("refreshDone in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+					System.err.println("refreshOnEDT " + (System.currentTimeMillis() - start) + "ms");
 				}
-
+			});
+			System.out.println("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+		} catch (ProcessCanceledException | IndexNotReadyException e) {
+			if (++failed > 5) {
+				LOG.error(e);
+				return;
 			}
-		});
+			System.out.println("refresh failed in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+			if (atomicReference.compareAndSet(null, request)) {
+				refresh2();
+			}
+		} catch (Exception e) {
+			LOG.error(e);
+			e.printStackTrace();
+		}
 	}
 
 
@@ -525,7 +532,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			System.out.println("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
 			//concurrency is a bitch, do not alter data
 //			displayedGroup.invalid();
-			refresh(false, null, false);
+			refresh(false, null);
 		}
 	}
 

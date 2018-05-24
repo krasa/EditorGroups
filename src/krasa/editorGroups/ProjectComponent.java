@@ -6,26 +6,24 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.FileEditorManagerListener;
-import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.Processor;
-import com.intellij.util.indexing.FileBasedIndex;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.XCollection;
-import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @State(name = "EditorGroups", storages = {@Storage(value = "EditorGroups.xml")})
 public class ProjectComponent implements com.intellij.openapi.components.ProjectComponent, PersistentStateComponent<ProjectComponent.State> {
+	private static final Logger log = LoggerFactory.getLogger(ProjectComponent.class);
+
 	private final Project project;
 
 	public ProjectComponent(Project project) {
@@ -34,13 +32,13 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 	@Override
 	public void projectOpened() {
-		initCache();
+		EditorGroupManager.getInstance(project).initCache();
 
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 			/**on EDT*/
 			@Override
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
-				System.out.println("fileOpened " + file);
+				long start = System.currentTimeMillis();
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
@@ -51,6 +49,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
+					log.debug("EditorGroupPanel created in " + (System.currentTimeMillis() - start));
 				}
 			}
 
@@ -61,36 +60,12 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 	}
 
-	private void initCache() {
-		//TODO run it on background?
-		DumbService.getInstance(project).runWhenSmart(new Runnable() {
-			@Override
-			public void run() {
-				long start = System.currentTimeMillis();
-				FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
-				IndexCache instance = IndexCache.getInstance(project);
-				Processor<String> processor = new Processor<String>() {
-					@Override
-					public boolean process(String s) {
-						List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-						for (EditorGroupIndexValue value : values) {
-							instance.initGroup(value);
-						}
-						return true;
-					}
-				};
-				fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, processor, project);
-				System.out.println("initCache " + (System.currentTimeMillis() - start));
-			}
-		});
-	}
-
 	@Nullable
 	@Override
 	public State getState() {
 		long start = System.currentTimeMillis();
 		State state = IndexCache.getInstance(project).getState();
-		System.err.println("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		log.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 		return state;
 	}
 
@@ -98,7 +73,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void loadState(@NotNull State state) {
 		long start = System.currentTimeMillis();
 		IndexCache.getInstance(project).loadState(state);
-		System.err.println("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		log.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	public static class State {
@@ -139,5 +114,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 
 	}
+
 
 }
