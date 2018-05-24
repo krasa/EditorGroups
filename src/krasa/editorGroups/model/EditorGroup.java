@@ -54,4 +54,5 @@ public interface EditorGroup {
 		}
 		return presentableNameForUI;
 	}
+
 }

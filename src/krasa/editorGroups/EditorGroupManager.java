@@ -107,7 +107,7 @@ public class EditorGroupManager {
 			}
 		}
 
-		if (refresh || result instanceof AutoGroup && result.size(project) == 0) {
+		if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
 			//refresh
 			if (result instanceof SameNameGroup) {
 				result = cache.getSameNameGroup(currentFile);
@@ -121,6 +121,8 @@ public class EditorGroupManager {
 				&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 				result = cache.getFolderGroup(currentFile);
 			}
+		} else if (result instanceof AutoGroup) {
+			result = cache.updateGroups((AutoGroup) result, currentFilePath);
 		}
 
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");

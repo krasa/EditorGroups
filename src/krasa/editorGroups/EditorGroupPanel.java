@@ -56,7 +56,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public static final Key<EditorGroup> EDITOR_GROUP = Key.create("EDITOR_GROUP");
 
 	@NotNull
-	private final FileEditor textEditor;
+	private final FileEditor fileEditor;
 	@NotNull
 	private Project project;
 	private final VirtualFile file;
@@ -90,10 +90,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (userData != null) {
 			displayedGroup = userData;
 		}
-		this.textEditor = fileEditor;
+		this.fileEditor = fileEditor;
 		this.project = project;
 		this.file = file;
-
 		if (fileEditor instanceof TextEditorImpl) {
 			Editor editor = ((TextEditorImpl) fileEditor).getEditor();
 			if (editor instanceof EditorImpl) {
@@ -454,10 +453,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
 				public EditorGroup compute() {
-					return EditorGroupManager.getInstance(project).getGroup(project, textEditor, displayedGroup, requestedGroup, refresh);
+					return EditorGroupManager.getInstance(project).getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh);
 				}
 			});
-			if (group == displayedGroup && !reload && !refresh) {
+			if (group == displayedGroup && !reload && !refresh
+				&& !(group instanceof AutoGroup) //need to refresh group links
+			) {
 				return;
 			}
 			SwingUtilities.invokeLater(new Runnable() {
@@ -465,7 +466,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				public void run() {
 
 					long start = System.currentTimeMillis();
-					textEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
+					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 
 					int groupsCount = 0;
 					if (group instanceof GroupsHolder) {
@@ -488,7 +489,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					reload = false;
 					failed = 0;
 					EditorGroupManager.getInstance(project).switching(false, null);
-					System.err.println("refreshOnEDT " + (System.currentTimeMillis() - start) + "ms");
+					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms");
 				}
 			});
 			System.out.println("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());

@@ -75,4 +75,9 @@ public abstract class AutoGroup implements EditorGroup, GroupsHolder {
 		}
 		return obj.getClass().equals(this.getClass());
 	}
+
+	public EditorGroup setGroups(Collection<EditorGroup> groups) {
+		this.groups = groups;
+		return this;
+	}
 }

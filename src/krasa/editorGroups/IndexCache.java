@@ -295,4 +295,8 @@ public class IndexCache {
 		}
 		return state;
 	}
+
+	public EditorGroup updateGroups(AutoGroup result, String currentFilePath) {
+		return result.setGroups(getGroups(currentFilePath));
+	}
 }
