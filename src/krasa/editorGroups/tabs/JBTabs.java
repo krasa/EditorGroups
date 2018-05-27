@@ -45,7 +45,7 @@ public interface JBTabs {
 	krasa.editorGroups.tabs.JBTabs setPopupGroup(@NotNull ActionGroup popupGroup, @NotNull String place, final boolean addNavigationGroup);
 
 	@NotNull
-	ActionCallback select(@NotNull TabInfo info, boolean requestFocus);
+	ActionCallback select(@NotNull TabInfo info, boolean requestFocus, Integer modifiers);
 
 	@Nullable
 	TabInfo getSelectedInfo();
@@ -98,6 +98,6 @@ public interface JBTabs {
 
 	interface SelectionChangeHandler {
 		@NotNull
-		ActionCallback execute(final TabInfo info, final boolean requestFocus, @NotNull ActiveRunnable doChangeSelection);
+		ActionCallback execute(final TabInfo info, final boolean requestFocus, Integer modifiers, @NotNull ActiveRunnable doChangeSelection);
 	}
 }

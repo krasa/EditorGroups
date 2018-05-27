@@ -37,7 +37,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
-public final class TabInfo implements Queryable, PlaceProvider<String> {
+public class TabInfo implements Queryable, PlaceProvider<String> {
 
 	public static final String ACTION_GROUP = "actionGroup";
 	public static final String ICON = "icon";
@@ -50,9 +50,6 @@ public final class TabInfo implements Queryable, PlaceProvider<String> {
 	public static final String ALERT_STATUS = "alertStatus";
 	public static final String HIDDEN = "hidden";
 	public static final String ENABLED = "enabled";
-
-	private JComponent myComponent;
-	private JComponent myPreferredFocusableComponent;
 
 	private ActionGroup myGroup;
 
@@ -97,9 +94,7 @@ public final class TabInfo implements Queryable, PlaceProvider<String> {
 	 */
 	private WeakReference<krasa.editorGroups.tabs.TabInfo> myPreviousSelection = new WeakReference<>(null);
 
-	public TabInfo(final JComponent component) {
-		myComponent = component;
-		myPreferredFocusableComponent = component;
+	public TabInfo() {
 	}
 
 	public PropertyChangeSupport getChangeSupport() {
@@ -153,21 +148,11 @@ public final class TabInfo implements Queryable, PlaceProvider<String> {
 		return this;
 	}
 
-	public krasa.editorGroups.tabs.TabInfo setComponent(Component c) {
-		if (myComponent == c) return this;
-		JComponent old = myComponent;
-		myComponent = (JComponent) c;
-		myChangeSupport.firePropertyChange(COMPONENT, old, myComponent);
-		return this;
-	}
 
 	public ActionGroup getGroup() {
 		return myGroup;
 	}
 
-	public JComponent getComponent() {
-		return myComponent;
-	}
 
 	public String getText() {
 		return myText.toString();
@@ -221,14 +206,6 @@ public final class TabInfo implements Queryable, PlaceProvider<String> {
 		return myObject;
 	}
 
-	public JComponent getPreferredFocusableComponent() {
-		return myPreferredFocusableComponent != null ? myPreferredFocusableComponent : myComponent;
-	}
-
-	public krasa.editorGroups.tabs.TabInfo setPreferredFocusableComponent(final JComponent component) {
-		myPreferredFocusableComponent = component;
-		return this;
-	}
 
 	public void setLastFocusOwner(final JComponent owner) {
 		myLastFocusOwner = new WeakReference<>(owner);

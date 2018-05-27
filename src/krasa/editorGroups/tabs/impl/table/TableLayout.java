@@ -166,26 +166,6 @@ public class TableLayout extends TabLayout {
 			row++;
 		}
 
-		if (myTabs.getSelectedInfo() != null) {
-			final JBTabsImpl.Toolbar selectedToolbar = myTabs.myInfo2Toolbar.get(myTabs.getSelectedInfo());
-
-			final int componentY = eachY + (myTabs.isEditorTabs() ? 0 : 2) - myTabs.getLayoutInsets().top;
-			if (!myTabs.myHorizontalSide && selectedToolbar != null && !selectedToolbar.isEmpty()) {
-				final int toolbarWidth = selectedToolbar.getPreferredSize().width;
-				final int vSeparatorWidth = toolbarWidth > 0 ? 1 : 0;
-				if (myTabs.isSideComponentBefore()) {
-					Rectangle compRect = myTabs.layoutComp(toolbarWidth + vSeparatorWidth, componentY, myTabs.getSelectedInfo().getComponent(), 0, 0);
-					myTabs.layout(selectedToolbar, compRect.x - toolbarWidth - vSeparatorWidth, compRect.y, toolbarWidth, compRect.height);
-				} else {
-					final int width = myTabs.getWidth() - toolbarWidth - vSeparatorWidth;
-					Rectangle compRect = myTabs.layoutComp(new Rectangle(0, componentY, width, myTabs.getHeight()),
-						myTabs.getSelectedInfo().getComponent(), 0, 0);
-					myTabs.layout(selectedToolbar, compRect.x + compRect.width + vSeparatorWidth, compRect.y, toolbarWidth, compRect.height);
-				}
-			} else {
-				myTabs.layoutComp(0, componentY, myTabs.getSelectedInfo().getComponent(), 0, 0);
-			}
-		}
 
 		myLastTableLayout = data;
 		return data;

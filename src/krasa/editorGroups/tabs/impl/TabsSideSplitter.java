@@ -19,10 +19,8 @@ import com.intellij.openapi.ui.OnePixelDivider;
 import com.intellij.openapi.ui.Splittable;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.tabs.JBTabsPosition;
-import krasa.editorGroups.tabs.TabInfo;
 import org.jetbrains.annotations.NotNull;
 
-import javax.swing.*;
 import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -73,12 +71,6 @@ class TabsSideSplitter implements Splittable, PropertyChangeListener {
 			myTabs.resetLayout(true);
 			myTabs.doLayout();
 			myTabs.repaint();
-			TabInfo info = myTabs.getSelectedInfo();
-			JComponent page = info != null ? info.getComponent() : null;
-			if (page != null) {
-				page.revalidate();
-				page.repaint();
-			}
 		}
 	}
 

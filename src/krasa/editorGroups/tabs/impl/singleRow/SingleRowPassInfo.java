@@ -47,7 +47,6 @@ public class SingleRowPassInfo extends LayoutPassInfo {
 
 	public Insets insets;
 
-	public WeakReference<JComponent> comp;
 	public Rectangle tabRectangle;
 	final int scrollOffset;
 

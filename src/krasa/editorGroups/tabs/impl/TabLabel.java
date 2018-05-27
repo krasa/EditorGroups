@@ -93,7 +93,7 @@ public class TabLabel extends JPanel implements Accessible {
 					}
 					Component c = SwingUtilities.getDeepestComponentAt(e.getComponent(), e.getX(), e.getY());
 					if (c instanceof InplaceButton) return;
-					myTabs.select(info, true);
+					myTabs.select(info, true, e.getModifiers());
 				} else {
 					handlePopup(e);
 				}
@@ -123,7 +123,7 @@ public class TabLabel extends JPanel implements Accessible {
 							// Select the previous tab, then set the focus its TabLabel.
 							TabInfo previous = myTabs.findEnabledBackward(index, true);
 							if (previous != null) {
-								myTabs.select(previous, false).doWhenDone(() -> myTabs.getSelectedLabel().requestFocusInWindow());
+								myTabs.select(previous, false, e.getModifiers()).doWhenDone(() -> myTabs.getSelectedLabel().requestFocusInWindow());
 							}
 						}
 					} else if (e.getKeyCode() == KeyEvent.VK_RIGHT) {
@@ -134,7 +134,7 @@ public class TabLabel extends JPanel implements Accessible {
 							TabInfo next = myTabs.findEnabledForward(index, true);
 							if (next != null) {
 								// Select the next tab, then set the focus its TabLabel.
-								myTabs.select(next, false).doWhenDone(() -> myTabs.getSelectedLabel().requestFocusInWindow());
+								myTabs.select(next, false, e.getModifiers()).doWhenDone(() -> myTabs.getSelectedLabel().requestFocusInWindow());
 							}
 						}
 					}
@@ -396,9 +396,9 @@ public class TabLabel extends JPanel implements Accessible {
 
 		JBTabsImpl tabs =
 			JBTabsImpl.NAVIGATION_ACTIONS_KEY.getData(DataManager.getInstance().getDataContext(e.getComponent(), e.getX(), e.getY()));
-		if (tabs == myTabs && myTabs.myAddNavigationGroup) {
-			toShow.addAll(myTabs.myNavigationActions);
-		}
+//		if (tabs == myTabs && myTabs.myAddNavigationGroup) {
+//			toShow.addAll(myTabs.myNavigationActions);
+//		}
 
 		if (toShow.getChildrenCount() == 0) return;
 

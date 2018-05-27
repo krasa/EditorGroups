@@ -202,30 +202,14 @@ public abstract class SingleRowLayoutStrategy {
 				final int y = myTabs.myHeaderFitSize.height + (myTabs.isEditorTabs() ? 0 : 1) +
 					(hToolbarHeight > 0 ? hToolbarHeight - 2 : 0);
 
-				JComponent comp = data.comp.get();
 				if (hToolbar != null) {
-					final Rectangle compBounds = myTabs.layoutComp(x, y, comp, 0, 0);
 					if (myTabs.isSideComponentOnTabs()) {
 						int toolbarX = (data.moreRect != null ? (int) data.moreRect.getMaxX() : data.position) + myTabs.getToolbarInset();
 						final Rectangle rec =
 							new Rectangle(toolbarX, data.insets.top + 1, myTabs.getSize().width - data.insets.left - toolbarX, myTabs.myHeaderFitSize.height);
 						myTabs.layout(hToolbar, rec);
-					} else {
-						final int toolbarHeight = hToolbar.getPreferredSize().height - 2;
-						myTabs.layout(hToolbar, compBounds.x, compBounds.y - toolbarHeight - 1, compBounds.width, toolbarHeight);
 					}
-				} else if (vToolbar != null) {
-					if (myTabs.isSideComponentBefore()) {
-						final Rectangle compBounds = myTabs.layoutComp(x, y, comp, 0, 0);
-						myTabs.layout(vToolbar, compBounds.x - vToolbarWidth - vSeparatorWidth, compBounds.y, vToolbarWidth, compBounds.height);
-					} else {
-						int width = vToolbarWidth > 0 ? myTabs.getWidth() - vToolbarWidth - vSeparatorWidth : myTabs.getWidth();
-						final Rectangle compBounds = myTabs.layoutComp(new Rectangle(0, y, width, myTabs.getHeight()), comp, 0, 0);
-						myTabs.layout(vToolbar, compBounds.x + compBounds.width + vSeparatorWidth, compBounds.y, vToolbarWidth, compBounds.height);
-					}
-				} else {
-					myTabs.layoutComp(x, y, comp, 0, 0);
-				}
+				} 
 			}
 		}
 	}

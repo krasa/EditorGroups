@@ -20,15 +20,12 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.Computable;
-import com.intellij.openapi.util.Key;
-import com.intellij.openapi.util.Weighted;
+import com.intellij.openapi.util.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
@@ -38,6 +35,8 @@ import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.GroupsHolder;
 import krasa.editorGroups.support.Utils;
+import krasa.editorGroups.tabs.JBTabs;
+import krasa.editorGroups.tabs.TabInfo;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,15 +67,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private final VirtualFile file;
 	private int currentIndex;
 	@NotNull
-	private EditorGroup displayedGroup = EditorGroup.EMPTY;
+	private volatile EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
 	private JBPanel groupsPanel = new JBPanel();
-	private JButton currentButton;
 	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
-		super(new HorizontalLayout(0));
+		super(new BorderLayout());
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
 //		scrollPane = new HackedJBScrollPane(this);
 //
@@ -119,13 +117,38 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		fileFromTextEditor = Utils.getFileFromTextEditor(project, fileEditor);
 		addButtons();
 
-		groupsPanel.setLayout(new HorizontalLayout(0));
+//		groupsPanel.setLayout(new HorizontalLayout(0));
 		tabs = new krasa.editorGroups.tabs.impl.JBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor);
+		tabs.setSelectionChangeHandler(new JBTabs.SelectionChangeHandler() {
+			@NotNull
+			@Override
+			public ActionCallback execute(TabInfo info, boolean requestFocus, Integer modifiers, ActiveRunnable doChangeSelection) {
+				if (modifiers == null) {
+					return ActionCallback.DONE;
+				}
+				MyTabInfo myTabInfo = (MyTabInfo) info;
+				VirtualFile fileByPath = Utils.getFileByPath(myTabInfo.path);
+				if (fileByPath == null) {
+					setEnabled(false);
+					return null;
+				}
 
+				if (modifiers == null) {
+					modifiers = 0;
+				}
+
+				boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_MASK);
+				boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_MASK);
+				boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_MASK);
+
+				openFile(fileByPath, ctrl || alt, shift);
+				return ActionCallback.DONE;
+			}
+		});
 		JComponent component = tabs.getComponent();
-		add(component);
-		
-		add(groupsPanel);
+		add(component, BorderLayout.CENTER);
+
+		add(groupsPanel, BorderLayout.EAST);
 		refresh(false, null);
 
 
@@ -146,7 +169,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			repaint();
 		}
 	}
-	    
+
 	@NotNull
 	private PopupHandler getPopupHandler() {
 		return new PopupHandler() {
@@ -160,7 +183,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void reloadLinks(EditorGroup group) {
 		tabs.removeAllTabs();
-		createLinks();
+		createLinks();  
 	}
 
 	private int reloadGroupLinks(Collection<EditorGroup> groups) {
@@ -218,7 +241,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		JComponent component = toolbar.getComponent();
 		component.addMouseListener(getPopupHandler());
 		component.setBorder(JBUI.Borders.empty());
-		add(component);
+		add(component, BorderLayout.WEST);
 	}
 
 	private void createLinks() {
@@ -227,64 +250,27 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		for (int i1 = 0; i1 < paths.size(); i1++) {
 			String path = paths.get(i1);
 
-			JButton button = new JButton(Utils.toPresentableName(path));
-			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 5));
-			// BROKEN in IJ 2018
-			// button.setBorder(null);
-			// button.setContentAreaFilled(false);
-			// button.setOpaque(false);
-			// button.setBorderPainted(false);
-			button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					VirtualFile fileByPath = Utils.getFileByPath(path);
-					if (fileByPath == null) {
-						setEnabled(false);
-						return;
-					}
-					boolean ctrl = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
-					boolean alt = BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK);
-					boolean shift = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
+			String name = Utils.toPresentableName(path);
+			MyTabInfo tab = new MyTabInfo();
+			tab.path = path;
+			TabInfo tabInfo = tab.setText(name).setTooltipText(path);
 
-					openFile(fileByPath, ctrl || alt, shift);
-				}
-			});
-			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
-				button.setFont(button.getFont().deriveFont(Font.BOLD));
-				if (UIUtil.isUnderDarcula()) {
-					button.setForeground(Color.WHITE);
-				} else {
-					button.setForeground(Color.BLACK);
-				}
-				currentIndex = i1;
-				currentButton = button;
-			} else {
-				if (displayedGroup instanceof AutoGroup) {
-					if (UIUtil.isUnderDarcula()) {
-						if (displayedGroup instanceof FolderGroup) {
-							button.setForeground(Color.orange);
-						}
-						button.setFont(button.getFont().deriveFont(Font.ITALIC));
-					} else {
-//						Color fg = new Color(0, 23, 3, 255);
-//						button.setForeground(fg);
-						button.setFont(button.getFont().deriveFont(Font.ITALIC));
-					}
-				}
-			}
-
-
-			button.setToolTipText(path);
-			button.addMouseListener(getPopupHandler());
 
 			if (!new File(path).exists()) {
-				button.setEnabled(false);
+				tab.setEnabled(false);
 			}
-			String name = Utils.toPresentableName(path);
-			krasa.editorGroups.tabs.TabInfo info = new krasa.editorGroups.tabs.TabInfo(new MyPlaceholder(name));
-			tabs.addTab(info.setText(name));
-//			links.add(button);
+
+			tabs.addTab(tabInfo);
+
+			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
+				tabs.setMySelectedInfo(tabInfo);
+				currentIndex = i1;
+			}
 		}
+	}
+
+	class MyTabInfo extends TabInfo {
+		String path;
 	}
 
 	public void previous(boolean newTab, boolean newWindow) {
@@ -397,7 +383,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			reload = true;
 			refresh(false, switchingGroup);
 		} else {
-			refresh(false, null);
+//			refresh(false, null);
 		}
 		EditorGroupManager.getInstance(project).switching(false, null);
 	}
@@ -476,7 +462,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					return EditorGroupManager.getInstance(project).getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh);
 				}
 			});
-			if (group == displayedGroup && !reload && !refresh
+			if (group == displayedGroup
+				&& !reload
+				&& !refresh
 				&& !(group instanceof AutoGroup) //need to refresh group links
 			) {
 				return;
@@ -485,7 +473,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					displayedGroup = group;
 					
 					long start = System.currentTimeMillis();
 					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
@@ -529,7 +516,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			e.printStackTrace();
 		}
 	}
-
 
 
 	@Override
