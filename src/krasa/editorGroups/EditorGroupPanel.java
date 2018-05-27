@@ -481,6 +481,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			) {
 				return;
 			}
+			displayedGroup = group;
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
