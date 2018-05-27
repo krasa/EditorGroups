@@ -24,16 +24,16 @@ import com.intellij.openapi.util.Computable;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.Weighted;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.PopupHandler;
+import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
-import com.intellij.ui.components.JBScrollPane;
 import com.intellij.ui.components.panels.HorizontalLayout;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.model.*;
-import krasa.editorGroups.support.HackedJBScrollPane;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,8 +41,11 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
 import java.io.File;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -65,25 +68,24 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
-	private JBPanel links = new JBPanel();
 	private JBPanel groupsPanel = new JBPanel();
-	private JBScrollPane scrollPane;
 	private JButton currentButton;
+	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new HorizontalLayout(0));
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
-		scrollPane = new HackedJBScrollPane(this);
-
-		scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
-		scrollPane.setViewportBorder(JBUI.Borders.empty());
-		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-
-			@Override
-			public void adjustmentValueChanged(AdjustmentEvent e) {
-				adjustScrollPane();
-			}
-		});
+//		scrollPane = new HackedJBScrollPane(this);
+//
+//		scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
+//		scrollPane.setViewportBorder(JBUI.Borders.empty());
+//		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
+//
+//			@Override
+//			public void adjustmentValueChanged(AdjustmentEvent e) {
+//				adjustScrollPane();
+//			}
+//		});
 
 
 		fileEditor.putUserData(EDITOR_PANEL, this);
@@ -115,20 +117,33 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		addButtons();
 
 		groupsPanel.setLayout(new HorizontalLayout(0));
-		links.setLayout(new HorizontalLayout(0));
+		tabs = new krasa.editorGroups.tabs.impl.JBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor);
 
-
-		add(links);
+		JComponent component = tabs.getComponent();
+		add(component);
+		
 		add(groupsPanel);
 		refresh(false, null);
 
 
 		addMouseListener(getPopupHandler());
-		links.addMouseListener(getPopupHandler());
-		groupsPanel.addMouseListener(getPopupHandler());
-		scrollPane.addMouseListener(getPopupHandler());
+		tabs.addMouseListener(getPopupHandler());
 	}
 
+	private static class MyPlaceholder extends JPanel {
+		MyPlaceholder(String evaluation_in_process) {
+			super(new BorderLayout());
+			add(new JBLabel(evaluation_in_process, SwingConstants.CENTER), BorderLayout.CENTER);
+		}
+
+		void setContent(@NotNull JComponent view, String placement) {
+			Arrays.stream(getComponents()).forEach(this::remove);
+			add(view, placement);
+			revalidate();
+			repaint();
+		}
+	}
+	    
 	@NotNull
 	private PopupHandler getPopupHandler() {
 		return new PopupHandler() {
@@ -141,7 +156,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	private void reloadLinks(EditorGroup group) {
-		links.removeAll();
+		tabs.removeAll();
 		this.displayedGroup = group;
 		createLinks();
 	}
@@ -263,7 +278,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (!new File(path).exists()) {
 				button.setEnabled(false);
 			}
-			links.add(button);
+			String name = Utils.toPresentableName(path);
+			krasa.editorGroups.tabs.TabInfo info = new krasa.editorGroups.tabs.TabInfo(new MyPlaceholder(name));
+			tabs.addTab(info.setText(name));
+//			links.add(button);
 		}
 	}
 
@@ -384,7 +402,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	public JComponent getRoot() {
-		return scrollPane;
+		return this;
 	}
 
 
@@ -478,14 +496,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					reloadLinks(group);
 
 					if (ApplicationConfiguration.state().hideEmpty) {
-						scrollPane.setVisible(group.getLinks(project).size() > 1 || groupsCount > 0);
+						setVisible(group.getLinks(project).size() > 1 || groupsCount > 0);
 					} else {
-						scrollPane.setVisible(true);
+						setVisible(true);
 					}
 
 					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
-					scrollPane.revalidate();
-					scrollPane.repaint();
+					revalidate();
+					repaint();
 					reload = false;
 					failed = 0;
 					EditorGroupManager.getInstance(project).switching(false, null);
@@ -509,20 +527,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	private void adjustScrollPane() {
-		if (scrollPane != null) {
-
-//			scrollPane.getHorizontalScrollBar().setValue(100);
-//			
-//			System.out.println("adjustScrollPane");
-//			Rectangle bounds = scrollPane.getViewport().getViewRect();
-//			Dimension size = scrollPane.getViewport().getViewSize();
-//			int x = (size.width - bounds.width) / 2;
-//			int y = (size.height - bounds.height) / 2;
-//			scrollPane.getViewport().setViewPosition(new Point(x, y));
-//			ScrollUtil.center(scrollPane, new Rectangle(5,5));
-		}
-	}
 
 	@Override
 	public void dispose() {
