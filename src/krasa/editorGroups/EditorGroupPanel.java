@@ -147,7 +147,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		});
 		JComponent component = tabs.getComponent();
 		add(component, BorderLayout.CENTER);
-
+		groupsPanel.withPreferredHeight(20);
 		add(groupsPanel, BorderLayout.EAST);
 		refresh(false, null);
 
@@ -208,9 +208,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				public void actionPerformed(ActionEvent e) {
 					refresh(false, editorGroup);
 				}
-			});
+			});  
 			button.setFont(newFont);
-			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 5));
+			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 10));
 			button.addMouseListener(getPopupHandler());
 			if (UIUtil.isUnderDarcula()) {
 				button.setBorder(new LineBorder(Color.lightGray));

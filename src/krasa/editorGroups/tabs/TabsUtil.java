@@ -10,7 +10,7 @@ public class TabsUtil {
 	public static final int TAB_VERTICAL_PADDING = 2;
 	public static final int TABS_BORDER = 1;
 
-	public static final int ACTIVE_TAB_UNDERLINE_HEIGHT = 4;
+	public static final int ACTIVE_TAB_UNDERLINE_HEIGHT = 0;
 
 	private TabsUtil() {
 	}
