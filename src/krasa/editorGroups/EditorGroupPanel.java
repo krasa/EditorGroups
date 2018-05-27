@@ -33,7 +33,10 @@ import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
-import krasa.editorGroups.model.*;
+import krasa.editorGroups.model.AutoGroup;
+import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.GroupsHolder;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -156,8 +159,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	private void reloadLinks(EditorGroup group) {
-		tabs.removeAll();
-		this.displayedGroup = group;
+		tabs.removeAllTabs();
 		createLinks();
 	}
 
@@ -482,7 +484,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-
+					displayedGroup = group;
+					
 					long start = System.currentTimeMillis();
 					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 
