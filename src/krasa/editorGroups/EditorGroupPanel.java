@@ -356,7 +356,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (newWindow) {
 			manager.openFileInNewWindow(fileToOpen);
 		} else {
-			manager.openFile(fileToOpen, true);
+			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+			if (fileEditors.length == 0) {  //directory or some fail
+				EditorGroupManager.getInstance(project).switching(false, null);
+				return;
+			}
 
 			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 			if (!newTab) {
@@ -501,6 +505,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms");
 				}
 			});
+			atomicReference.compareAndSet(request, null);
 			System.out.println("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
 		} catch (ProcessCanceledException | IndexNotReadyException e) {
 			if (++failed > 5) {

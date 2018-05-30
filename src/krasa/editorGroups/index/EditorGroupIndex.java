@@ -18,7 +18,7 @@ import java.util.List;
 //@idea.related PlainTextIndexer.java
 public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGroupIndexValue> {
 	@NonNls
-	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("EditorGroupIndex");
+	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("krasa.EditorGroupIndex");
 
 	private final DataExternalizer<EditorGroupIndexValue> myValueExternalizer = new DataExternalizer<EditorGroupIndexValue>() {
 

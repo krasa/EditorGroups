@@ -6,13 +6,10 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFileSystemItem;
-import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.CommonProcessors;
-import com.intellij.util.FilteringProcessor;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
+import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +20,7 @@ import java.util.function.Predicate;
 
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
+	public static final int LIMIT_SAME_NAME = 100;
 
 	public static IndexCache getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, IndexCache.class);
@@ -203,25 +201,22 @@ public class IndexCache {
 		String nameWithoutExtension = currentFile.getNameWithoutExtension();
 		long start = System.currentTimeMillis();
 
-		CommonProcessors.CollectProcessor<String> matchingNamesProc = new CommonProcessors.CollectProcessor<>();
-		FilenameIndex.processAllFileNames(new FilteringProcessor<>(s -> s.equals(nameWithoutExtension) || s.startsWith(nameWithoutExtension + "."), matchingNamesProc), GlobalSearchScope.projectScope(project), null);
-		Collection<String> matchingNames = matchingNamesProc.getResults();
-
-		CommonProcessors.CollectProcessor<PsiFileSystemItem> processor = new CommonProcessors.CollectProcessor<>();
-		for (String matchingName : matchingNames) {
-			FilenameIndex.processFilesByName(
-				matchingName, false, false, processor, GlobalSearchScope.projectScope(project), project, null);
-
-		}
-
-		List<String> paths = new ArrayList<>();
-		Collection<PsiFileSystemItem> results = processor.getResults();
-		for (PsiFileSystemItem result : results) {
-			if (ProjectCoreUtil.isProjectOrWorkspaceFile(result.getVirtualFile())) {
+		Collection<VirtualFile> virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, nameWithoutExtension, true, GlobalSearchScope.projectScope(project));
+		List<String> paths = new ArrayList<>(Math.max(virtualFilesByName.size(), LIMIT_SAME_NAME));
+		for (VirtualFile file : virtualFilesByName) {
+			if (ProjectCoreUtil.isProjectOrWorkspaceFile(file)) {
 				continue;
 			}
-			paths.add(result.getVirtualFile().getCanonicalPath());
+			if (file.isDirectory()) {
+				continue;
+			}
+			if (paths.size() == LIMIT_SAME_NAME) {
+				LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + virtualFilesByName.size());
+				break;
+			}
+			paths.add(file.getCanonicalPath());
 		}
+
 		Collections.sort(paths);
 
 		long t0 = System.currentTimeMillis() - start;
@@ -263,9 +258,6 @@ public class IndexCache {
 	}
 
 	public void loadState(ProjectComponent.State state) {
-		if (groupsByLinks.size() > 0) {
-			LOG.error("groupsByLinks.size()=" + groupsByLinks.size());
-		}
 		for (ProjectComponent.StringPair stringStringPair : state.lastGroup) {
 			EditorGroups editorGroups = new EditorGroups();
 			groupsByLinks.put(stringStringPair.key, editorGroups);

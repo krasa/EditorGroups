@@ -29,4 +29,10 @@ public class SameNameGroup extends AutoGroup {
 		return "By same file name";
 	}
 
+	@Override
+	public String toString() {
+		return "SameNameGroup{" +
+			"'" + fileNameWithoutExtension + '\'' +
+			'}';
+	}
 }
