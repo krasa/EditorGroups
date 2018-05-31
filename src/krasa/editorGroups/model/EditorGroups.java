@@ -15,7 +15,7 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 	}
 
 
-	public void add(EditorGroup editorGroup) {   
+	public void add(EditorGroup editorGroup) {
 		if (editorGroup instanceof AutoGroup) {
 			return;
 		}
@@ -80,8 +80,14 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 		Iterator<EditorGroup> iterator = map.values().iterator();
 		while (iterator.hasNext()) {
 			EditorGroup next = iterator.next();
-			boolean valid = indexCache.validate(next);
-			if (!valid) {
+			indexCache.validate(next);
+		}
+		//IndexCache.validate accesses index which can triggers indexing which updates this map, 
+		//removing it in one cycle would remove a key with new validvalue
+		iterator = map.values().iterator();
+		while (iterator.hasNext()) {
+			EditorGroup next = iterator.next();
+			if (next.isInvalid()) {
 				iterator.remove();
 			}
 		}

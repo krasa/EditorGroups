@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Predicate;
 
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
@@ -74,25 +75,15 @@ public class IndexCache {
 		}
 		if (group instanceof EditorGroupIndexValue) {
 			String ownerPath = group.getOwnerPath();
-			List<EditorGroupIndexValue> groups = null;
 			try {
-				groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+				List<EditorGroupIndexValue> groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+				if (groups.stream().noneMatch(Predicate.isEqual(group))) {
+					group.invalidate();
+					return false;
+				}
 			} catch (ProcessCanceledException e) {
-				return true;
 			}
 
-			if (groups.isEmpty()) {
-				group.invalidate();
-				return false;
-			} else if (groups.size() == 1) {
-				EditorGroupIndexValue editorGroupIndexValue = groups.get(0);
-				if (!group.equals(editorGroupIndexValue)) {
-					((EditorGroupIndexValue) group).updateFrom(editorGroupIndexValue);
-				}
-				return group.isValid();
-			} else if (groups.size() > 1) {
-				LOG.error(groups);
-			}
 		}
 		return group.isValid();
 	}

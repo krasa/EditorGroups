@@ -30,15 +30,6 @@ public class EditorGroupIndexValue implements EditorGroup {
 		this.valid = valid;
 	}
 
-	public void updateFrom(EditorGroupIndexValue editorGroupIndexValue) {
-		this.ownerPath = editorGroupIndexValue.ownerPath;
-		this.title = editorGroupIndexValue.title;
-		this.relatedPaths = editorGroupIndexValue.relatedPaths;
-
-		this.links = editorGroupIndexValue.links;
-		this.valid = editorGroupIndexValue.valid;
-	}
-
 	public EditorGroupIndexValue setTitle(String title) {
 		this.title = StringUtil.notNullize(title);
 		return this;
