@@ -35,11 +35,6 @@ public abstract class AutoGroup implements EditorGroup, GroupsHolder {
 
 
 	@Override
-	public List<String> getRelatedPaths() {
-		return Collections.emptyList();
-	}
-
-	@Override
 	public abstract String getTitle();
 
 	@Override

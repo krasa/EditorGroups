@@ -1,6 +1,9 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.support.Utils;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -13,9 +16,8 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 public interface EditorGroup {
 	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
+	@Nullable
 	String getOwnerPath();
-
-	List<String> getRelatedPaths();
 
 	String getTitle();
 
@@ -53,6 +55,19 @@ public interface EditorGroup {
 			}
 		}
 		return presentableNameForUI;
+	}
+
+	default String getPresentableDescription() {
+		if (this instanceof AutoGroup) {
+			return null;
+		}
+		return "Owner:" + getOwnerPath();
+	}
+
+
+	default VirtualFile getOwnerFile() {
+		String ownerPath = getOwnerPath();
+		return Utils.getFileByPath(ownerPath);
 	}
 
 }

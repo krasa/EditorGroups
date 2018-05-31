@@ -30,6 +30,15 @@ public class EditorGroupIndexValue implements EditorGroup {
 		this.valid = valid;
 	}
 
+	public void updateFrom(EditorGroupIndexValue editorGroupIndexValue) {
+		this.ownerPath = editorGroupIndexValue.ownerPath;
+		this.title = editorGroupIndexValue.title;
+		this.relatedPaths = editorGroupIndexValue.relatedPaths;
+
+		this.links = editorGroupIndexValue.links;
+		this.valid = editorGroupIndexValue.valid;
+	}
+
 	public EditorGroupIndexValue setTitle(String title) {
 		this.title = StringUtil.notNullize(title);
 		return this;
@@ -96,8 +105,8 @@ public class EditorGroupIndexValue implements EditorGroup {
 	public EditorGroupIndexValue setLinks(List<String> links) {
 		this.links = links;
 		return this;
-	}           
-	
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -126,5 +135,6 @@ public class EditorGroupIndexValue implements EditorGroup {
 			"related='" + relatedPaths + '\'' +
 			'}';
 	}
+
 
 }

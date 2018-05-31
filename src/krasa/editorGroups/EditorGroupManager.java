@@ -25,7 +25,7 @@ public class EditorGroupManager {
 	private final Project project;
 	//	@NotNull
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
-	IndexCache cache;
+	public IndexCache cache;
 
 	/**
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
@@ -98,7 +98,6 @@ public class EditorGroupManager {
 			}
 		}
 
-
 		if (result.isInvalid()) {
 			if (applicationConfiguration.getState().autoSameName) {
 				result = AutoGroup.SAME_NAME_INSTANCE;
@@ -113,6 +112,8 @@ public class EditorGroupManager {
 				result = cache.getSameNameGroup(currentFile);
 			} else if (result instanceof FolderGroup) {
 				result = cache.getFolderGroup(currentFile);
+			} else if (result instanceof FavoritesGroup) {
+				result = cache.getFavoritesGroup(result.getTitle());
 			}
 
 			if (applicationConfiguration.getState().autoFolders
@@ -124,6 +125,7 @@ public class EditorGroupManager {
 		} else if (result instanceof AutoGroup) {
 			result = cache.updateGroups((AutoGroup) result, currentFilePath);
 		}
+
 
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);

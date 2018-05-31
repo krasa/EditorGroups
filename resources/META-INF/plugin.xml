@@ -39,6 +39,7 @@
         <fileBasedIndex implementation="krasa.editorGroups.index.FilenameWithoutExtensionIndex"/>
         <projectService serviceImplementation="krasa.editorGroups.PanelRefresher"/>
         <applicationService serviceImplementation="krasa.editorGroups.index.MyFileNameIndexService"/>
+
     </extensions>
 
     <project-components>

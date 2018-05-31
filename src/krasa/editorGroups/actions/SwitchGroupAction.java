@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.DumbAwareAction;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -16,10 +17,7 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.FolderGroup;
-import krasa.editorGroups.model.SameNameGroup;
+import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,30 +61,54 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	private void fillGroup(DefaultActionGroup actionGroup, EditorGroupPanel panel, Project project) {
 		EditorGroup displayedGroup = panel.getDisplayedGroup();
 		VirtualFile file = panel.getFile();
-		EditorGroupManager instance = EditorGroupManager.getInstance(project);
-		Collection<EditorGroup> groups = instance.getGroups(file);
+		EditorGroupManager manager = EditorGroupManager.getInstance(project);
+		Collection<EditorGroup> groups = manager.getGroups(file);
 
 		Handler refresh = refreshHandler(panel);
 
-		actionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project, refresh));
-		actionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project, refresh));
+		actionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project, refresh, null));
+		actionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project, refresh, null));
+
+
+		actionGroup.add(new Separator("Groups"));
 		for (EditorGroup g : groups) {
-			actionGroup.add(createAction(displayedGroup, g, project, refresh));
+			actionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
-
-
+		actionGroup.add(new Separator("Other Groups"));
+		              
 		try {
-			List<EditorGroupIndexValue> allGroups = instance.getAllGroups();
-			actionGroup.add(new Separator("Other groups"));
+			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
 			for (EditorGroupIndexValue g : allGroups) {
 				if (g.getOwnerPath().equals(file.getCanonicalPath())) {
 					continue;
 				}
 				if (!groups.contains(g)) {
-					actionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(panel)));
+					actionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(panel), null));
 				}
 			}
-		} catch (ProcessCanceledException e) {
+
+		} catch (ProcessCanceledException | IndexNotReadyException e) {
+			AnAction action = new AnAction("Indexing...") {
+				@Override
+				public void actionPerformed(AnActionEvent anActionEvent) {
+
+				}
+			};
+			action.getTemplatePresentation().setEnabled(false);
+			actionGroup.add(action);
+		}
+
+
+		Collection<FavoritesGroup> favoritesGroups = manager.cache.getFavoritesGroups();
+		if (!favoritesGroups.isEmpty()) {
+			Separator favourites = new Separator("Favourites");
+			actionGroup.add(favourites);
+			for (FavoritesGroup favoritesGroup : favoritesGroups) {
+//				if (displayedGroup instanceof FavoritesGroup && displayedGroup.getTitle().equals(favoritesGroup.getTitle())) {
+//					continue;
+//				}
+				actionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(panel), null));
+			}
 		}
 
 	}
@@ -106,8 +128,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return new Handler() {
 			@Override
 			void run(EditorGroup editorGroup) {
-				String ownerPath = editorGroup.getOwnerPath();
-				VirtualFile fileByPath = Utils.getFileByPath(ownerPath);
+				VirtualFile fileByPath = editorGroup.getOwnerFile();
 				if (fileByPath != null) {
 					panel.open(fileByPath, editorGroup, false, true);
 				}
@@ -116,20 +137,24 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	}
 
 	@NotNull
-	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler) {
+	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler, final Icon icon) {
 		boolean isSelected = displayedGroup.equals(groupLink);
 		String description = null;
 		String title;
 
 
-		String ownerPath = groupLink.getOwnerPath();
-		String name = Utils.toPresentableName(ownerPath);
+		if (groupLink instanceof FavoritesGroup) {
+			title = groupLink.getTitle();
+		} else {
+			String ownerPath = groupLink.getOwnerPath();
+			String name = Utils.toPresentableName(ownerPath);
+			title = groupLink.getPresentableTitle(project, name, false);
 
-		title = groupLink.getPresentableTitle(project, name, false);
-		description = "Owner:" + ownerPath;
+			description = groupLink.getPresentableDescription();
+		}
 
 
-		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : null) {
+		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : icon) {
 			@Override
 			public void actionPerformed(AnActionEvent e1) {
 				actionHandler.run(groupLink);
@@ -166,6 +191,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					presentation.setIcon(AllIcons.Nodes.Folder);
 				} else if (displayedGroup instanceof SameNameGroup) {
 					presentation.setIcon(AllIcons.Actions.Copy);
+				} else if (displayedGroup instanceof FavoritesGroup) {
+					presentation.setIcon(AllIcons.Toolwindows.ToolWindowFavorites);
 				} else {
 					presentation.setIcon(AllIcons.Actions.GroupByModule);
 				}

@@ -5,6 +5,7 @@ image::example.jpg[]
 === Type of gropus
 - by file name without extension anywhere in the project
 - by folder
+- from Favourites tool window
 - manually defined
 
 === Definitions

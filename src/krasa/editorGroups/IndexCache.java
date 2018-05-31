@@ -1,12 +1,18 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.favoritesTreeView.FavoritesManager;
+import com.intellij.ide.projectView.impl.AbstractUrl;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectCoreUtil;
+import com.intellij.openapi.roots.ProjectFileIndex;
+import com.intellij.openapi.roots.ProjectRootManager;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.TreeItem;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.index.MyFileNameIndexService;
@@ -16,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Predicate;
 
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
@@ -31,9 +36,13 @@ public class IndexCache {
 	private FileResolver fileResolver;
 	private Map<String, EditorGroups> groupsByLinks = new ConcurrentHashMap<>();
 
+	private FavoritesManager favoritesManager;
+	private ProjectFileIndex fileIndex;
 
 	public IndexCache(@NotNull Project project) {
 		this.project = project;
+		favoritesManager = FavoritesManager.getInstance(project);
+		fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
 		fileResolver = new FileResolver();
 	}
 
@@ -63,25 +72,29 @@ public class IndexCache {
 		if (group.isInvalid()) {
 			return false;
 		}
-		if (group instanceof AutoGroup) {
-			return group.isValid();
-		}
+		if (group instanceof EditorGroupIndexValue) {
+			String ownerPath = group.getOwnerPath();
+			List<EditorGroupIndexValue> groups = null;
+			try {
+				groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+			} catch (ProcessCanceledException e) {
+				return true;
+			}
 
-		String ownerPath = group.getOwnerPath();
-		List<EditorGroupIndexValue> groups = null;
-		try {
-			groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
-		} catch (ProcessCanceledException e) {
-			return true;
+			if (groups.isEmpty()) {
+				group.invalidate();
+				return false;
+			} else if (groups.size() == 1) {
+				EditorGroupIndexValue editorGroupIndexValue = groups.get(0);
+				if (!group.equals(editorGroupIndexValue)) {
+					((EditorGroupIndexValue) group).updateFrom(editorGroupIndexValue);
+				}
+				return group.isValid();
+			} else if (groups.size() > 1) {
+				LOG.error(groups);
+			}
 		}
-
-		Optional<EditorGroupIndexValue> first = groups.stream().filter(Predicate.isEqual(group)).findFirst();
-		EditorGroupIndexValue editorGroupIndexValue = first.orElse(null);
-		if (!group.equals(editorGroupIndexValue)) {
-			group.invalidate();
-			return false;
-		}
-		return true;
+		return group.isValid();
 	}
 
 
@@ -89,7 +102,9 @@ public class IndexCache {
 		for (String link : links) {
 			EditorGroups editorGroups = groupsByLinks.get(link);
 			if (editorGroups == null) {
-				groupsByLinks.put(link, new EditorGroups(group));
+				EditorGroups value = new EditorGroups();
+				value.add(group);
+				groupsByLinks.put(link, value);
 			} else {
 				editorGroups.add(group);
 			}
@@ -135,6 +150,8 @@ public class IndexCache {
 					result = AutoGroup.SAME_NAME_INSTANCE;
 				} else if (!force && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
+				} else if (last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
+					result = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
 				} else {
 					EditorGroup lastGroup = getByOwner(last);
 					if (lastGroup.getLinks(project).contains(currentFilePath)) {
@@ -166,7 +183,8 @@ public class IndexCache {
 
 		EditorGroups editorGroups = groupsByLinks.get(currentFile);
 		if (editorGroups == null) {
-			editorGroups = new EditorGroups(result);
+			editorGroups = new EditorGroups();
+			editorGroups.add(result);
 			groupsByLinks.put(currentFile, editorGroups);
 		}
 		editorGroups.setLast(result.getOwnerPath());
@@ -290,5 +308,33 @@ public class IndexCache {
 
 	public EditorGroup updateGroups(AutoGroup result, String currentFilePath) {
 		return result.setGroups(getGroups(currentFilePath));
+	}
+
+	public EditorGroup getFavoritesGroup(String title) {
+		List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(title);
+		if (favoritesListRootUrls.isEmpty()) {
+			return EditorGroup.EMPTY;
+		}
+
+		return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
+	}
+
+	public Collection<FavoritesGroup> getFavoritesGroups() {
+		List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
+
+		ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
+		for (String name : availableFavoritesListNames) {
+			List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
+			if (favoritesListRootUrls.isEmpty()) {
+				continue;
+
+			}
+			FavoritesGroup e = new FavoritesGroup(name, favoritesListRootUrls, project, fileIndex);
+			if (e.size(project) > 0) {
+				favoritesGroups.add(e);
+			}
+		}
+
+		return favoritesGroups;
 	}
 }

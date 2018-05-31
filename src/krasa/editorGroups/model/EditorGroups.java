@@ -14,14 +14,14 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 	public EditorGroups() {
 	}
 
-	public EditorGroups(EditorGroup editorGroup) {
+
+	public void add(EditorGroup editorGroup) {   
 		if (editorGroup instanceof AutoGroup) {
 			return;
 		}
-		add(editorGroup);
-	}
-
-	public void add(EditorGroup editorGroup) {
+		if (editorGroup instanceof FavoritesGroup) {
+			return;
+		}
 		map.put(editorGroup.getOwnerPath(), editorGroup);
 	}
 
@@ -38,10 +38,6 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 		return "EDITOR_GROUPS";
 	}
 
-	@Override
-	public List<String> getRelatedPaths() {
-		return Collections.emptyList();
-	}
 
 	@Override
 	public String getTitle() {
