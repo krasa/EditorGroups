@@ -75,7 +75,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new BorderLayout());
-		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(EditorGroupPanel.this.project);
+		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
 //		scrollPane = new HackedJBScrollPane(this);
 //
