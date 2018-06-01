@@ -170,12 +170,9 @@ public class EditorGroupManager {
 
 	public Color getColor(VirtualFile file) {
 		String canonicalPath = file.getCanonicalPath();
-		EditorGroup group = cache.getByOwner(canonicalPath);
-		if (group == null) {
-			group = cache.getEditorGroupAsSlave(canonicalPath, false, false);
-		}
+		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
 		if (group != null) {
-			return group.getTabColor();
+			return group.getColor();
 		}
 		return null;
 	}

@@ -113,4 +113,16 @@ public class EditorGroups implements EditorGroup, GroupsHolder {
 	public Collection<EditorGroup> getGroups() {
 		return map.values();
 	}
+
+	public EditorGroup ownerOrLast(String currentFilePath) {
+		Iterator<EditorGroup> iterator = map.values().iterator();
+		EditorGroup group = EMPTY;
+		while (iterator.hasNext()) {
+			group = iterator.next();
+			if (group.isOwner(currentFilePath)) {
+				break;
+			}
+		}
+		return group;
+	}
 }

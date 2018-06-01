@@ -71,7 +71,7 @@ public interface EditorGroup {
 		return Utils.getFileByPath(ownerPath);
 	}
 
-	default Color getTabColor() {
+	default Color getColor() {
 		return null;
 	}
 }

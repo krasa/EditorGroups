@@ -22,6 +22,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	/*runtime data*/
 	private transient volatile List<String> links;
 	private transient volatile boolean valid = true;
+	private transient volatile Color colorInstance = null;
 
 	public EditorGroupIndexValue() {
 	}
@@ -86,7 +87,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	public EditorGroupIndexValue setColor(String value) {
-		color = StringUtil.notNullize(value);
+		color = StringUtil.notNullize(value).toLowerCase();
 		return this;
 	}
 
@@ -104,14 +105,22 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return color;
 	}
 
+
+	@Override
 	public Color getColor() {
-		if (!color.isEmpty()) {
-			try {
-				return Color.decode(color);
-			} catch (Exception e) {
+		if (colorInstance == null) {
+			if (!color.isEmpty()) {
+				try {
+					if (color.startsWith("0x") || color.startsWith("#")) {
+						colorInstance = Color.decode(color);
+					} else {
+						colorInstance = Utils.colorMap.get(color);
+					}
+				} catch (Exception e) {
+				}
 			}
 		}
-		return null;
+		return colorInstance;
 	}
 
 	public EditorGroupIndexValue setLinks(List<String> links) {

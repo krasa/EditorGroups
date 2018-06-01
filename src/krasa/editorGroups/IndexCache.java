@@ -175,6 +175,26 @@ public class IndexCache {
 		return result;
 	}
 
+	public EditorGroup getEditorGroupForColor(String currentFilePath) {
+		EditorGroup result = EditorGroup.EMPTY;
+		EditorGroups groups = groupsByLinks.get(currentFilePath);
+
+		if (groups != null) {
+			String last = groups.getLast();
+			if (last != null) {
+				EditorGroup lastGroup = getByOwner(last);
+				if (lastGroup.getLinks(project).contains(currentFilePath)) {
+					result = lastGroup;
+				}
+			}
+
+			if (result.isInvalid()) {
+				result = groups.ownerOrLast(currentFilePath);
+			}
+		}
+		return result;
+	}
+
 
 	public void setLast(String currentFile, EditorGroup result) {
 		if (!result.isValid()) {
@@ -337,4 +357,5 @@ public class IndexCache {
 
 		return favoritesGroups;
 	}
+
 }

@@ -481,6 +481,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					
 					long start = System.currentTimeMillis();
 					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
+					file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 
 					int groupsCount = 0;
 					if (group instanceof GroupsHolder) {
