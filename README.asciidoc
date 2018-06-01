@@ -12,6 +12,7 @@ image::example.jpg[]
 Add anywhere in the file:
 
 - @idea.title yourTitle 
+- @idea.color #FF0096 (or 0xFF0096)  
                   
 === Relative paths to the current file
 - @idea.related file.txt

@@ -7,6 +7,7 @@ import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	/*definitions*/
 	private String ownerPath = "";
 	private String title = "";
+	private String color = "";
 	private List<String> relatedPaths = new ArrayList<>();
 
 	/*runtime data*/
@@ -41,7 +43,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 	}
 
 	public void setOwnerPath(String ownerPath) {
-		this.ownerPath = ownerPath;
+		this.ownerPath = StringUtil.notNullize(ownerPath);
 	}
 
 	public List<String> getRelatedPaths() {
@@ -83,6 +85,11 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return links;
 	}
 
+	public EditorGroupIndexValue setColor(String value) {
+		color = StringUtil.notNullize(value);
+		return this;
+	}
+
 	public EditorGroupIndexValue addRelated(String value) {
 		relatedPaths.add(value);
 		return this;
@@ -91,6 +98,20 @@ public class EditorGroupIndexValue implements EditorGroup {
 	@Override
 	public boolean isOwner(@NotNull String canonicalPath) {
 		return ownerPath.equals(canonicalPath);
+	}
+
+	public String getColorString() {
+		return color;
+	}
+
+	public Color getColor() {
+		if (!color.isEmpty()) {
+			try {
+				return Color.decode(color);
+			} catch (Exception e) {
+			}
+		}
+		return null;
 	}
 
 	public EditorGroupIndexValue setLinks(List<String> links) {
@@ -105,16 +126,18 @@ public class EditorGroupIndexValue implements EditorGroup {
 
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
-		if (!ownerPath.equals(that.ownerPath)) return false;
-		if (!title.equals(that.title)) return false;
-		return relatedPaths.equals(that.relatedPaths);
+		if (ownerPath != null ? !ownerPath.equals(that.ownerPath) : that.ownerPath != null) return false;
+		if (title != null ? !title.equals(that.title) : that.title != null) return false;
+		if (color != null ? !color.equals(that.color) : that.color != null) return false;
+		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
 	}
 
 	@Override
 	public int hashCode() {
-		int result = ownerPath.hashCode();
-		result = 31 * result + title.hashCode();
-		result = 31 * result + relatedPaths.hashCode();
+		int result = ownerPath != null ? ownerPath.hashCode() : 0;
+		result = 31 * result + (title != null ? title.hashCode() : 0);
+		result = 31 * result + (color != null ? color.hashCode() : 0);
+		result = 31 * result + (relatedPaths != null ? relatedPaths.hashCode() : 0);
 		return result;
 	}
 

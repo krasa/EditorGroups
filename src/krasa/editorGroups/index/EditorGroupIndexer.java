@@ -18,11 +18,12 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
-	private static final Logger LOG = Logger.getInstance(PlainTextIndexer.class);
+public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
+	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
 		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.title\\s(.*)", false), new TitleConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.color\\s(.*)", false), new ColorConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("@idea.related\\s(.*)", false), new RelatedFilesConsumer())
 	};
 
@@ -84,6 +85,13 @@ public class PlainTextIndexer implements DataIndexer<String, EditorGroupIndexVal
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
 			return init(object).setTitle(value);
+		}
+	}
+
+	static class ColorConsumer extends Consumer {
+		@Override
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
+			return init(object).setColor(value);
 		}
 	}
 

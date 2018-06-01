@@ -51,7 +51,7 @@ public class IndexCache {
 		System.out.println("> getByOwner " + canonicalPath);
 
 		EditorGroup result = EditorGroup.EMPTY;
-		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, canonicalPath, GlobalSearchScope.projectScope(project));
+		List<EditorGroupIndexValue> values = getGroupss(canonicalPath);
 		for (EditorGroupIndexValue value : values) {
 			if (value.isOwner(canonicalPath)) {
 				result = value;
@@ -76,7 +76,7 @@ public class IndexCache {
 		if (group instanceof EditorGroupIndexValue) {
 			String ownerPath = group.getOwnerPath();
 			try {
-				List<EditorGroupIndexValue> groups = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+				List<EditorGroupIndexValue> groups = getGroupss(ownerPath);
 				if (groups.stream().noneMatch(Predicate.isEqual(group))) {
 					group.invalidate();
 					return false;
@@ -86,6 +86,15 @@ public class IndexCache {
 
 		}
 		return group.isValid();
+	}
+
+	@NotNull
+	private List<EditorGroupIndexValue> getGroupss(String ownerPath) {
+		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
+		if (values.size() > 1) {
+			LOG.error(String.valueOf(values));
+		}
+		return values;
 	}
 
 
@@ -130,18 +139,18 @@ public class IndexCache {
 	}
 
 
-	public EditorGroup getEditorGroupAsSlave(String currentFilePath, boolean force) {
+	public EditorGroup getEditorGroupAsSlave(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
 
 		if (groups != null) {
 			String last = groups.getLast();
 			if (last != null) {
-				if (!force && AutoGroup.SAME_FILE_NAME.equals(last)) {
+				if (includeAutogroups && AutoGroup.SAME_FILE_NAME.equals(last)) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
-				} else if (!force && AutoGroup.DIRECTORY.equals(last)) {
+				} else if (includeAutogroups && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
-				} else if (last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
+				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
 					result = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
 				} else {
 					EditorGroup lastGroup = getByOwner(last);

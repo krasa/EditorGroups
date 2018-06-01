@@ -5,6 +5,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.Collections;
 import java.util.List;
 
@@ -70,4 +71,7 @@ public interface EditorGroup {
 		return Utils.getFileByPath(ownerPath);
 	}
 
+	default Color getTabColor() {
+		return null;
+	}
 }

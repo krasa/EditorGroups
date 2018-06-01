@@ -9,6 +9,7 @@ import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.awt.*;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -77,7 +78,7 @@ public class EditorGroupManager {
 				result = cache.getByOwner(currentFilePath);
 			}
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath, true);
+				result = cache.getEditorGroupAsSlave(currentFilePath, false, true);
 			}
 		}
 
@@ -94,7 +95,7 @@ public class EditorGroupManager {
 			}
 
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath, false);
+				result = cache.getEditorGroupAsSlave(currentFilePath, true, true);
 			}
 		}
 
@@ -165,5 +166,17 @@ public class EditorGroupManager {
 
 	public void initCache() {
 		panelRefresher.initCache();
+	}
+
+	public Color getColor(VirtualFile file) {
+		String canonicalPath = file.getCanonicalPath();
+		EditorGroup group = cache.getByOwner(canonicalPath);
+		if (group == null) {
+			group = cache.getEditorGroupAsSlave(canonicalPath, false, false);
+		}
+		if (group != null) {
+			return group.getTabColor();
+		}
+		return null;
 	}
 }

@@ -1,6 +1,5 @@
 package krasa.editorGroups.index;
 
-import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.EnumeratorStringDescriptor;
@@ -24,9 +23,10 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 		@Override
 		public void save(@NotNull DataOutput out, EditorGroupIndexValue value) throws IOException {
-			String title = value.getTitle();
+			//WATCH OUT FOR HASHCODE AND EQUALS!!
 			out.writeUTF(value.getOwnerPath());
-			out.writeUTF(StringUtil.notNullize(title));
+			out.writeUTF(value.getTitle());
+			out.writeUTF(value.getColorString());
 			out.writeInt(value.getRelatedPaths().size());
 			List<String> related = value.getRelatedPaths();
 			for (String s : related) {
@@ -37,9 +37,11 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 		@Override
 		public EditorGroupIndexValue read(@NotNull DataInput in) throws IOException {
+			//WATCH OUT FOR HASHCODE AND EQUALS!!
 			EditorGroupIndexValue value = new EditorGroupIndexValue();
 			value.setOwnerPath(in.readUTF());
 			value.setTitle(in.readUTF());
+			value.setColor(in.readUTF());
 			int i = in.readInt();
 			for (int j = 0; j < i; j++) {
 				value.addRelated(in.readUTF());
@@ -49,12 +51,12 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	};
 
-	private final DataIndexer<String, EditorGroupIndexValue, FileContent> myIndexer = new PlainTextIndexer();
+	private final DataIndexer<String, EditorGroupIndexValue, FileContent> myIndexer = new EditorGroupIndexer();
 
 
 	@Override
 	public int getVersion() {
-		return 1;
+		return 2;
 	}
 
 	@Override
