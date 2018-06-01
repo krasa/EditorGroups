@@ -187,6 +187,13 @@ public class EditorGroupManager {
 
 			System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "]");
 
+			//must find window before opening the file!
+			VirtualFile selectedFile = null;
+			EditorWindow currentWindow = manager.getCurrentWindow();
+			if (currentWindow != null) {
+				selectedFile = currentWindow.getSelectedFile();
+			}
+			
 			//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
 //		manager.closeFile(fileToOpen, false, false);
 
@@ -201,9 +208,7 @@ public class EditorGroupManager {
 				}
 
 				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
-				if (!newTab) {
-					EditorWindow currentWindow = manager.getCurrentWindow();
-					VirtualFile selectedFile = currentWindow.getSelectedFile();
+				if (selectedFile != null && !newTab) {
 					manager.closeFile(selectedFile, currentWindow, false);
 				}
 
