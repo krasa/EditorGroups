@@ -194,8 +194,6 @@ public class EditorGroupManager {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 			
-			//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
-//		manager.closeFile(fileToOpen, false, false);
 
 			switching(true, group);
 			if (newWindow) {
