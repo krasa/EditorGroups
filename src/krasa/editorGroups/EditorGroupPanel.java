@@ -14,7 +14,6 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
-import com.intellij.openapi.fileEditor.impl.MyFileManager;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
@@ -72,9 +71,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	boolean reload = true;
 	private JBPanel groupsPanel = new JBPanel();
 	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
+	private FileEditorManagerImpl fileEditorManager;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new BorderLayout());
+		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(EditorGroupPanel.this.project);
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
 //		scrollPane = new HackedJBScrollPane(this);
 //
@@ -451,7 +452,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		long start = System.currentTimeMillis();
 		RefreshRequest request = atomicReference.getAndSet(null);
 		if (request == null) {
-			System.out.println("nothing to refresh");
+			System.out.println("nothing to refresh " + fileEditor.getName());
 			return;
 		}
 		System.out.println(">refreshSmart " + request);
@@ -496,13 +497,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						setVisible(true);
 					}
 
-					MyFileManager.updateTitle(EditorGroupPanel.this.project, file);
+					fileEditorManager.updateFilePresentation(file);
+
 					revalidate();
 					repaint();
 					reload = false;
 					failed = 0;
 					EditorGroupManager.getInstance(project).switching(false, null);
-					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms");
+					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
 				}
 			});
 			atomicReference.compareAndSet(request, null);
