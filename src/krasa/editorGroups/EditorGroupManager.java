@@ -1,7 +1,11 @@
 package krasa.editorGroups;
 
+import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
+import com.intellij.openapi.fileEditor.impl.EditorWindow;
+import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.*;
@@ -175,5 +179,35 @@ public class EditorGroupManager {
 			return group.getColor();
 		}
 		return null;
+	}
+
+	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab) {
+		CommandProcessor.getInstance().executeCommand(project, () -> {
+			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+
+			System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "]");
+
+			//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
+//		manager.closeFile(fileToOpen, false, false);
+
+			switching(true, group);
+			if (newWindow) {
+				manager.openFileInNewWindow(fileToOpen);
+			} else {
+				FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+				if (fileEditors.length == 0) {  //directory or some fail
+					switching(false, null);
+					return;
+				}
+
+				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
+				if (!newTab) {
+					EditorWindow currentWindow = manager.getCurrentWindow();
+					VirtualFile selectedFile = currentWindow.getSelectedFile();
+					manager.closeFile(selectedFile, currentWindow, false);
+				}
+
+			}
+		}, null, null);
 	}
 }

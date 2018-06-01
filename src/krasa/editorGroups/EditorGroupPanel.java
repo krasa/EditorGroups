@@ -5,14 +5,12 @@ import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
 import com.intellij.openapi.editor.impl.EditorImpl;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
-import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -72,9 +70,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private JBPanel groupsPanel = new JBPanel();
 	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
 	private FileEditorManagerImpl fileEditorManager;
+	public EditorGroupManager groupManager;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
 		super(new BorderLayout());
+		this.fileEditor = fileEditor;
+		this.project = project;
+		this.file = file;
+		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
 //		scrollPane = new HackedJBScrollPane(this);
@@ -94,9 +97,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (userData != null) {
 			displayedGroup = userData;
 		}
-		this.fileEditor = fileEditor;
-		this.project = project;
-		this.file = file;
 		if (fileEditor instanceof TextEditorImpl) {
 			Editor editor = ((TextEditorImpl) fileEditor).getEditor();
 			if (editor instanceof EditorImpl) {
@@ -104,7 +104,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				editorImpl.addFocusListener(new FocusChangeListener() {
 					@Override
 					public void focusGained(Editor editor) {
-						EditorGroupPanel.this.focusGained(editor);
+						EditorGroupPanel.this.focusGained();
 					}
 
 					@Override
@@ -332,43 +332,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 
 
-		if (EditorGroupManager.getInstance(project).switching()) {
+		if (groupManager.switching()) {
 			System.out.println("openFile fail - switching");
 			return;
 		}
 
-		CommandProcessor.getInstance().executeCommand(project, () -> {
-			open(fileToOpen, displayedGroup, newWindow, newTab);
-		}, null, null);
-
-	}
-
-	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab) {
-		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-
-		EditorWindow currentWindow = manager.getCurrentWindow();
-		VirtualFile selectedFile = currentWindow.getSelectedFile();
-		System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "]");
-
-		//not closing existing tab beforehand seems to have either no effect, or it is better, dunno
-//		manager.closeFile(fileToOpen, false, false);
-
-		EditorGroupManager.getInstance(project).switching(true, group);
-		if (newWindow) {
-			manager.openFileInNewWindow(fileToOpen);
-		} else {
-			FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
-			if (fileEditors.length == 0) {  //directory or some fail
-				EditorGroupManager.getInstance(project).switching(false, null);
-				return;
-			}
-
-			//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
-			if (!newTab) {
-				manager.closeFile(selectedFile, currentWindow, false);
-			}
-
-		}
+		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab);
 
 	}
 
@@ -379,10 +348,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	private void focusGained(@NotNull Editor editor) {
+	private void focusGained() {
 		//important when switching to a file that has an exsting editor
 
-		EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+		EditorGroup switchingGroup = groupManager.getSwitchingGroup();
 		System.out.println("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			reload = true;
@@ -390,7 +359,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		} else {
 //			refresh(false, null);
 		}
-		EditorGroupManager.getInstance(project).switching(false, null);
+		groupManager.switching(false, null);
 	}
 
 
@@ -464,7 +433,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
 				public EditorGroup compute() {
-					return EditorGroupManager.getInstance(project).getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh);
+					return groupManager.getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh);
 				}
 			});
 			if (group == displayedGroup
@@ -504,7 +473,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					repaint();
 					reload = false;
 					failed = 0;
-					EditorGroupManager.getInstance(project).switching(false, null);
+					groupManager.switching(false, null);
 					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
 				}
 			});
