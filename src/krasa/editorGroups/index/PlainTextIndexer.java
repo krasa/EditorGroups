@@ -8,7 +8,7 @@ import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
 import krasa.editorGroups.PanelRefresher;
 import krasa.editorGroups.model.EditorGroupIndexValue;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
