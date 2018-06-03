@@ -48,7 +48,7 @@ public class IndexCache {
 	}
 
 	public EditorGroup getByOwner(String canonicalPath) {
-		List<EditorGroupIndexValue> values = getGroupss(canonicalPath);
+		List<EditorGroupIndexValue> values = getGroupsFromIndex(canonicalPath);
 		EditorGroup result = values.size() > 0 ? values.get(0) : EditorGroup.EMPTY;
 		//init
 		result.getLinks(project);
@@ -67,7 +67,7 @@ public class IndexCache {
 		if (group instanceof EditorGroupIndexValue) {
 			String ownerPath = group.getOwnerPath();
 			try {
-				List<EditorGroupIndexValue> groups = getGroupss(ownerPath);
+				List<EditorGroupIndexValue> groups = getGroupsFromIndex(ownerPath);
 				if (groups.stream().noneMatch(Predicate.isEqual(group))) {
 					group.invalidate();
 					return false;
@@ -80,7 +80,7 @@ public class IndexCache {
 	}
 
 	@NotNull
-	private List<EditorGroupIndexValue> getGroupss(String ownerPath) {
+	private List<EditorGroupIndexValue> getGroupsFromIndex(String ownerPath) {
 		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, ownerPath, GlobalSearchScope.projectScope(project));
 		if (values.size() > 1) {
 			LOG.error(String.valueOf(values));
