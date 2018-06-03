@@ -48,20 +48,11 @@ public class IndexCache {
 	}
 
 	public EditorGroup getByOwner(String canonicalPath) {
-		System.out.println("> getByOwner " + canonicalPath);
-
-		EditorGroup result = EditorGroup.EMPTY;
 		List<EditorGroupIndexValue> values = getGroupss(canonicalPath);
-		for (EditorGroupIndexValue value : values) {
-			if (value.isOwner(canonicalPath)) {
-				result = value;
-				break;
-			}
-		}
+		EditorGroup result = values.size() > 0 ? values.get(0) : EditorGroup.EMPTY;
 		//init
 		result.getLinks(project);
 
-		System.out.println("< getByOwner " + canonicalPath + " result=" + result);
 		return result;
 	}
 
@@ -175,6 +166,9 @@ public class IndexCache {
 		return result;
 	}
 
+	/**
+	 * called very often!
+	 */
 	public EditorGroup getEditorGroupForColor(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
@@ -182,8 +176,9 @@ public class IndexCache {
 		if (groups != null) {
 			String last = groups.getLast();
 			if (last != null) {
-				EditorGroup lastGroup = getByOwner(last);
-				if (lastGroup.getLinks(project).contains(currentFilePath)) {
+				EditorGroups editorGroups = groupsByLinks.get(last);
+				EditorGroup lastGroup = editorGroups.getByOwner(last);
+				if (lastGroup.isValid() && lastGroup.getLinks(project).contains(currentFilePath)) {
 					result = lastGroup;
 				}
 			}
