@@ -177,9 +177,11 @@ public class IndexCache {
 			String last = groups.getLast();
 			if (last != null) {
 				EditorGroups editorGroups = groupsByLinks.get(last);
-				EditorGroup lastGroup = editorGroups.getByOwner(last);
-				if (lastGroup.isValid() && lastGroup.getLinks(project).contains(currentFilePath)) {
-					result = lastGroup;
+				if (editorGroups != null) {
+					EditorGroup lastGroup = editorGroups.getByOwner(last);
+					if (lastGroup.isValid() && lastGroup.getLinks(project).contains(currentFilePath)) {
+						result = lastGroup;
+					}
 				}
 			}
 
