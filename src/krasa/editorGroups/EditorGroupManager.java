@@ -143,6 +143,10 @@ public class EditorGroupManager {
 		switchingGroup = group;
 	}
 
+	public void switching(boolean b) {
+		switching = false;
+	}
+	          
 	public EditorGroup getSwitchingGroup() {
 		return switchingGroup;
 	}
@@ -201,7 +205,7 @@ public class EditorGroupManager {
 			} else {
 				FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 				if (fileEditors.length == 0) {  //directory or some fail
-					switching(false, null);
+					switching(false);
 					return;
 				}
 
@@ -213,4 +217,5 @@ public class EditorGroupManager {
 			}
 		}, null, null);
 	}
+
 }

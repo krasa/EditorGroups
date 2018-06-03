@@ -359,7 +359,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		} else {
 //			refresh(false, null);
 		}
-		groupManager.switching(false, null);
+		groupManager.switching(false);
 	}
 
 
@@ -473,7 +473,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					repaint();
 					reload = false;
 					failed = 0;
-					groupManager.switching(false, null);
+					groupManager.switching(false);
 					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
 				}
 			});
