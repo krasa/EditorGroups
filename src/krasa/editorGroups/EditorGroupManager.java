@@ -9,7 +9,6 @@ import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.*;
-import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,6 +38,7 @@ public class EditorGroupManager {
 	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
 	private EditorGroup switchingGroup;
 	private PanelRefresher panelRefresher;
+	private VirtualFile switchingFile;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
@@ -53,11 +53,8 @@ public class EditorGroupManager {
 		return ServiceManager.getService(project, EditorGroupManager.class);
 	}
 
-	/**
-	 * @param displayedGroup
-	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh) {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
 		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
@@ -67,11 +64,6 @@ public class EditorGroupManager {
 			requestedGroup = displayedGroup;
 		}
 
-		VirtualFile currentFile = Utils.getFileFromTextEditor(this.project, fileEditor);
-		if (currentFile == null) {
-			System.out.println("< getGroup - currentFile is null for " + fileEditor);
-			return result;
-		}
 
 		String currentFilePath = currentFile.getCanonicalPath();
 
@@ -90,12 +82,11 @@ public class EditorGroupManager {
 			cache.validate(requestedGroup);
 			if (requestedGroup.isValid()
 				&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath))) {
-				
 				result = requestedGroup;
 			}
 		}
 
-		if (!force) { 
+		if (!force) {
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
@@ -139,18 +130,25 @@ public class EditorGroupManager {
 		return result;
 	}
 
-	public void switching(boolean switching, EditorGroup group) {
+	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen) {
 		System.out.println("switching " + "[" + switching + "], group = [" + group + "]");
+		switchingFile = fileToOpen;
 		this.switching = switching;
 		switchingGroup = group;
 	}
 
 	public void switching(boolean b) {
+		System.out.println("switching " + " [" + b + "]");
 		switching = false;
 	}
-	          
-	public EditorGroup getSwitchingGroup() {
-		return switchingGroup;
+
+	public EditorGroup getSwitchingGroup(@NotNull VirtualFile file) {
+		if (file.equals(switchingFile)) {
+			EditorGroup switchingGroup = this.switchingGroup;
+			this.switchingGroup = null;
+			return switchingGroup;
+		}
+		return null;
 	}
 
 	public boolean switching() {
@@ -187,11 +185,11 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab) {
+	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile) {
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
-			System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "]");
+			System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "], currentFile = [" + currentFile + "]");
 
 			//must find window before opening the file!
 			VirtualFile selectedFile = null;
@@ -199,9 +197,9 @@ public class EditorGroupManager {
 			if (currentWindow != null) {
 				selectedFile = currentWindow.getSelectedFile();
 			}
-			
 
-			switching(true, group);
+
+			switching(true, group, fileToOpen);
 			if (newWindow) {
 				manager.openFileInNewWindow(fileToOpen);
 			} else {

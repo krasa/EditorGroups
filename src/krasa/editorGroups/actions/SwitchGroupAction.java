@@ -148,7 +148,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			void run(EditorGroup editorGroup) {
 				VirtualFile fileByPath = editorGroup.getOwnerFile();
 				if (fileByPath != null) {
-					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true);
+					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null);
 				}
 			}
 		};

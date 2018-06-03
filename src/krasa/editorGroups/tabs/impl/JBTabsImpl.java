@@ -18,6 +18,7 @@ import com.intellij.ui.*;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.switcher.QuickActionProvider;
 import com.intellij.util.Function;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.*;
 import com.intellij.util.ui.update.LazyUiDisposable;
@@ -269,34 +270,40 @@ public class JBTabsImpl extends JComponent
 					myProject = project;
 				}
 
-				Disposer.register(child, myAnimator);
-				Disposer.register(child, new Disposable() {
-					@Override
-					public void dispose() {
-						removeTimerUpdate();
-					}
-				});
-
-				if (!myTestMode) {
-					final IdeGlassPane gp = IdeGlassPaneUtil.find(child);
-					if (gp != null) {
-						gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, child);
-						myGlassPane = gp;
-					}
-
-					UIUtil.addAwtListener(new AWTEventListener() {
+				try {
+					Disposer.register(child, myAnimator);
+					Disposer.register(child, new Disposable() {
 						@Override
-						public void eventDispatched(final AWTEvent event) {
-							if (mySingleRowLayout.myMorePopup != null) return;
-							processFocusChange();
+						public void dispose() {
+							removeTimerUpdate();
 						}
-					}, AWTEvent.FOCUS_EVENT_MASK, child);
+					});
 
+					if (!myTestMode) {
+						final IdeGlassPane gp = IdeGlassPaneUtil.find(child);
+						if (gp != null) {
+							gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, child);
+							myGlassPane = gp;
+						}
+
+						UIUtil.addAwtListener(new AWTEventListener() {
+							@Override
+							public void eventDispatched(final AWTEvent event) {
+								if (mySingleRowLayout.myMorePopup != null) return;
+								processFocusChange();
+							}
+						}, AWTEvent.FOCUS_EVENT_MASK, child);
+
+					}
+
+					if (myProject != null && myFocusManager == IdeFocusManager.getGlobalInstance()) {
+						myFocusManager = IdeFocusManager.getInstance(myProject);
+					}
+				} catch (IncorrectOperationException e) {
+					myAnimator.dispose();
+					removeTimerUpdate();
 				}
 
-				if (myProject != null && myFocusManager == IdeFocusManager.getGlobalInstance()) {
-					myFocusManager = IdeFocusManager.getInstance(myProject);
-				}
 			}
 		};
 	}
@@ -1391,7 +1398,6 @@ public class JBTabsImpl extends JComponent
 				final Insets insets = getLayoutInsets();
 				layout(label, insets.left, bounds.y, getWidth() - insets.right - insets.left, bounds.height);
 			}
-
 
 
 			myTabActionsAutoHideListener.processMouseOver();
@@ -3370,12 +3376,12 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public int getAccessibleChildrenCount() {
-				return 0;
+			return 0;
 		}
 
 		@Override
 		public Accessible getAccessibleChild(int i) {
-				return null;
+			return null;
 		}
 
 		@Override
@@ -3516,7 +3522,7 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public Accessible getAccessibleAt(Point p) {
-				return null;
+			return null;
 		}
 
 		@Override

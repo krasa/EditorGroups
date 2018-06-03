@@ -33,7 +33,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void projectOpened() {
 		EditorGroupManager.getInstance(project).initCache();
 
-
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 			//IJ 2018.2
 			@Override
@@ -44,7 +43,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 						continue;
 					}
 
-					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(file);
 					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
@@ -64,7 +63,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 						continue;
 					}
 
-					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(file);
 					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
@@ -80,7 +79,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
-						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(panel.getFile());
 						panel.refresh(false, switchingGroup);
 					}
 				}

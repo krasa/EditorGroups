@@ -23,8 +23,15 @@ public class Utils {
 
 	public static Map<String, Color> colorMap;
 
+	/**
+	 * not good enough for UI forms sometimes
+	 */
 	@Nullable
 	public static VirtualFile getFileFromTextEditor(Project project, FileEditor textEditor) {
+		VirtualFile file = textEditor.getFile();
+		if (file != null) {
+			return file;
+		}
 		return FileEditorManagerEx.getInstanceEx(project).getFile(textEditor);
 	}
 

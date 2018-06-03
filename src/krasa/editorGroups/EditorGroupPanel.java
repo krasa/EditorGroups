@@ -62,7 +62,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@NotNull
 	private Project project;
 	private final VirtualFile file;
-	private int currentIndex;
+	private int currentIndex = -1;
 	@NotNull
 	private volatile EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private VirtualFile fileFromTextEditor;
@@ -91,7 +91,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //				adjustScrollPane();
 //			}
 //		});
-
 
 		fileEditor.putUserData(EDITOR_PANEL, this);
 		if (userData != null) {
@@ -275,6 +274,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void previous(boolean newTab, boolean newWindow) {
+		if (currentIndex == -1) { //group was not refreshed
+			return;
+		}
 		if (displayedGroup.isInvalid()) {
 			return;
 		}
@@ -301,6 +303,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void next(boolean newTab, boolean newWindow) {
+		if (currentIndex == -1) { //group was not refreshed
+			return;
+		}
 		if (displayedGroup.isInvalid()) {
 			return;
 		}
@@ -337,7 +342,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab);
+		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file);
 
 	}
 
@@ -351,13 +356,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void focusGained() {
 		//important when switching to a file that has an exsting editor
 
-		EditorGroup switchingGroup = groupManager.getSwitchingGroup();
+		EditorGroup switchingGroup = groupManager.getSwitchingGroup(file);
 		System.out.println("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			reload = true;
 			refresh(false, switchingGroup);
 		} else {
-//			refresh(false, null);
+			refresh(false, null);
 		}
 		groupManager.switching(false);
 	}
@@ -433,7 +438,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
 				public EditorGroup compute() {
-					return groupManager.getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh);
+					return groupManager.getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh, file);
 				}
 			});
 			if (group == displayedGroup
