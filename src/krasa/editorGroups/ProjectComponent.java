@@ -70,7 +70,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					manager.addTopComponent(fileEditor, panel.getRoot());
 				}
 				if (log.isDebugEnabled()) {
-					log.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + fileEditors.length);
+					log.debug("async EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + fileEditors.length);
 				}
 			}
 
