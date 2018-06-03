@@ -88,12 +88,14 @@ public class EditorGroupManager {
 
 		if (result.isInvalid()) {
 			cache.validate(requestedGroup);
-			if (requestedGroup.isValid() && requestedGroup.containsLink(project, currentFilePath)) {
+			if (requestedGroup.isValid()
+				&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath))) {
+				
 				result = requestedGroup;
 			}
 		}
 
-		if (!force) {
+		if (!force) { 
 			if (result.isInvalid()) {
 				result = cache.getByOwner(currentFilePath);
 			}
