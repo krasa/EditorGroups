@@ -21,8 +21,8 @@ import java.util.List;
 
 /*
  * @idea.title CORE
+ * @idea.color black
  * @idea.related ./*
- * @idea.related support/FileResolver.java
  */
 public class EditorGroupManager {
 

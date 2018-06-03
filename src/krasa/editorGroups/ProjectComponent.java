@@ -3,11 +3,9 @@ package krasa.editorGroups;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileEditor.FileEditorManager;
-import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
-import com.intellij.openapi.fileEditor.FileEditorManagerListener;
+import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
@@ -35,7 +33,27 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void projectOpened() {
 		EditorGroupManager.getInstance(project).initCache();
 
+
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
+			//IJ 2018.2
+			@Override
+			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
+				long start = System.currentTimeMillis();
+				for (FileEditor fileEditor : editors.getFirst()) {
+					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
+						continue;
+					}
+
+					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup();
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
+
+					manager.addTopComponent(fileEditor, panel.getRoot());
+				}
+				if (log.isDebugEnabled()) {
+					log.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + editors.getFirst().length);
+				}
+			}
+
 			/**on EDT*/
 			@Override
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
@@ -50,7 +68,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
-					log.debug("EditorGroupPanel created in " + (System.currentTimeMillis() - start));
+				}
+				if (log.isDebugEnabled()) {
+					log.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + fileEditors.length);
 				}
 			}
 
