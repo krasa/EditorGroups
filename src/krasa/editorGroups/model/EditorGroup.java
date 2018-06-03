@@ -15,7 +15,7 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 // @idea.title EditorGroup
 // @idea.related EditorGroupIndexValue.java
 public interface EditorGroup {
-	public static EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
+	EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
 	@Nullable
 	String getOwnerPath();
@@ -73,5 +73,9 @@ public interface EditorGroup {
 
 	default Color getColor() {
 		return null;
+	}
+
+	default boolean containsLink(Project project, String currentFilePath) {
+		return getLinks(project).contains(currentFilePath);
 	}
 }

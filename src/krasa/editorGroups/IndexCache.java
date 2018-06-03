@@ -130,7 +130,7 @@ public class IndexCache {
 	}
 
 
-	public EditorGroup getEditorGroupAsSlave(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
+	public EditorGroup getLastEditorGroup(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
 
@@ -142,10 +142,13 @@ public class IndexCache {
 				} else if (includeAutogroups && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
-					result = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
+					EditorGroup favoritesGroup = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
+					if (favoritesGroup.containsLink(project, currentFilePath)) {
+						result = favoritesGroup;
+					}
 				} else {
 					EditorGroup lastGroup = getByOwner(last);
-					if (lastGroup.getLinks(project).contains(currentFilePath)) {
+					if (lastGroup.containsLink(project, currentFilePath)) {
 						result = lastGroup;
 					}
 				}
@@ -179,7 +182,7 @@ public class IndexCache {
 				EditorGroups editorGroups = groupsByLinks.get(last);
 				if (editorGroups != null) {
 					EditorGroup lastGroup = editorGroups.getByOwner(last);
-					if (lastGroup.isValid() && lastGroup.getLinks(project).contains(currentFilePath)) {
+					if (lastGroup.isValid() && lastGroup.containsLink(project, currentFilePath)) {
 						result = lastGroup;
 					}
 				}

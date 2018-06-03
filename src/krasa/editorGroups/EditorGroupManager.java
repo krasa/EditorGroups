@@ -82,13 +82,13 @@ public class EditorGroupManager {
 				result = cache.getByOwner(currentFilePath);
 			}
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath, false, true);
+				result = cache.getLastEditorGroup(currentFilePath, false, true);
 			}
 		}
 
 		if (result.isInvalid()) {
 			cache.validate(requestedGroup);
-			if (requestedGroup.isValid()) {
+			if (requestedGroup.isValid() && requestedGroup.containsLink(project, currentFilePath)) {
 				result = requestedGroup;
 			}
 		}
@@ -99,7 +99,7 @@ public class EditorGroupManager {
 			}
 
 			if (result.isInvalid()) {
-				result = cache.getEditorGroupAsSlave(currentFilePath, true, true);
+				result = cache.getLastEditorGroup(currentFilePath, true, true);
 			}
 		}
 
