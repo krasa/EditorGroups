@@ -32,6 +32,7 @@
         <projectService serviceImplementation="krasa.editorGroups.IndexCache"/>
         <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
         <editorTabColorProvider implementation="krasa.editorGroups.MyEditorTabColorProvider" order="first"/>
+        <defaultLiveTemplatesProvider implementation="krasa.editorGroups.support.EditorGroupsLiveTemplatesProvider"/>
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
 
