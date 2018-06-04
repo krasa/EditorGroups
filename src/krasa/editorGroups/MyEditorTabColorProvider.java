@@ -1,9 +1,13 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.impl.EditorTabColorProvider;
+import com.intellij.openapi.fileEditor.impl.EditorWindow;
+import com.intellij.openapi.fileEditor.impl.EditorWithProviderComposite;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
@@ -37,11 +41,22 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 		return getColor(project, textEditor, file);
 	}
 
-	//non existing API
+	/**
+	 * since 2018.2
+	 */
 	@Nullable
 	@Override
-	public Color getEditorTabColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable FileEditor editor) {
-		return getColor(project, editor, file);
+	public Color getEditorTabColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
+		if (editorWindow != null) {
+			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
+				if (editor.getFile().equals(file)) {
+					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
+					FileEditor first = pair.first;
+					return getColor(project, first, file);
+				}
+			}
+		}
+		return null;
 	}
 
 	@Nullable
