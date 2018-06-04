@@ -12,7 +12,10 @@ image::example.jpg[]
 Add anywhere in the file:
 
 - @idea.title yourTitle 
-- @idea.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp or a code like #FF0096 or 0xFF0096)  
+- @idea.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
+- @idea.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
+- @idea.color #FF0096
+- @idea.color 0xFF0096
                   
 === Relative paths to the current file
 - @idea.related file.txt

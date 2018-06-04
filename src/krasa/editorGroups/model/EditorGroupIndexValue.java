@@ -3,6 +3,7 @@ package krasa.editorGroups.model;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.ColorUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -114,7 +115,45 @@ public class EditorGroupIndexValue implements EditorGroup {
 					if (color.startsWith("0x") || color.startsWith("#")) {
 						colorInstance = Color.decode(color);
 					} else {
-						colorInstance = Utils.colorMap.get(color);
+						String colorName = color;
+						char[] modifier = new char[0];
+						int lighterIndex = color.indexOf("-");
+						if (lighterIndex > 0) {
+							colorName = color.substring(0, lighterIndex);
+							modifier = color.substring(lighterIndex).toCharArray();
+						}
+
+						int darkerIndex = color.indexOf("+");
+						if (darkerIndex > 0) {
+							colorName = color.substring(0, darkerIndex);
+							modifier = color.substring(darkerIndex).toCharArray();
+						}
+
+						Color myColor = Utils.colorMap.get(colorName);
+						String number = "";
+
+						for (int i = modifier.length - 1; i >= 0; i--) {
+							char c = modifier[i];
+							if (Character.isDigit(c)) {
+								number = number + c;
+							} else if (c == '+') {
+								int tones = 1;
+								if (!number.isEmpty()) {
+									tones = Integer.parseInt(number);
+									number = "";
+								}
+								myColor = ColorUtil.brighter(myColor, tones);
+							} else if (c == '-') {
+								int tones = 1;
+								if (!number.isEmpty()) {
+									tones = Integer.parseInt(number);
+									number = "";
+								}
+								myColor = ColorUtil.darker(myColor, tones);
+							}
+						}
+
+						colorInstance = myColor;
 					}
 				} catch (Exception e) {
 				}
