@@ -23,7 +23,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 	@Nullable
 	@Override
 	public String getEditorTabTitle(@NotNull Project project, @NotNull VirtualFile virtualFile) {
-		String presentableNameForUI = getPresentableNameForUI(project, virtualFile, null);
+		String presentableNameForUI = getPresentableNameForUI(project, virtualFile, null, false);
 
 		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(virtualFile);
 
@@ -36,7 +36,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 	@Nullable
 	@Override
 	public String getEditorTabTitle(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
-		String presentableNameForUI = getPresentableNameForUI(project, file, editorWindow);
+		String presentableNameForUI = getPresentableNameForUI(project, file, editorWindow, true);
 
 		if (editorWindow != null) {
 			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
@@ -52,14 +52,19 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 	}
 
 	@NotNull
-	public static String getPresentableNameForUI(@NotNull Project project, @NotNull VirtualFile file, EditorWindow editorWindow) {
+	public static String getPresentableNameForUI(@NotNull Project project, @NotNull VirtualFile file, EditorWindow editorWindow, boolean newAPI) {
 		List<EditorTabTitleProvider> providers = DumbService.getInstance(project).filterByDumbAwareness(
 			Extensions.getExtensions(EditorTabTitleProvider.EP_NAME));
 		for (EditorTabTitleProvider provider : providers) {
 			if (provider instanceof EditorGroupTabTitleProvider) {
 				continue;
 			}
-			String result = provider.getEditorTabTitle(project, file, editorWindow);
+			String result;
+			if (newAPI) {
+				result = provider.getEditorTabTitle(project, file, editorWindow);
+			} else {
+				result = provider.getEditorTabTitle(project, file);
+			}
 			if (result != null) {
 				return result;
 			}
