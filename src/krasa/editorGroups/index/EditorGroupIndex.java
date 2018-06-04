@@ -89,12 +89,12 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 	}
 
 	private final FileBasedIndex.InputFilter myInputFilter = file -> {
-		if (!file.isInLocalFileSystem()  // skip library sources
-			|| file.getFileType().isBinary()
+		if (file.isInLocalFileSystem()  // skip library sources
+			&& !file.getFileType().isBinary()
 		) {
-			return false;
+			return true;
 		}
-		return true;
+		return false;
 	};
 
 	@NotNull

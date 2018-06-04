@@ -72,6 +72,20 @@ public class PanelRefresher {
 
 	}
 
+	public void refresh(String owner) {
+		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+		for (FileEditor selectedEditor : manager.getAllEditors()) {
+			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				if (panel.getDisplayedGroup().isOwner(owner)) {
+					panel.refresh(false, null);
+
+				}
+			}
+		}
+
+	}
+
 	public EditorGroupIndexValue onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
 		group = cache.onIndexingDone(group);
 		if (DumbService.isDumb(project)) { //optimization
@@ -125,4 +139,6 @@ public class PanelRefresher {
 	public void refreshOnBackground(Runnable task) {
 		ourThreadExecutorsService.submit(task);
 	}
+
+
 }

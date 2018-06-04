@@ -16,6 +16,7 @@ Add anywhere in the file:
 - @idea.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
 - @idea.color #FF0096
 - @idea.color 0xFF0096
+- @idea.disable (to not index the current file)
                   
 === Relative paths to the current file
 - @idea.related file.txt
@@ -51,4 +52,5 @@ Add anywhere in the file:
 
 === Advanced actions and settings
 - right click on the panel
+
 

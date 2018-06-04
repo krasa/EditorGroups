@@ -60,6 +60,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		}
 		fillOtherGroup(defaultActionGroup, panel, project);
 
+		defaultActionGroup.add(new Separator());
+		defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
 	}
 
 	private void fillCurrentFileGroups(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel) {
@@ -78,7 +80,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		for (EditorGroup g : groups) {
 			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
-		defaultActionGroup.add(new Separator("Other Groups"));
+		defaultActionGroup.add(new Separator("Other Groups"));        
 	}
 
 	private void fillOtherGroup(DefaultActionGroup defaultActionGroup, @Nullable EditorGroupPanel panel, Project project) {

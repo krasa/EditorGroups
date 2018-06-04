@@ -31,7 +31,6 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 
 	@Override
 	public void loadState(@NotNull State state) {
-
 		this.state = state;
 	}
 
@@ -42,5 +41,48 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean forceSwitch = true;
 		public boolean hideEmpty = true;
 		public boolean showSize = false;
+
+
+		public boolean isAutoFolders() {
+			return autoFolders;
+		}
+
+		public void setAutoFolders(boolean autoFolders) {
+			this.autoFolders = autoFolders;
+		}
+
+		public boolean isAutoSameName() {
+			return autoSameName;
+		}
+
+		public void setAutoSameName(boolean autoSameName) {
+			this.autoSameName = autoSameName;
+		}
+
+		public boolean isForceSwitch() {
+			return forceSwitch;
+		}
+
+		public void setForceSwitch(boolean forceSwitch) {
+			this.forceSwitch = forceSwitch;
+		}
+
+		public boolean isHideEmpty() {
+			return hideEmpty;
+		}
+
+		public void setHideEmpty(boolean hideEmpty) {
+			this.hideEmpty = hideEmpty;
+		}
+
+		public boolean isShowSize() {
+			return showSize;
+		}
+
+		public void setShowSize(boolean showSize) {
+			this.showSize = showSize;
+		}
+	
+	
 	}
 }

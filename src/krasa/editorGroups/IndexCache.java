@@ -157,12 +157,14 @@ public class IndexCache {
 			if (result.isInvalid()) {
 				groups.validate(this);
 
-				int size = groups.size(project);
-
-				if (size == 1) {
-					result = groups.first();
-				} else if (size > 1) {
-					result = groups;
+				Collection<EditorGroup> all = groups.getAll();
+				for (EditorGroup editorGroup : all) {
+					if (result.isValid() && editorGroup.isValid()) {
+						result = groups;
+						break;
+					} else if (editorGroup.isValid()) {
+						result = editorGroup;
+					}
 				}
 			}
 		}
@@ -357,5 +359,32 @@ public class IndexCache {
 
 		return favoritesGroups;
 	}
+
+	public void removeGroup(String ownerPath) {
+		EditorGroup group = null;
+		for (Map.Entry<String, EditorGroups> entry : groupsByLinks.entrySet()) {
+			EditorGroups value = entry.getValue();
+			for (EditorGroup editorGroup : value.getAll()) {
+				group = editorGroup;
+				if (group.isOwner(ownerPath)) {
+					System.out.println("removeFromIndex invalidating" + "" + group);
+					group.invalidate();
+				}
+			}
+		}
+
+		if (group != null) {
+			List<String> links = group.getLinks(project);
+			for (String link : links) {
+				EditorGroups editorGroups = groupsByLinks.get(link);
+				if (editorGroups != null) {
+					editorGroups.remove(group);
+				}
+			}
+		}
+
+		PanelRefresher.getInstance(project).refresh(ownerPath);
+	}
+
 
 }

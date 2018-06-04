@@ -130,8 +130,8 @@ public class EditorGroupIndexValue implements EditorGroup {
 						}
 
 						Color myColor = Utils.colorMap.get(colorName);
-						String number = "";
-
+						String number = ""; 
+						
 						for (int i = modifier.length - 1; i >= 0; i--) {
 							char c = modifier[i];
 							if (Character.isDigit(c)) {
@@ -143,7 +143,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 									number = "";
 								}
 								myColor = ColorUtil.brighter(myColor, tones);
-							} else if (c == '-') {
+							} else if (c == '-') {  
 								int tones = 1;
 								if (!number.isEmpty()) {
 									tones = Integer.parseInt(number);

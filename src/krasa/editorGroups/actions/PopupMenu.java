@@ -20,6 +20,8 @@ public class PopupMenu {
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleForce"));
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleHideEmpty"));
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.ToggleShowSize"));
+		group.add(new Separator());
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
 		ActionPopupMenu menu = ActionManager.getInstance().createActionPopupMenu(ActionPlaces.UNKNOWN, group);
 		menu.getComponent().show(component, x, y);
 	}

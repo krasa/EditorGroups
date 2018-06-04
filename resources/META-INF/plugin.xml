@@ -41,6 +41,8 @@
         <fileBasedIndex implementation="krasa.editorGroups.index.FilenameWithoutExtensionIndex"/>
         <projectService serviceImplementation="krasa.editorGroups.PanelRefresher"/>
         <applicationService serviceImplementation="krasa.editorGroups.index.MyFileNameIndexService"/>
+        <applicationConfigurable instance="krasa.editorGroups.MyConfigurable" id="EditorGroups"
+                                 displayName="Editor Groups"/>
 
     </extensions>
 
@@ -128,6 +130,13 @@
                 text="Switch Editor Group">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
+
+        <action id="krasa.editorGroups.OpenConfiguration" class="krasa.editorGroups.actions.OpenConfigurationAction"
+                icon="AllIcons.General.Settings"
+                text="Open configuration" description="Open EditorGroups configuration">
+        </action>
+
+
     </actions>
 
 </idea-plugin>
