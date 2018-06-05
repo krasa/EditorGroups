@@ -51,6 +51,7 @@ public class FileResolver {
 			throw new RuntimeException(e);
 		}
 		for (String filePath : relatedPaths) {
+			long start1 = System.currentTimeMillis();
 			try {
 				filePath = useMacros(project, virtualFile, filePath);
 				filePath = sanitize(filePath);
@@ -70,6 +71,10 @@ public class FileResolver {
 
 			} catch (Exception e) {
 				LOG.warn("filePath='" + filePath + "'; owner=" + ownerPath, e);
+			}
+			long delta = System.currentTimeMillis() - start1;
+			if (delta > 100) {
+				System.err.println("resolveLink " + filePath + " " + delta + "ms");
 			}
 		}
 		System.out.println("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
@@ -118,7 +123,10 @@ public class FileResolver {
 	}
 
 	protected static String sanitize(String filePath) {
-		return filePath.replace("\\", "/");
+		String replace = filePath.replace("\\", "/");
+		//file path starting with // causes major delays for some reason
+		replace = replace.replaceFirst("/+", "/");
+		return replace;
 	}
 
 	protected static void resolve(Set<String> links, File file) throws IOException {

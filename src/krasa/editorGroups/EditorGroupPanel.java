@@ -27,7 +27,6 @@ import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
-import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.GroupsHolder;
@@ -66,12 +65,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private int currentIndex = -1;
 	@NotNull
 	private volatile EditorGroup displayedGroup = EditorGroup.EMPTY;
+	private volatile EditorGroup toBeRendered;
 	private VirtualFile fileFromTextEditor;
 	boolean reload = true;
 	private JBPanel groupsPanel = new JBPanel();
 	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
 	private FileEditorManagerImpl fileEditorManager;
 	public EditorGroupManager groupManager;
+	private ActionToolbar toolbar;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
@@ -240,7 +241,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		DefaultActionGroup action = new DefaultActionGroup();
 		actionGroup.add(action);
 
-		ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
+		toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
 		JComponent component = toolbar.getComponent();
 		component.addMouseListener(getPopupHandler());
@@ -345,7 +346,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			System.out.println("openFile fail - switching");
 			return;
 		}
-
+		if (toBeRendered != null) {
+			System.out.println("openFile fail - toBeRendered != null");
+			return;
+		}
 		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, tabs.getMyScrollOffset());
 
 	}
@@ -407,10 +411,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			atomicReference.set(new RefreshRequest(refresh, newGroup));
 		}
 		refresh2();
-
 	}
 
 	private void refresh2() {
+		myScrollOffset = tabs.getMyScrollOffset();   //this will have edge cases
+
 		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
 			@Override
 			public void run() {
@@ -433,7 +438,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			System.out.println("nothing to refresh " + fileEditor.getName());
 			return;
 		}
-		System.out.println(">refreshSmart " + request);
+		System.out.println(">refresh3 " + request);
 
 		EditorGroup requestedGroup = request.requestedGroup;
 		boolean refresh = request.refresh;
@@ -442,25 +447,30 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
 				public EditorGroup compute() {
-					return groupManager.getGroup(project, fileEditor, displayedGroup, requestedGroup, refresh, file);
+					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
+					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
 				}
 			});
-			if (group == displayedGroup
+			if ((group == displayedGroup || group == toBeRendered || group.isSame(project, displayedGroup))
 				&& !reload
 				&& !refresh
-				&& isSameAutogroup(group)
+
 			) {
+				groupManager.switching(false); //need for UI forms, when switching to open ones, focus listener do not get that
+				System.out.println("no change, skipping refresh");
 				return;
 			}
-			displayedGroup = group;
+			toBeRendered = group;
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-
+					if (toBeRendered == null) {
+						return;
+					}
+					displayedGroup = toBeRendered;
+					toBeRendered = null;
+					
 					long start = System.currentTimeMillis();
-					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
-					file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
-
 					int groupsCount = 0;
 					if (group instanceof GroupsHolder) {
 						groupsCount = reloadGroupLinks(((GroupsHolder) group).getGroups());
@@ -476,14 +486,17 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						setVisible(true);
 					}
 
+					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
+					file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 					fileEditorManager.updateFilePresentation(file);
-
+					toolbar.updateActionsImmediately();
+					
 					revalidate();
 					repaint();
 					reload = false;
 					failed = 0;
 					groupManager.switching(false);
-					System.err.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
+					System.out.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
 				}
 			});
 			atomicReference.compareAndSet(request, null);
@@ -503,10 +516,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private boolean isSameAutogroup(EditorGroup group) {
-		return group instanceof AutoGroup && ((AutoGroup) group).isSame(displayedGroup);
-	}
-
 
 	@Override
 	public void dispose() {
@@ -519,7 +528,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //			displayedGroup.invalid();                    0o
 			refresh(false, null);
 		}
-	}
+	}                                             
 
 	@NotNull
 	public EditorGroup getDisplayedGroup() {

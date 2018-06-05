@@ -12,7 +12,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class EditorGroupIndexValue implements EditorGroup {
+public class EditorGroupIndexValue extends EditorGroup {
 
 	/*definitions*/
 	private String ownerPath = "";
@@ -130,8 +130,8 @@ public class EditorGroupIndexValue implements EditorGroup {
 						}
 
 						Color myColor = Utils.colorMap.get(colorName);
-						String number = ""; 
-						
+						String number = "";
+
 						for (int i = modifier.length - 1; i >= 0; i--) {
 							char c = modifier[i];
 							if (Character.isDigit(c)) {
@@ -143,7 +143,7 @@ public class EditorGroupIndexValue implements EditorGroup {
 									number = "";
 								}
 								myColor = ColorUtil.brighter(myColor, tones);
-							} else if (c == '-') {  
+							} else if (c == '-') {
 								int tones = 1;
 								if (!number.isEmpty()) {
 									tones = Integer.parseInt(number);
@@ -167,6 +167,9 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return this;
 	}
 
+	/**
+	 * FOR INDEX STORE
+	 */
 	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
@@ -180,6 +183,9 @@ public class EditorGroupIndexValue implements EditorGroup {
 		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
 	}
 
+	/**
+	 * FOR INDEX STORE
+	 */
 	@Override
 	public int hashCode() {
 		int result = ownerPath != null ? ownerPath.hashCode() : 0;

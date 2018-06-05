@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class FavoritesGroup implements EditorGroup {
+public class FavoritesGroup extends EditorGroup {
 	public static final String OWNER_PREFIX = "Bookmark: ";
 	private final List<VirtualFile> files = new ArrayList<>();
 	private final String name;
@@ -110,5 +110,10 @@ public class FavoritesGroup implements EditorGroup {
 	@Override
 	public boolean equals(Object obj) {
 		return (obj instanceof FavoritesGroup) && ((FavoritesGroup) obj).getOwnerPath().equals(this.getOwnerPath());
+	}
+
+	@Override
+	public boolean isSame(Project project, EditorGroup group) {
+		return super.isSame(project, group) && name.equals(((FavoritesGroup) group).name);
 	}
 }

@@ -6,7 +6,7 @@ import krasa.editorGroups.IndexCache;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EditorGroups implements EditorGroup, GroupsHolder {
+public class EditorGroups extends EditorGroup implements GroupsHolder {
 
 	private Map<String, EditorGroup> map = new ConcurrentHashMap<>();
 	private String last;

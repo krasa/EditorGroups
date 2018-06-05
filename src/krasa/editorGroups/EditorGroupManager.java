@@ -107,7 +107,9 @@ public class EditorGroupManager {
 
 		if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
 			//refresh
-			if (result instanceof SameNameGroup) {
+			if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
+				cache.initGroup((EditorGroupIndexValue) result);
+			} else if (result instanceof SameNameGroup) {
 				result = cache.getSameNameGroup(currentFile);
 			} else if (result instanceof FolderGroup) {
 				result = cache.getFolderGroup(currentFile);

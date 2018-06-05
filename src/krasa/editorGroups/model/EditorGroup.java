@@ -14,29 +14,29 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
 // @idea.title EditorGroup
 // @idea.related EditorGroupIndexValue.java
-public interface EditorGroup {
-	EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
+public abstract class EditorGroup {
+	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
 	@Nullable
-	String getOwnerPath();
+	public abstract String getOwnerPath();
 
-	String getTitle();
+	public abstract String getTitle();
 
-	boolean isValid();
+	public abstract boolean isValid();
 
-	void invalidate();
+	public abstract void invalidate();
 
-	int size(Project project);
+	public abstract int size(Project project);
 
-	default boolean isInvalid() {
+	public boolean isInvalid() {
 		return !isValid();
 	}
 
-	List<String> getLinks(Project project);
+	public abstract List<String> getLinks(Project project);
 
-	boolean isOwner(String ownerPath);
+	public abstract boolean isOwner(String ownerPath);
 
-	default String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
+	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		//			System.out.println("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
 
 		if (showSize) {
@@ -58,7 +58,7 @@ public interface EditorGroup {
 		return presentableNameForUI;
 	}
 
-	default String getPresentableDescription() {
+	public String getPresentableDescription() {
 		if (this instanceof AutoGroup) {
 			return null;
 		}
@@ -66,17 +66,32 @@ public interface EditorGroup {
 	}
 
 
-	default VirtualFile getOwnerFile() {
+	public VirtualFile getOwnerFile() {
 		String ownerPath = getOwnerPath();
 		return Utils.getFileByPath(ownerPath);
 	}
 
-	default Color getColor() {
+	public Color getColor() {
 		return null;
 	}
 
-	default boolean containsLink(Project project, String currentFilePath) {
+	public boolean containsLink(Project project, String currentFilePath) {
 		return getLinks(project).contains(currentFilePath);
 	}
 
+	public boolean isSame(Project project, EditorGroup group) {
+		if (group == null) {
+			return false;
+		}
+		if (this == group) {
+			return true;
+		}
+		if (!group.getClass().equals(this.getClass())) {
+			return false;
+		}
+		if (!this.getLinks(project).equals(group.getLinks(project))) {
+			return false;
+		}
+		return true;
+	}
 }

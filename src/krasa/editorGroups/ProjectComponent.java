@@ -90,6 +90,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
 						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(panel.getFile());
+						System.out.println("selectionChanged, refresh");
 						panel.refresh(false, switchingGroup);
 					}
 				}

@@ -7,7 +7,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AutoGroup implements EditorGroup, GroupsHolder {
+public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
@@ -75,15 +75,13 @@ public abstract class AutoGroup implements EditorGroup, GroupsHolder {
 		return this;
 	}
 
-	public boolean isSame(EditorGroup group) {
-		if (!group.getClass().equals(this.getClass())) {
+	@Override
+	public boolean isSame(Project project, EditorGroup group) {
+		if (!super.isSame(project, group)) {
 			return false;
 		}
-		AutoGroup autoGroup = (AutoGroup) group;
 
-		if (!autoGroup.links.equals(this.links)) {
-			return false;
-		}
+		AutoGroup autoGroup = (AutoGroup) group;
 		if (!autoGroup.groups.equals(this.groups)) {
 			return false;
 		}
