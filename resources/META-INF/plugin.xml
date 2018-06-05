@@ -123,7 +123,7 @@
 
         <action id="krasa.editorGroups.ToggleShowSize"
                 class="krasa.editorGroups.actions.ToggleShowSizeAction"
-                text="Show size at titles"/>
+                text="Show group size at titles"/>
 
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"

@@ -133,13 +133,14 @@ public class IndexCache {
 	public EditorGroup getLastEditorGroup(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
+		ApplicationConfiguration.State state = ApplicationConfiguration.state();
 
 		if (groups != null) {
 			String last = groups.getLast();
 			if (last != null) {
-				if (includeAutogroups && AutoGroup.SAME_FILE_NAME.equals(last)) {
+				if (includeAutogroups && state.autoSameName && AutoGroup.SAME_FILE_NAME.equals(last)) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
-				} else if (includeAutogroups && AutoGroup.DIRECTORY.equals(last)) {
+				} else if (includeAutogroups && state.autoFolders && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
 					EditorGroup favoritesGroup = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
