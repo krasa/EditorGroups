@@ -41,6 +41,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean forceSwitch = true;
 		public boolean hideEmpty = true;
 		public boolean showSize = false;
+		private boolean continuousScrolling;
 
 
 		public boolean isAutoFolders() {
@@ -84,5 +85,12 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		}
 
 
+		public boolean isContinuousScrolling() {
+			return continuousScrolling;
+		}
+
+		public void setContinuousScrolling(final boolean continuousScrolling) {
+			this.continuousScrolling = continuousScrolling;
+		}
 	}
 }

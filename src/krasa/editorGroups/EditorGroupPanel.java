@@ -288,10 +288,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (!isVisible()) {
 			return;
 		}
+
 		int iterations = 0;
 		List<String> paths = displayedGroup.getLinks(project);
 		VirtualFile fileByPath = null;
 
+		if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex == 0) {
+			return;
+		}
 		while (fileByPath == null && iterations < paths.size()) {
 			iterations++;
 
@@ -316,11 +320,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		if (!isVisible()) {
 			return;
-		}
+		}     
 		VirtualFile fileByPath = null;
 		int iterations = 0;
 		List<String> paths = displayedGroup.getLinks(project);
 
+		if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex == paths.size() - 1) {
+			return;
+		}
 		while (fileByPath == null && iterations < paths.size()) {
 			iterations++;
 

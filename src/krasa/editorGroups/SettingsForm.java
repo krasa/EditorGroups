@@ -9,6 +9,7 @@ public class SettingsForm {
 	private JCheckBox autoSwitch;
 	private JCheckBox hideEmpty;
 	private JCheckBox showSize;
+	private JCheckBox continuousScrolling;
 
 
 	public JPanel getRoot() {
@@ -30,41 +31,34 @@ public class SettingsForm {
 	}
 
 
-	/**
-	 * GENERATED
-	 */
+	private void createUIComponents() {
+	}
+
 	public void setData(ApplicationConfiguration.State data) {
 		byName.setSelected(data.isAutoSameName());
 		showSize.setSelected(data.isShowSize());
 		hideEmpty.setSelected(data.isHideEmpty());
 		autoSwitch.setSelected(data.isForceSwitch());
 		byFolder.setSelected(data.isAutoFolders());
+		continuousScrolling.setSelected(data.isContinuousScrolling());
 	}
 
-	/**
-	 * GENERATED
-	 */
 	public void getData(ApplicationConfiguration.State data) {
 		data.setAutoSameName(byName.isSelected());
 		data.setShowSize(showSize.isSelected());
 		data.setHideEmpty(hideEmpty.isSelected());
 		data.setForceSwitch(autoSwitch.isSelected());
 		data.setAutoFolders(byFolder.isSelected());
+		data.setContinuousScrolling(continuousScrolling.isSelected());
 	}
 
-	/**
-	 * GENERATED
-	 */
 	public boolean isModified(ApplicationConfiguration.State data) {
 		if (byName.isSelected() != data.isAutoSameName()) return true;
 		if (showSize.isSelected() != data.isShowSize()) return true;
 		if (hideEmpty.isSelected() != data.isHideEmpty()) return true;
 		if (autoSwitch.isSelected() != data.isForceSwitch()) return true;
 		if (byFolder.isSelected() != data.isAutoFolders()) return true;
+		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
 		return false;
 	}
-
-	private void createUIComponents() {
-	}
-
 }
