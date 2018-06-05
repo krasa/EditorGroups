@@ -37,8 +37,10 @@ Add anywhere in the file:
 - @idea.related f??e.txt
 
 === Exact filename anywhere in the project
-- @idea.related */file.txt
+- @idea.related */foo/file.txt
 
+=== All files with the same name anywhere in the project
+- @idea.related */foo/file.*
 
 === Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           

@@ -10,6 +10,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import krasa.editorGroups.index.MyFileNameIndexService;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -23,6 +24,8 @@ import java.io.FilenameFilter;
 import java.io.IOException;
 import java.util.*;
 
+import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
+
 public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
@@ -31,7 +34,7 @@ public class FileResolver {
 		long start = System.currentTimeMillis();
 		File file1 = new File(ownerPath);
 		String folder = file1.isFile() ? file1.getParent() : ownerPath;
-		
+
 		VirtualFile virtualFile = Utils.getFileByPath(ownerPath);
 
 		Set<String> links = new LinkedHashSet<String>() {
@@ -53,7 +56,9 @@ public class FileResolver {
 				filePath = sanitize(filePath);
 
 
-				if (filePath.startsWith("*/")) {
+				if (filePath.startsWith("*/") && filePath.endsWith(".*")) {
+					resolveSameNameProjectFiles(project, links, filePath);
+				} else if (filePath.startsWith("*/")) {
 					resolveProjectFiles(project, links, filePath);
 				} else if (FileUtil.isAbsolute(filePath)) {
 					File file = new File(filePath);
@@ -69,6 +74,27 @@ public class FileResolver {
 		}
 		System.out.println("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
 		return new ArrayList<>(links);
+	}
+
+	private void resolveSameNameProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
+		String sanitizedPath = filePath.substring("*/".length());
+		sanitizedPath = StringUtils.substringBefore(sanitizedPath, ".*");
+		String fileName = sanitizedPath;
+		if (fileName.contains("/")) {
+			fileName = StringUtils.substringAfterLast(fileName, "/");
+		}
+
+
+		Collection<VirtualFile> virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, fileName, !SystemInfo.isWindows, GlobalSearchScope.allScope(project));
+		for (VirtualFile file : virtualFilesByName) {
+
+			String canonicalPath = file.getCanonicalPath();
+			if (canonicalPath != null) {
+				if (substringBeforeLast(file.getCanonicalPath(), ".").endsWith(sanitizedPath)) {
+					add(links, canonicalPath);
+				}
+			}
+		}
 	}
 
 	protected static void resolveProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
