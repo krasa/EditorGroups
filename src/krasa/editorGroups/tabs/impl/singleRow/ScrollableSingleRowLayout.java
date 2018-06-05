@@ -166,4 +166,8 @@ public class ScrollableSingleRowLayout extends SingleRowLayout {
 		}
 		return null;
 	}
+
+	public int getMyScrollOffset() {
+		return myScrollOffset;
+	}
 }

@@ -3588,4 +3588,19 @@ public class JBTabsImpl extends JComponent
 			return true;
 		}
 	}
+
+	public void scroll(int myScrollOffset) {
+		if (mySingleRowLayout.myLastSingRowLayout != null) {
+			mySingleRowLayout.scroll(myScrollOffset);
+			revalidateAndRepaint(false);
+		}
+	}
+
+	public int getMyScrollOffset() {
+		if (mySingleRowLayout instanceof ScrollableSingleRowLayout) {
+			ScrollableSingleRowLayout mySingleRowLayout = (ScrollableSingleRowLayout) this.mySingleRowLayout;
+			return mySingleRowLayout.getMyScrollOffset();
+		}
+		return 0;
+	}
 }

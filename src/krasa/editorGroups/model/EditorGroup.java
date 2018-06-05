@@ -78,4 +78,5 @@ public interface EditorGroup {
 	default boolean containsLink(Project project, String currentFilePath) {
 		return getLinks(project).contains(currentFilePath);
 	}
+
 }

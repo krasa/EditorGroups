@@ -220,7 +220,7 @@ public class IndexCache {
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
 		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
-		return new FolderGroup(folder, links, getGroups(file.getCanonicalPath()));
+		return new FolderGroup(folder, links);
 	}
 
 
@@ -265,7 +265,7 @@ public class IndexCache {
 		}
 		System.out.println("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
-		return new SameNameGroup(nameWithoutExtension, paths, getGroups(currentFile.getCanonicalPath()));
+		return new SameNameGroup(nameWithoutExtension, paths);
 	}
 
 	public List<EditorGroupIndexValue> getAllGroups() {

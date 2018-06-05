@@ -12,16 +12,15 @@ public abstract class AutoGroup implements EditorGroup, GroupsHolder {
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
 
-	public static final FolderGroup DIRECTORY_INSTANCE = new FolderGroup("DIRECTORY_INSTANCE", Collections.emptyList(), Collections.emptyList());
-	public static final SameNameGroup SAME_NAME_INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList(), Collections.emptyList());
+	public static final FolderGroup DIRECTORY_INSTANCE = new FolderGroup("DIRECTORY_INSTANCE", Collections.emptyList());
+	public static final SameNameGroup SAME_NAME_INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList());
 
 
 	protected final List<String> links;
 	protected Collection<EditorGroup> groups = Collections.emptyList();
 	protected volatile boolean valid = true;
 
-	public AutoGroup(Collection<EditorGroup> groups, List<String> links) {
-		this.groups = groups;
+	public AutoGroup(List<String> links) {
 		this.links = links;
 	}
 
@@ -75,4 +74,22 @@ public abstract class AutoGroup implements EditorGroup, GroupsHolder {
 		this.groups = groups;
 		return this;
 	}
+
+	public boolean isSame(EditorGroup group) {
+		if (!group.getClass().equals(this.getClass())) {
+			return false;
+		}
+		AutoGroup autoGroup = (AutoGroup) group;
+
+		if (!autoGroup.links.equals(this.links)) {
+			return false;
+		}
+		if (!autoGroup.groups.equals(this.groups)) {
+			return false;
+		}
+		return true;
+	}
+
+	;
+	
 }

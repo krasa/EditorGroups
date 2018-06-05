@@ -72,8 +72,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 		Handler refresh = refreshHandler(panel);
 
-		defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList(), Collections.emptyList()), project, refresh, null));
-		defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList(), Collections.emptyList()), project, refresh, null));
+		defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refresh, null));
+		defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refresh, null));
 
 
 		defaultActionGroup.add(new Separator("Groups"));
@@ -150,7 +150,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			void run(EditorGroup editorGroup) {
 				VirtualFile fileByPath = editorGroup.getOwnerFile();
 				if (fileByPath != null) {
-					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null);
+					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null, 0);
 				}
 			}
 		};

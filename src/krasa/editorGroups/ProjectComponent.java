@@ -38,16 +38,21 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
 				long start = System.currentTimeMillis();
+
+				EditorGroupManager instance = EditorGroupManager.getInstance(project);
+				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
+				int myScrollOffset = instance.myScrollOffset;
+				
 				for (FileEditor fileEditor : editors.getFirst()) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
-
-					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(file);
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
+					instance.myScrollOffset = 0;
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file, myScrollOffset);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 				}
+
 				if (log.isDebugEnabled()) {
 					log.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + editors.getFirst().length);
 				}
@@ -58,13 +63,18 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
 				long start = System.currentTimeMillis();
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
+
+				EditorGroupManager instance = EditorGroupManager.getInstance(project);
+				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
+				int myScrollOffset = instance.myScrollOffset;
+				
 				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
 
-					EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(file);
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file);
+					instance.myScrollOffset = 0;
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file, myScrollOffset);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 				}

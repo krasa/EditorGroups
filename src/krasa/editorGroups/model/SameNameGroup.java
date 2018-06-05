@@ -2,15 +2,14 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 
-import java.util.Collection;
 import java.util.List;
 
 public class SameNameGroup extends AutoGroup {
 
 	private final String fileNameWithoutExtension;
 
-	public SameNameGroup(String fileNameWithoutExtension, List<String> links, Collection<EditorGroup> groups) {
-		super(groups, links);
+	public SameNameGroup(String fileNameWithoutExtension, List<String> links) {
+		super(links);
 		this.fileNameWithoutExtension = fileNameWithoutExtension;
 	}
 

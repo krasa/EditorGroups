@@ -82,7 +82,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public void setShowSize(boolean showSize) {
 			this.showSize = showSize;
 		}
-	
-	
+
+
 	}
 }

@@ -3,15 +3,14 @@ package krasa.editorGroups.model;
 import com.intellij.openapi.project.Project;
 
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
 
 public class FolderGroup extends AutoGroup {
 
 	private final String folderPath;
 
-	public FolderGroup(String folderPath, List<String> links, Collection<EditorGroup> groups) {
-		super(groups, links);
+	public FolderGroup(String folderPath, List<String> links) {
+		super(links);
 		this.folderPath = folderPath;
 	}
 

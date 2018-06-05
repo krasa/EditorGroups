@@ -39,6 +39,7 @@ public class EditorGroupManager {
 	private EditorGroup switchingGroup;
 	private PanelRefresher panelRefresher;
 	private VirtualFile switchingFile;
+	public int myScrollOffset = 0;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
@@ -120,9 +121,11 @@ public class EditorGroupManager {
 				&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 				result = cache.getFolderGroup(currentFile);
 			}
-		} else if (result instanceof AutoGroup) {
-			result = cache.updateGroups((AutoGroup) result, currentFilePath);
 		}
+
+//		if (result instanceof AutoGroup) {
+//			result = cache.updateGroups((AutoGroup) result, currentFilePath);
+//		}
 
 
 		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
@@ -130,7 +133,8 @@ public class EditorGroupManager {
 		return result;
 	}
 
-	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen) {
+	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen, int myScrollOffset) {
+		this.myScrollOffset = myScrollOffset;
 		System.out.println("switching " + "[" + switching + "], group = [" + group + "]");
 		switchingFile = fileToOpen;
 		this.switching = switching;
@@ -185,7 +189,7 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile) {
+	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -199,7 +203,7 @@ public class EditorGroupManager {
 			}
 
 
-			switching(true, group, fileToOpen);
+			switching(true, group, fileToOpen, myScrollOffset);
 			if (newWindow) {
 				manager.openFileInNewWindow(fileToOpen);
 			} else {

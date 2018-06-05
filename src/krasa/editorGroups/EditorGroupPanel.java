@@ -62,6 +62,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@NotNull
 	private Project project;
 	private final VirtualFile file;
+	private int myScrollOffset;
 	private int currentIndex = -1;
 	@NotNull
 	private volatile EditorGroup displayedGroup = EditorGroup.EMPTY;
@@ -72,11 +73,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private FileEditorManagerImpl fileEditorManager;
 	public EditorGroupManager groupManager;
 
-	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file) {
+	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
 		this.fileEditor = fileEditor;
 		this.project = project;
 		this.file = file;
+		this.myScrollOffset = myScrollOffset;
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
@@ -181,9 +183,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	private void reloadLinks(EditorGroup group) {
+	private void reloadLinks() {
 		tabs.removeAllTabs();
-		createLinks();  
+		createLinks();
+		tabs.doLayout();
+		tabs.scroll(myScrollOffset);
 	}
 
 	private int reloadGroupLinks(Collection<EditorGroup> groups) {
@@ -208,7 +212,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				public void actionPerformed(ActionEvent e) {
 					refresh(false, editorGroup);
 				}
-			});  
+			});
 			button.setFont(newFont);
 			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 10));
 			button.addMouseListener(getPopupHandler());
@@ -342,7 +346,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file);
+		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, tabs.getMyScrollOffset());
 
 	}
 
@@ -444,7 +448,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (group == displayedGroup
 				&& !reload
 				&& !refresh
-				&& !(group instanceof AutoGroup) //need to refresh group links
+				&& isSameAutogroup(group)
 			) {
 				return;
 			}
@@ -452,7 +456,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					
+
 					long start = System.currentTimeMillis();
 					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 					file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
@@ -464,7 +468,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						groupsPanel.setVisible(false);
 					}
 
-					reloadLinks(group);
+					reloadLinks();
 
 					if (ApplicationConfiguration.state().hideEmpty) {
 						setVisible(group.getLinks(project).size() > 1 || groupsCount > 0);
@@ -499,6 +503,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
+	private boolean isSameAutogroup(EditorGroup group) {
+		return group instanceof AutoGroup && ((AutoGroup) group).isSame(displayedGroup);
+	}
+
 
 	@Override
 	public void dispose() {
@@ -508,7 +516,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (atomicReference.get() == null && displayedGroup.isOwner(ownerPath) && !displayedGroup.equals(group)) {
 			System.out.println("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
 			//concurrency is a bitch, do not alter data
-//			displayedGroup.invalid();
+//			displayedGroup.invalid();                    0o
 			refresh(false, null);
 		}
 	}
