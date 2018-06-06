@@ -118,7 +118,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				LOG.debug("fileClosed [" + file + "]");
 			}
 		});
-		` `
 	}
 
 	@Nullable
