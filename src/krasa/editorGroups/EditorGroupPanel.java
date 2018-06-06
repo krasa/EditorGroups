@@ -27,6 +27,7 @@ import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
+import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.GroupsHolder;
@@ -488,7 +489,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					reloadLinks();
 
 					if (ApplicationConfiguration.state().hideEmpty) {
-						setVisible(group.getLinks(project).size() > 1 || groupsCount > 0);
+						boolean hide = (group instanceof AutoGroup && group.getLinks(project).size() == 0 && groupsCount == 0);
+						setVisible(!hide);
 					} else {
 						setVisible(true);
 					}

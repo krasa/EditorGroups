@@ -243,7 +243,15 @@ public class IndexCache {
 		long start = System.currentTimeMillis();
 
 		Collection<VirtualFile> virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, nameWithoutExtension, true, GlobalSearchScope.projectScope(project));
-		List<String> paths = new ArrayList<>(Math.max(virtualFilesByName.size(), LIMIT_SAME_NAME));
+
+
+		boolean containsCurrent = virtualFilesByName.contains(currentFile);
+		int size = virtualFilesByName.size();
+		List<String> paths = new ArrayList<>(Math.max(containsCurrent ? size : size + 1, LIMIT_SAME_NAME));
+
+		if (!containsCurrent) {
+			paths.add(currentFile.getCanonicalPath());
+		}
 		for (VirtualFile file : virtualFilesByName) {
 			if (ProjectCoreUtil.isProjectOrWorkspaceFile(file)) {
 				continue;
@@ -252,7 +260,7 @@ public class IndexCache {
 				continue;
 			}
 			if (paths.size() == LIMIT_SAME_NAME) {
-				LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + virtualFilesByName.size());
+				LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
 				break;
 			}
 			paths.add(file.getCanonicalPath());

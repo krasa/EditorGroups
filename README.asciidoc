@@ -3,21 +3,21 @@
 image::example.jpg[]
 
 === Type of gropus
+- from Favorites tool window
 - by file name without extension anywhere in the project
 - by folder
-- from Favorites tool window
 - manually defined
 
-=== Definitions
+== Definitions
 Add anywhere in the file:
-
+                        
+=== Title customization
 - @idea.title yourTitle 
 - @idea.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
 - @idea.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
 - @idea.color #FF0096
 - @idea.color 0xFF0096
-- @idea.disable (to not index the current file)
-                  
+
 === Relative paths to the current file
 - @idea.related file.txt
 - @idea.related ../file.txt
@@ -42,15 +42,18 @@ Add anywhere in the file:
 === All files with the same name anywhere in the project
 - @idea.related */foo/file.*
 
-=== Shortcuts 
+=== Other
+- @idea.disable (to not index the current file)
+                  
+== Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           
 - [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + ; or ' ] - switch file (leaving the previous one opened)
 - [Ctrl + Alt + Shift + Mouse Wheel] or [Ctrl + Alt + Shift + ; or ' ] - switch file into a new window
 - Alt + Shift + Q - refresh                                                           
               
-=== Buttons modifiers
-- Next/Previous button + [Ctrl/Alt + click] - open a file in a new tab
-- Next/Previous button + [Shift + click] - open a file in a new window
+=== Tab click modifiers
+- [Ctrl/Alt + click] - open a file in a new tab
+- [Shift + click] - open a file in a new window
 
 === Advanced actions and settings
 - right click on the panel

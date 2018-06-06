@@ -76,11 +76,11 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refresh, null));
 
 
-		defaultActionGroup.add(new Separator("Groups"));
+		defaultActionGroup.add(new Separator("Groups for the current file"));
 		for (EditorGroup g : groups) {
 			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
-		defaultActionGroup.add(new Separator("Other Groups"));        
+		defaultActionGroup.add(new Separator("Other groups"));        
 	}
 
 	private void fillOtherGroup(DefaultActionGroup defaultActionGroup, @Nullable EditorGroupPanel panel, Project project) {
