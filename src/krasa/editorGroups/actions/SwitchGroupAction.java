@@ -15,6 +15,7 @@ import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
+import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.model.*;
@@ -99,9 +100,9 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		try {
 			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
 			for (EditorGroupIndexValue g : allGroups) {
-				if (currentFile != null && g.getOwnerPath().equals(currentFile.getCanonicalPath())) {
-					continue;
-				}
+//				if (currentFile != null && g.getId().equals(currentFile.getCanonicalPath())) {
+//					continue;
+//				}
 				if (!groups.contains(g)) {
 					defaultActionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(project), null));
 				}
@@ -151,7 +152,9 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 				VirtualFile fileByPath = editorGroup.getOwnerFile();
 				if (fileByPath != null) {
 					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null, 0);
-				}
+				} else {
+					System.err.println("opening failed, file does not exists " + editorGroup);
+				} 
 			}
 		};
 	}
@@ -168,7 +171,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		} else {
 			String ownerPath = groupLink.getOwnerPath();
 			String name = Utils.toPresentableName(ownerPath);
-			title = groupLink.getPresentableTitle(project, name, false);
+			title = groupLink.getPresentableTitle(project, name, ApplicationConfiguration.state().showSize);
 
 			description = groupLink.getPresentableDescription();
 		}
@@ -207,6 +210,12 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
 				EditorGroup displayedGroup = panel.getDisplayedGroup();
+				if (displayedGroup == EditorGroup.EMPTY) {
+					EditorGroup toBeRendered = panel.getToBeRendered();
+					if (toBeRendered != null) {
+						displayedGroup = toBeRendered; //to remove flicker when switching
+					}
+				}
 				if (displayedGroup instanceof FolderGroup) {
 					presentation.setIcon(AllIcons.Nodes.Folder);
 				} else if (displayedGroup instanceof SameNameGroup) {
