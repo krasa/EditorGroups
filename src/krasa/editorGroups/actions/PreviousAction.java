@@ -26,8 +26,7 @@ public class PreviousAction extends DumbAwareAction implements CustomComponentAc
 			if (panel != null) {
 				InputEvent e = anActionEvent.getInputEvent();
 
-				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && !(e instanceof MouseEvent);
-				newTab |= BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
+				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
 			
 				panel.previous(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK));
 			}
