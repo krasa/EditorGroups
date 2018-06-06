@@ -40,14 +40,14 @@ public class EditorGroupManager {
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
 	public IndexCache cache;
 
+	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
+	private PanelRefresher panelRefresher;
 	/**
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
 	 */
-	private boolean switching;
-	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
-	private EditorGroup switchingGroup;
-	private PanelRefresher panelRefresher;
-	private VirtualFile switchingFile;
+	private volatile boolean switching;
+	private volatile EditorGroup switchingGroup;
+	private volatile VirtualFile switchingFile;
 	public int myScrollOffset = 0;
 
 	public EditorGroupManager(Project project) {
@@ -149,8 +149,8 @@ public class EditorGroupManager {
 	}
 
 	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen, int myScrollOffset) {
+		LOG.debug("switching " + "switching = [" + switching + "], group = [" + group + "], fileToOpen = [" + fileToOpen + "], myScrollOffset = [" + myScrollOffset + "]");
 		this.myScrollOffset = myScrollOffset;
-		LOG.debug("switching " + "[" + switching + "], group = [" + group + "]");
 		switchingFile = fileToOpen;
 		this.switching = switching;
 		switchingGroup = group;
@@ -167,6 +167,7 @@ public class EditorGroupManager {
 			this.switchingGroup = null;
 			return switchingGroup;
 		}
+		LOG.debug("getSwitchingGroup returning null for " + "file = [" + file + "], switchingFile=" + switchingFile);
 		return null;
 	}
 
@@ -206,10 +207,10 @@ public class EditorGroupManager {
 	}
 
 	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
+		LOG.debug("open " + "fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
+		
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-
-			LOG.debug("open newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "], currentFile = [" + currentFile + "]");
 
 			//must find window before opening the file!
 			VirtualFile selectedFile = null;
@@ -218,11 +219,14 @@ public class EditorGroupManager {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 
-
 			switching(true, group, fileToOpen, myScrollOffset);
 			if (newWindow) {
+				LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
 			} else {
+
+
+				LOG.debug("openFile " + fileToOpen);
 				FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 				if (fileEditors.length == 0) {  //directory or some fail
 					switching(false);
@@ -230,13 +234,15 @@ public class EditorGroupManager {
 				}
 				for (FileEditor fileEditor : fileEditors) {
 					LOG.debug("opened fileEditor = " + fileEditor);
-				}
-
+				}  	      
+					
+					
 				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 				if (selectedFile != null && !newTab) {
-					LOG.debug("closing file " + selectedFile);
+					LOG.debug("closeFile " + selectedFile);
 					manager.closeFile(selectedFile, currentWindow, false);
 				}
+
 
 			}
 		}, null, null);
