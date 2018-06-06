@@ -13,6 +13,7 @@ import com.intellij.util.TreeItem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class FavoritesGroup extends EditorGroup {
@@ -109,7 +110,7 @@ public class FavoritesGroup extends EditorGroup {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof FavoritesGroup) && ((FavoritesGroup) obj).getOwnerPath().equals(this.getOwnerPath());
+		return (obj instanceof FavoritesGroup) && Objects.equals(((FavoritesGroup) obj).getOwnerPath(), this.getOwnerPath());
 	}
 
 	@Override
