@@ -35,6 +35,7 @@ Add anywhere in the file:
 - @idea.related *.txt
 - @idea.related file.*
 - @idea.related f??e.txt
+- @idea.related fileName (with all extensions, unless the file exists)
 
 === Exact filename anywhere in the project
 - @idea.related */foo/file.txt
@@ -43,7 +44,7 @@ Add anywhere in the file:
 - @idea.related \*/foo/file.*
 
 === Other
-- @idea.disable (to not index the current file)
+- @idea.disable (disables indexing of the current file)
                   
 == Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           
