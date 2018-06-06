@@ -2,6 +2,7 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
@@ -32,7 +33,7 @@ import java.util.List;
  *
  */
 public class EditorGroupManager {
-
+	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(EditorGroupManager.class);
 
 	private final Project project;
 	//	@NotNull
@@ -64,7 +65,7 @@ public class EditorGroupManager {
 
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
-		System.out.println(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
+		LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
 
@@ -142,21 +143,21 @@ public class EditorGroupManager {
 //		}
 
 
-		System.out.println("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
+		LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
 	}
 
 	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen, int myScrollOffset) {
 		this.myScrollOffset = myScrollOffset;
-		System.out.println("switching " + "[" + switching + "], group = [" + group + "]");
+		LOG.debug("switching " + "[" + switching + "], group = [" + group + "]");
 		switchingFile = fileToOpen;
 		this.switching = switching;
 		switchingGroup = group;
 	}
 
 	public void switching(boolean b) {
-		System.out.println("switching " + " [" + b + "]");
+		LOG.debug("switching " + " [" + b + "]");
 		switching = false;
 	}
 
@@ -187,7 +188,7 @@ public class EditorGroupManager {
 				return o1.getTitle().compareTo(o2.getTitle());
 			}
 		});
-		System.out.println("getAllGroups " + (System.currentTimeMillis() - start));
+		LOG.debug("getAllGroups " + (System.currentTimeMillis() - start));
 		return allGroups;
 	}
 
@@ -208,7 +209,7 @@ public class EditorGroupManager {
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
-			System.out.println("open " + "newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "], currentFile = [" + currentFile + "]");
+			LOG.debug("open newTab = [" + newTab + "], fileToOpen = [" + fileToOpen + "], newWindow = [" + newWindow + "], currentFile = [" + currentFile + "]");
 
 			//must find window before opening the file!
 			VirtualFile selectedFile = null;
@@ -227,9 +228,13 @@ public class EditorGroupManager {
 					switching(false);
 					return;
 				}
+				for (FileEditor fileEditor : fileEditors) {
+					LOG.debug("opened fileEditor = " + fileEditor);
+				}
 
 				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 				if (selectedFile != null && !newTab) {
+					LOG.debug("closing file " + selectedFile);
 					manager.closeFile(selectedFile, currentWindow, false);
 				}
 

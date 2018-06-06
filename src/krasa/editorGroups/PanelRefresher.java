@@ -2,6 +2,7 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
@@ -22,6 +23,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PanelRefresher {
+	private static final Logger LOG = Logger.getInstance(PanelRefresher.class);
+
 	private final Project project;
 	private AtomicBoolean cacheReady = new AtomicBoolean();
 	private final ExecutorService ourThreadExecutorsService;
@@ -66,7 +69,7 @@ public class PanelRefresher {
 						panel.refresh(false, null);
 					}
 				}
-				System.out.println("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+				LOG.debug("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 			}
 		});
 
@@ -101,7 +104,7 @@ public class PanelRefresher {
 			}
 		}
 
-		System.out.println("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+		LOG.debug("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 		return group;
 	}
 
@@ -125,7 +128,7 @@ public class PanelRefresher {
 						}
 					}, project);
 					cacheReady();
-					System.out.println("initCache " + (System.currentTimeMillis() - start));
+					LOG.debug("initCache " + (System.currentTimeMillis() - start));
 				}
 			);
 		});

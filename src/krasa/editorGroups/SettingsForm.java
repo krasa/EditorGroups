@@ -1,8 +1,14 @@
 package krasa.editorGroups;
 
+import com.intellij.openapi.diagnostic.Logger;
+
 import javax.swing.*;
 
 public class SettingsForm {
+
+	private static final Logger LOG = Logger.getInstance(SettingsForm.class);
+
+	
 	private JPanel root;
 	private JCheckBox byName;
 	private JCheckBox byFolder;
@@ -25,7 +31,7 @@ public class SettingsForm {
 	}
 
 	public void apply() {
-		System.out.println("apply " + "");
+		LOG.debug("apply " + "");
 		ApplicationConfiguration.State state = ApplicationConfiguration.state();
 		getData(state);
 	}

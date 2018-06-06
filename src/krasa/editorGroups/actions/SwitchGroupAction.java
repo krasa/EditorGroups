@@ -5,6 +5,7 @@ import com.intellij.ide.actions.QuickSwitchSchemeAction;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbAware;
@@ -34,6 +35,8 @@ import java.util.List;
 import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
 
 public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAware, CustomComponentAction {
+
+	private static final Logger LOG = Logger.getInstance(SwitchGroupAction.class);
 
 	protected void showPopup(AnActionEvent e, ListPopup popup) {
 		Project project = e.getProject();
@@ -153,7 +156,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 				if (fileByPath != null) {
 					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null, 0);
 				} else {
-					System.err.println("opening failed, file does not exists " + editorGroup);
+					LOG.debug("opening failed, file does not exists " + editorGroup);
 				} 
 			}
 		};

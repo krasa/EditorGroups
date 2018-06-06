@@ -75,7 +75,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		toBeRendered = editorGroup;
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + editorGroup + "], file = [" + file + "]");
+		LOG.debug("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + editorGroup + "], file = [" + file + "]");
 		fileEditor.putUserData(EDITOR_PANEL, this);
 
 		if (fileEditor instanceof TextEditorImpl) {
@@ -320,22 +320,22 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
 		if (fileToOpen == null) {
-			System.err.println("openFile fail - file is null");
+			LOG.debug("openFile fail - file is null");
 			return;
 		}
 
 		if (fileToOpen.equals(file) && !newWindow) {
-			System.err.println("openFile fail - same file");
+			LOG.debug("openFile fail - same file");
 			return;
 		}
 
 
 		if (groupManager.switching()) {
-			System.out.println("openFile fail - switching");
+			LOG.debug("openFile fail - switching");
 			return;
 		}
 		if (toBeRendered != null) {
-			System.out.println("openFile fail - toBeRendered != null");
+			LOG.debug("openFile fail - toBeRendered != null");
 			return;
 		}
 		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, tabs.getMyScrollOffset());
@@ -353,7 +353,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		//important when switching to a file that has an exsting editor
 
 		EditorGroup switchingGroup = groupManager.getSwitchingGroup(file);
-		System.out.println("focusGained " + file + " " + switchingGroup);
+		LOG.debug("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			refresh(false, switchingGroup);
 		} else {
@@ -420,10 +420,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		long start = System.currentTimeMillis();
 		RefreshRequest request = atomicReference.getAndSet(null);
 		if (request == null) {
-			System.out.println("nothing to refresh " + fileEditor.getName());
+			LOG.debug("nothing to refresh " + fileEditor.getName());
 			return;
 		}
-		System.out.println(">refresh3 " + request);
+		LOG.debug(">refresh3 " + request);
 
 		EditorGroup requestedGroup = request.requestedGroup;
 		boolean refresh = request.refresh;
@@ -438,7 +438,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			});
 			if (!refresh && (group == displayedGroup || group == toBeRendered || group.isSame(project, displayedGroup))) {
 				groupManager.switching(false); //need for UI forms - when switching to open editors , focus listener does not do that
-				System.out.println("no change, skipping refresh, toBeRendered=" + toBeRendered);
+				LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered);
 				return;
 			}
 			toBeRendered = group;
@@ -454,13 +454,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 			});
 			atomicReference.compareAndSet(request, null);
-			System.out.println("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+			LOG.debug("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
 		} catch (ProcessCanceledException | IndexNotReadyException e) {
 			if (++failed > 5) {
 				LOG.error(e);
 				return;
 			}
-			System.out.println("refresh failed in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+			LOG.debug("refresh failed in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
 			if (atomicReference.compareAndSet(null, request)) {
 				refresh2();
 			}
@@ -498,7 +498,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		repaint();
 		failed = 0;
 		groupManager.switching(false);
-		System.out.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
+		LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
 	}
 
 
@@ -508,7 +508,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	public void onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {
 		if (atomicReference.get() == null && displayedGroup.isOwner(ownerPath) && !displayedGroup.equals(group)) {
-			System.out.println("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
+			LOG.debug("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
 			//concurrency is a bitch, do not alter data
 //			displayedGroup.invalid();                    0o
 			refresh(false, null);

@@ -2,14 +2,17 @@ package krasa.editorGroups.index;
 
 import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.IndexCache;
 
 public class ReindexAction extends AnAction {
+	private static final Logger LOG = Logger.getInstance(ReindexAction.class);
+
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {
-		System.err.println("INDEXING START " + System.currentTimeMillis());
+		LOG.debug("INDEXING START " + System.currentTimeMillis());
 		FileBasedIndex.getInstance().requestRebuild(EditorGroupIndex.NAME);
 //		FileBasedIndex.getInstance().requestRebuild(FilenameWithoutExtensionIndex.NAME);
 		IndexCache.getInstance(e.getProject()).clear();

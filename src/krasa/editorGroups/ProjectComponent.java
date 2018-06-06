@@ -3,6 +3,7 @@ package krasa.editorGroups;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
@@ -14,15 +15,13 @@ import com.intellij.util.xmlb.annotations.XCollection;
 import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @State(name = "EditorGroups", storages = {@Storage(value = "EditorGroups.xml")})
 public class ProjectComponent implements com.intellij.openapi.components.ProjectComponent, PersistentStateComponent<ProjectComponent.State> {
-	private static final Logger log = LoggerFactory.getLogger(ProjectComponent.class);
+	private static final Logger LOG = Logger.getInstance(ProjectComponent.class);
 
 	private final Project project;
 
@@ -54,8 +53,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					manager.addTopComponent(fileEditor, panel.getRoot());
 				}
 
-				if (log.isDebugEnabled()) {
-					log.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + editors.getFirst().length);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("sync EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + editors.getFirst().length);
 				}
 			}
 
@@ -79,8 +78,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 				}
-				if (log.isDebugEnabled()) {
-					log.debug("async EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + fileEditors.length);
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("async EditorGroupPanel created in " + (System.currentTimeMillis() - start) + "ms" + ", editors=" + fileEditors.length);
 				}
 			}
 
@@ -94,7 +93,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
 						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(panel.getFile());
-						System.out.println("selectionChanged, refresh");
+						LOG.debug("selectionChanged, refresh");
 						panel.refresh(false, switchingGroup);
 					}
 				}
@@ -112,7 +111,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public State getState() {
 		long start = System.currentTimeMillis();
 		State state = IndexCache.getInstance(project).getState();
-		log.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		LOG.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 		return state;
 	}
 
@@ -120,7 +119,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void loadState(@NotNull State state) {
 		long start = System.currentTimeMillis();
 		IndexCache.getInstance(project).loadState(state);
-		log.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		LOG.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	public static class State {
