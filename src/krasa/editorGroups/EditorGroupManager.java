@@ -22,6 +22,14 @@ import java.util.List;
  * @idea.title CORE
  * @idea.color black
  * @idea.related ./*
+ *
+ *
+ * @idea.title CORE2
+ * @idea.color black
+ * @idea.related EditorGroupPanel
+ * @idea.related IndexCache
+ *
+ *
  */
 public class EditorGroupManager {
 
@@ -117,11 +125,15 @@ public class EditorGroupManager {
 				result = cache.getFavoritesGroup(result.getTitle());
 			}
 
-			if (applicationConfiguration.getState().autoFolders
-				&& result instanceof SameNameGroup && result.size(project) <= 1
-				&& !(requestedGroup instanceof SameNameGroup)
-				&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
-				result = cache.getFolderGroup(currentFile);
+
+			if (result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup)) {
+				EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
+				if (slaveGroup.isValid()) {
+					result = slaveGroup;
+				} else if (applicationConfiguration.getState().autoFolders
+					&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
+					result = cache.getFolderGroup(currentFile);
+				}
 			}
 		}
 
@@ -165,6 +177,7 @@ public class EditorGroupManager {
 		return cache.getGroups(file.getCanonicalPath());
 	}
 
+	//TODO cache it?
 	public List<EditorGroupIndexValue> getAllGroups() {
 		long start = System.currentTimeMillis();
 		List<EditorGroupIndexValue> allGroups = cache.getAllGroups();

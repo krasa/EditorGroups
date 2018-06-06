@@ -25,7 +25,7 @@ public class FolderGroup extends AutoGroup {
 	}
 
 	@Override
-	public String getOwnerPath() {
+	public String getId() {
 		return DIRECTORY;
 	}
 

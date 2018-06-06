@@ -14,7 +14,7 @@ public class SameNameGroup extends AutoGroup {
 	}
 
 	@Override
-	public String getOwnerPath() {
+	public String getId() {
 		return SAME_FILE_NAME;
 	}
 

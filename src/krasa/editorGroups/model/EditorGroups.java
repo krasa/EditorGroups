@@ -22,7 +22,7 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		if (editorGroup instanceof FavoritesGroup) {
 			return;
 		}
-		map.put(editorGroup.getOwnerPath(), editorGroup);
+		map.put(editorGroup.getId(), editorGroup);
 	}
 
 	public Collection<EditorGroup> getAll() {
@@ -30,11 +30,11 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 	}
 
 	public void remove(EditorGroup editorGroup) {
-		map.remove(editorGroup.getOwnerPath());
+		map.remove(editorGroup.getId());
 	}
 
 	@Override
-	public String getOwnerPath() {
+	public String getId() {
 		return "EDITOR_GROUPS";
 	}
 
@@ -101,8 +101,8 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		return EMPTY;
 	}
 
-	public EditorGroup getByOwner(String ownerPath) {
-		EditorGroup editorGroup = map.get(ownerPath);
+	public EditorGroup getById(String id) {
+		EditorGroup editorGroup = map.get(id);
 		if (editorGroup == null) {
 			editorGroup = EMPTY;
 		}

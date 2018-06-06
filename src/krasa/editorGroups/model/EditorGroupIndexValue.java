@@ -2,10 +2,10 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.ColorUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -15,7 +15,7 @@ import java.util.List;
 public class EditorGroupIndexValue extends EditorGroup {
 
 	/*definitions*/
-	private String ownerPath = "";
+	private String id = "";
 	private String title = "";
 	private String color = "";
 	private List<String> relatedPaths = new ArrayList<>();
@@ -28,8 +28,8 @@ public class EditorGroupIndexValue extends EditorGroup {
 	public EditorGroupIndexValue() {
 	}
 
-	public EditorGroupIndexValue(String ownerPath, String title, boolean valid) {
-		this.ownerPath = ownerPath;
+	public EditorGroupIndexValue(String id, String title, boolean valid) {
+		this.id = id;
 		this.title = title;
 		this.valid = valid;
 	}
@@ -40,12 +40,16 @@ public class EditorGroupIndexValue extends EditorGroup {
 	}
 
 	@NotNull
-	public String getOwnerPath() {
-		return ownerPath;
+	public String getId() {
+		return id;
 	}
 
-	public void setOwnerPath(String ownerPath) {
-		this.ownerPath = StringUtil.notNullize(ownerPath);
+	public void setId(String ownerPath, int index) {
+		this.id = ownerPath + ";" + index;
+	}
+
+	public void setId(String id) {
+		this.id = StringUtil.notNullize(id);
 	}
 
 	public List<String> getRelatedPaths() {
@@ -70,12 +74,6 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return getLinks(project).size();
 	}
 
-	public VirtualFile getOwnerVirtualFile() {
-		if (ownerPath == null) {
-			return null;
-		}
-		return Utils.getFileByPath(ownerPath);
-	}
 
 	@Override
 	@NotNull
@@ -99,7 +97,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 	@Override
 	public boolean isOwner(@NotNull String canonicalPath) {
-		return ownerPath.equals(canonicalPath);
+		return id.equals(canonicalPath);
 	}
 
 	public String getColorString() {
@@ -162,6 +160,12 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return colorInstance;
 	}
 
+	@Override
+	public String getOwnerPath() {
+		String ownerPath = super.getOwnerPath();
+		return StringUtils.substringBefore(ownerPath, ";");
+	}
+
 	public EditorGroupIndexValue setLinks(List<String> links) {
 		this.links = links;
 		return this;
@@ -177,7 +181,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
-		if (ownerPath != null ? !ownerPath.equals(that.ownerPath) : that.ownerPath != null) return false;
+		if (id != null ? !id.equals(that.id) : that.id != null) return false;
 		if (title != null ? !title.equals(that.title) : that.title != null) return false;
 		if (color != null ? !color.equals(that.color) : that.color != null) return false;
 		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
@@ -188,7 +192,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	 */
 	@Override
 	public int hashCode() {
-		int result = ownerPath != null ? ownerPath.hashCode() : 0;
+		int result = id != null ? id.hashCode() : 0;
 		result = 31 * result + (title != null ? title.hashCode() : 0);
 		result = 31 * result + (color != null ? color.hashCode() : 0);
 		result = 31 * result + (relatedPaths != null ? relatedPaths.hashCode() : 0);
@@ -199,7 +203,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	public String toString() {
 		return "EditorGroupIndexValue{" +
 			"title='" + title + '\'' +
-			"owner='" + ownerPath + '\'' +
+			"id='" + id + '\'' +
 			"related='" + relatedPaths + '\'' +
 			'}';
 	}

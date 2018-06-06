@@ -18,7 +18,7 @@ public abstract class EditorGroup {
 	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
 	@Nullable
-	public abstract String getOwnerPath();
+	public abstract String getId();
 
 	public abstract String getTitle();
 
@@ -67,8 +67,7 @@ public abstract class EditorGroup {
 
 
 	public VirtualFile getOwnerFile() {
-		String ownerPath = getOwnerPath();
-		return Utils.getFileByPath(ownerPath);
+		return Utils.getFileByPath(getOwnerPath());
 	}
 
 	public Color getColor() {
@@ -93,5 +92,9 @@ public abstract class EditorGroup {
 			return false;
 		}
 		return true;
+	}
+
+	public String getOwnerPath() {
+		return getId();
 	}
 }

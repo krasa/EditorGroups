@@ -2,17 +2,17 @@
 
 image::example.jpg[]
 
-=== Type of gropus
+=== Type of groups
 - from Favorites tool window
 - by file name without extension anywhere in the project
 - by folder
-- manually defined
+- manually defined in any file
 
 == Definitions
 Add anywhere in the file:
                         
 === Title customization
-- @idea.title yourTitle 
+- @idea.title yourTitle (creates a new group if there is more than one)
 - @idea.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
 - @idea.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
 - @idea.color #FF0096

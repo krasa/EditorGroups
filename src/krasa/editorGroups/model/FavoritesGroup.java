@@ -74,7 +74,7 @@ public class FavoritesGroup extends EditorGroup {
 	}
 
 	@Override
-	public String getOwnerPath() {
+	public String getId() {
 		return OWNER_PREFIX + getTitle();
 	}
 
@@ -110,7 +110,7 @@ public class FavoritesGroup extends EditorGroup {
 
 	@Override
 	public boolean equals(Object obj) {
-		return (obj instanceof FavoritesGroup) && Objects.equals(((FavoritesGroup) obj).getOwnerPath(), this.getOwnerPath());
+		return (obj instanceof FavoritesGroup) && Objects.equals(((FavoritesGroup) obj).getId(), this.getId());
 	}
 
 	@Override

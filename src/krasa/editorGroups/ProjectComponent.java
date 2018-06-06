@@ -4,6 +4,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.fileEditor.*;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -86,6 +87,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void selectionChanged(@NotNull FileEditorManagerEvent event) {
 				FileEditor fileEditor = event.getNewEditor();
+				if (fileEditor instanceof TextEditorImpl) {
+					return; //focus listener handles that
+				}
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 

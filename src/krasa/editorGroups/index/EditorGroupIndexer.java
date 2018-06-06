@@ -9,7 +9,6 @@ import com.intellij.util.indexing.FileContent;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.PanelRefresher;
 import krasa.editorGroups.model.EditorGroupIndexValue;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -18,6 +17,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
@@ -43,22 +44,29 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 				return Collections.emptyMap();
 			}
 
-			EditorGroupIndexValue value = null;
+			EditorGroupIndexValue currentGroup = null;
+			EditorGroupIndexValue lastGroup = null;
+			int index = 0;
+			HashMap<String, EditorGroupIndexValue> map = new HashMap<>();
+
 			CharSequence input = StringPattern.newBombedCharSequence(chars);
 			Pattern optimizedIndexingPattern = MAIN_PATTERN.getOptimizedIndexingPattern();
 			Matcher matcher = optimizedIndexingPattern.matcher(input);
 			while (matcher.find()) {
 				if (matcher.start() != matcher.end()) {
 					String trim = matcher.group(0).trim();
-					value = processPatterns(inputData, folder, value, trim);
+					currentGroup = processPatterns(inputData, folder, currentGroup, trim);
+
+					if (lastGroup != null && lastGroup != currentGroup) {
+						index = add(inputData, ownerPath, lastGroup, index, map);
+					}
+
+					lastGroup = currentGroup;
 				}
 			}
 
-			HashMap<String, EditorGroupIndexValue> map = new HashMap<>();
-			if (value != null) {
-				value.setOwnerPath(ownerPath);
-				value = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, value);
-				map.put(ownerPath, value);
+			if (currentGroup != null && isEmpty(currentGroup.getId())) {
+				add(inputData, ownerPath, currentGroup, index, map);
 			}
 			return map;
 		} catch (DisableException e) {
@@ -70,6 +78,13 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 			LOG.error(e);
 			return Collections.emptyMap();
 		}
+	}
+
+	public int add(@NotNull FileContent inputData, String ownerPath, EditorGroupIndexValue lastGroup, int index, HashMap<String, EditorGroupIndexValue> map) {
+		lastGroup.setId(ownerPath, index++);
+		lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
+		map.put(lastGroup.getId(), lastGroup);
+		return index;
 	}
 
 	public EditorGroupIndexValue processPatterns(@NotNull FileContent inputData, File folder, EditorGroupIndexValue value, CharSequence trim) {
@@ -103,7 +118,11 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	static class TitleConsumer extends Consumer {
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
-			return init(object).setTitle(value);
+			EditorGroupIndexValue group = init(object);
+			if (isNotEmpty(group.getTitle())) {
+				group = new EditorGroupIndexValue();
+			}
+			return group.setTitle(value);
 		}
 	}
 
@@ -118,7 +137,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String filePath) {
-			if (StringUtils.isBlank(filePath)) {
+			if (isBlank(filePath)) {
 				return object;
 			}
 			object = init(object);

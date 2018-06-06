@@ -30,7 +30,7 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 	}
 
 	@Override
-	public abstract String getOwnerPath();
+	public abstract String getId();
 
 
 	@Override
@@ -86,6 +86,10 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 			return false;
 		}
 		return true;
+	}
+
+	public boolean isEmpty() {
+		return links.size() == 0 && groups.size() == 0;
 	}
 
 	;
