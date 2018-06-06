@@ -40,7 +40,7 @@ Add anywhere in the file:
 - @idea.related */foo/file.txt
 
 === All files with the same name anywhere in the project
-- @idea.related */foo/file.*
+- @idea.related \*/foo/file.*
 
 === Other
 - @idea.disable (to not index the current file)
