@@ -21,11 +21,9 @@ import com.intellij.openapi.util.*;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.PopupHandler;
-import com.intellij.ui.components.JBLabel;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
-import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
@@ -38,16 +36,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import javax.swing.border.LineBorder;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
@@ -62,44 +55,29 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@NotNull
 	private Project project;
 	private final VirtualFile file;
-	private int myScrollOffset;
+	private volatile int myScrollOffset;
 	private int currentIndex = -1;
 	@NotNull
 	private volatile EditorGroup displayedGroup = EditorGroup.EMPTY;
 	private volatile EditorGroup toBeRendered;
 	private VirtualFile fileFromTextEditor;
-	boolean reload = true;
-	private JBPanel groupsPanel = new JBPanel();
 	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
 	private FileEditorManagerImpl fileEditorManager;
 	public EditorGroupManager groupManager;
 	private ActionToolbar toolbar;
 
-	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup userData, VirtualFile file, int myScrollOffset) {
+	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
 		this.fileEditor = fileEditor;
 		this.project = project;
 		this.file = file;
 		this.myScrollOffset = myScrollOffset;
+		toBeRendered = editorGroup;
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + userData + "], file = [" + file + "]");
-//		scrollPane = new HackedJBScrollPane(this);
-//
-//		scrollPane.setBorder(JBUI.Borders.empty()); // set empty border, because setting null doesn't always take effect
-//		scrollPane.setViewportBorder(JBUI.Borders.empty());
-//		scrollPane.createHorizontalScrollBar().addAdjustmentListener(new AdjustmentListener() {
-//
-//			@Override
-//			public void adjustmentValueChanged(AdjustmentEvent e) {
-//				adjustScrollPane();
-//			}
-//		});
-
+		System.out.println("EditorGroupPanel " + "textEditor = [" + fileEditor + "], project = [" + project + "], userData = [" + editorGroup + "], file = [" + file + "]");
 		fileEditor.putUserData(EDITOR_PANEL, this);
-		if (userData != null) {
-			displayedGroup = userData;
-		}
+
 		if (fileEditor instanceof TextEditorImpl) {
 			Editor editor = ((TextEditorImpl) fileEditor).getEditor();
 			if (editor instanceof EditorImpl) {
@@ -130,49 +108,53 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				if (modifiers == null) {
 					return ActionCallback.DONE;
 				}
-				MyTabInfo myTabInfo = (MyTabInfo) info;
-				VirtualFile fileByPath = Utils.getFileByPath(myTabInfo.path);
-				if (fileByPath == null) {
-					setEnabled(false);
-					return null;
+
+				if (info instanceof MyGroupTabInfo) {
+					refresh(false, ((MyGroupTabInfo) info).editorGroup);
+				} else {
+					MyTabInfo myTabInfo = (MyTabInfo) info;
+					VirtualFile fileByPath = Utils.getFileByPath(myTabInfo.path);
+					if (fileByPath == null) {
+						setEnabled(false);
+						return null;
+					}
+
+					if (modifiers == null) {
+						modifiers = 0;
+					}
+
+					boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_MASK);
+					boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_MASK);
+					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_MASK);
+
+					openFile(fileByPath, ctrl || alt, shift);
 				}
-
-				if (modifiers == null) {
-					modifiers = 0;
-				}
-
-				boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_MASK);
-				boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_MASK);
-				boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_MASK);
-
-				openFile(fileByPath, ctrl || alt, shift);
 				return ActionCallback.DONE;
 			}
 		});
 		JComponent component = tabs.getComponent();
 		add(component, BorderLayout.CENTER);
-		groupsPanel.withPreferredHeight(20);
-		add(groupsPanel, BorderLayout.EAST);
-		refresh(false, null);
 
 
 		addMouseListener(getPopupHandler());
 		tabs.addMouseListener(getPopupHandler());
+
+
+		if (editorGroup == null) {
+			refresh(false, null);
+		} else {
+// TODO minimize flicker  - DOES NOT WORK
+//			render();
+
+			SwingUtilities.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					render();
+				}
+			});
+		}
 	}
 
-	private static class MyPlaceholder extends JPanel {
-		MyPlaceholder(String evaluation_in_process) {
-			super(new BorderLayout());
-			add(new JBLabel(evaluation_in_process, SwingConstants.CENTER), BorderLayout.CENTER);
-		}
-
-		void setContent(@NotNull JComponent view, String placement) {
-			Arrays.stream(getComponents()).forEach(this::remove);
-			add(view, placement);
-			revalidate();
-			repaint();
-		}
-	}
 
 	@NotNull
 	private PopupHandler getPopupHandler() {
@@ -184,52 +166,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		};
 	}
 
-
-	private void reloadLinks() {
-		tabs.removeAllTabs();
-		createLinks();
-		tabs.doLayout();
-		tabs.scroll(myScrollOffset);
-	}
-
-	private int reloadGroupLinks(Collection<EditorGroup> groups) {
-		Font font = getFont();
-		Map attributes = font.getAttributes();
-//		attributes.put(TextAttribute.UNDERLINE, TextAttribute.UNDERLINE_ON);
-		Font newFont = font.deriveFont(attributes);
-
-		this.groupsPanel.removeAll();
-		boolean added = false;
-		int groupsCount = 0;
-		for (EditorGroup editorGroup : groups) {
-			added = true;
-			String title = editorGroup.getTitle();
-			if (title.isEmpty()) {
-				title = Utils.toPresentableName(editorGroup.getOwnerPath());
-			}
-
-			JButton button = new JButton("[ " + title + " ]");
-			button.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					refresh(false, editorGroup);
-				}
-			});
-			button.setFont(newFont);
-			button.setPreferredSize(new Dimension(button.getPreferredSize().width, button.getPreferredSize().height - 10));
-			button.addMouseListener(getPopupHandler());
-			if (UIUtil.isUnderDarcula()) {
-				button.setBorder(new LineBorder(Color.lightGray));
-			} else {
-				button.setBorder(new LineBorder(Color.BLACK));
-			}
-			button.setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath(), true));
-			this.groupsPanel.add(button);
-			groupsCount++;
-		}
-		this.groupsPanel.setVisible(added);
-		return groupsCount;
-	}
 
 	private void addButtons() {
 		DefaultActionGroup actionGroup = new DefaultActionGroup();
@@ -250,33 +186,75 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(component, BorderLayout.WEST);
 	}
 
+	private void reloadTabs() {
+		tabs.removeAllTabs();
+		createLinks();
+		if (displayedGroup instanceof GroupsHolder) {
+			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
+		}
+
+
+		tabs.doLayout();
+		tabs.scroll(myScrollOffset);
+	}
+
 	private void createLinks() {
 		List<String> paths = displayedGroup.getLinks(project);
 
 		for (int i1 = 0; i1 < paths.size(); i1++) {
 			String path = paths.get(i1);
 
-			String name = Utils.toPresentableName(path);
-			MyTabInfo tab = new MyTabInfo();
-			tab.path = path;
-			TabInfo tabInfo = tab.setText(name).setTooltipText(path);
+			MyTabInfo tab = new MyTabInfo(path);
 
-
-			if (!new File(path).exists()) {
-				tab.setEnabled(false);
-			}
-
-			tabs.addTab(tabInfo);
+			tabs.addTab(tab);
 
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
-				tabs.setMySelectedInfo(tabInfo);
+				tabs.setMySelectedInfo(tab);
 				currentIndex = i1;
 			}
 		}
 	}
 
+	private void createGroupLinks(Collection<EditorGroup> groups) {
+		if (tabs.getTabCount() == 0) {
+			tabs.addTab(new MyTabInfo(file.getCanonicalPath()));
+		}
+		for (EditorGroup editorGroup : groups) {
+			tabs.addTab(new MyGroupTabInfo(editorGroup));
+		}
+	}
+
 	class MyTabInfo extends TabInfo {
 		String path;
+
+		public MyTabInfo(String path) {
+			this.path = path;
+			String name = Utils.toPresentableName(path);
+			setText(name);
+			setTooltipText(path);
+
+			if (!new File(path).exists()) {
+				setEnabled(false);
+			}
+		}
+	}
+
+	class MyGroupTabInfo extends TabInfo {
+		EditorGroup editorGroup;
+
+		public MyGroupTabInfo(EditorGroup editorGroup) {
+			this.editorGroup = editorGroup;
+			String title = editorGroup.getTitle();
+			if (title.isEmpty()) {
+				title = Utils.toPresentableName(editorGroup.getOwnerPath());
+			}
+			if (ApplicationConfiguration.state().showSize) {
+				title += ":" + editorGroup.size(project);
+			}
+			setText("[ " + title + " ]");
+			setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath(), true));
+
+		}
 	}
 
 	public void previous(boolean newTab, boolean newWindow) {
@@ -321,7 +299,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		if (!isVisible()) {
 			return;
-		}     
+		}
 		VirtualFile fileByPath = null;
 		int iterations = 0;
 		List<String> paths = displayedGroup.getLinks(project);
@@ -342,10 +320,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
 		if (fileToOpen == null) {
+			System.err.println("openFile fail - file is null");
 			return;
 		}
 
 		if (fileToOpen.equals(file) && !newWindow) {
+			System.err.println("openFile fail - same file");
 			return;
 		}
 
@@ -375,7 +355,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup switchingGroup = groupManager.getSwitchingGroup(file);
 		System.out.println("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
-			reload = true;
 			refresh(false, switchingGroup);
 		} else {
 			refresh(false, null);
@@ -413,7 +392,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	 * call from any thread
 	 */
 	public void refresh(boolean refresh, EditorGroup newGroup) {
-		if (!refresh && newGroup == null) { //unnecessary refresh
+		if (!refresh && newGroup == null) { //unnecessary or initial refresh
 			atomicReference.compareAndSet(null, new RefreshRequest(refresh, newGroup));
 		} else {
 			atomicReference.set(new RefreshRequest(refresh, newGroup));
@@ -422,8 +401,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void refresh2() {
-		myScrollOffset = tabs.getMyScrollOffset();   //this will have edge cases
-
 		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
 			@Override
 			public void run() {
@@ -459,53 +436,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
 				}
 			});
-			if ((group == displayedGroup || group == toBeRendered || group.isSame(project, displayedGroup))
-				&& !reload
-				&& !refresh
-
-			) {
-				groupManager.switching(false); //need for UI forms, when switching to open ones, focus listener do not get that
-				System.out.println("no change, skipping refresh");
+			if (!refresh && (group == displayedGroup || group == toBeRendered || group.isSame(project, displayedGroup))) {
+				groupManager.switching(false); //need for UI forms - when switching to open editors , focus listener does not do that
+				System.out.println("no change, skipping refresh, toBeRendered=" + toBeRendered);
 				return;
 			}
 			toBeRendered = group;
+			if (refresh) {
+				myScrollOffset = tabs.getMyScrollOffset();   //this will have edge cases
+			}
+			
+			
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
-					if (toBeRendered == null) {
-						return;
-					}
-					displayedGroup = toBeRendered;
-					toBeRendered = null;
-					
-					long start = System.currentTimeMillis();
-					int groupsCount = 0;
-					if (group instanceof GroupsHolder) {
-						groupsCount = reloadGroupLinks(((GroupsHolder) group).getGroups());
-					} else {
-						groupsPanel.setVisible(false);
-					}
-
-					reloadLinks();
-
-					if (ApplicationConfiguration.state().hideEmpty) {
-						boolean hide = (group instanceof AutoGroup && group.getLinks(project).size() == 0 && groupsCount == 0);
-						setVisible(!hide);
-					} else {
-						setVisible(true);
-					}
-
-					fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
-					file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
-					fileEditorManager.updateFilePresentation(file);
-					toolbar.updateActionsImmediately();
-					
-					revalidate();
-					repaint();
-					reload = false;
-					failed = 0;
-					groupManager.switching(false);
-					System.out.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
+					render();
 				}
 			});
 			atomicReference.compareAndSet(request, null);
@@ -525,6 +470,37 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
+	private void render() {
+		EditorGroup rendering = toBeRendered;
+		if (rendering == null) {
+			return;
+		}
+		displayedGroup = rendering;
+		toBeRendered = null;
+
+		long start = System.currentTimeMillis();
+
+		reloadTabs();
+
+		if (ApplicationConfiguration.state().hideEmpty) {
+			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty());
+			setVisible(!hide);
+		} else {
+			setVisible(true);
+		}
+
+		fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
+		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
+		fileEditorManager.updateFilePresentation(file);
+		toolbar.updateActionsImmediately();
+
+		revalidate();
+		repaint();
+		failed = 0;
+		groupManager.switching(false);
+		System.out.println("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + " " + displayedGroup);
+	}
+
 
 	@Override
 	public void dispose() {
@@ -537,11 +513,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //			displayedGroup.invalid();                    0o
 			refresh(false, null);
 		}
-	}                                             
+	}
 
 	@NotNull
 	public EditorGroup getDisplayedGroup() {
 		return displayedGroup;
+	}
+
+	public EditorGroup getToBeRendered() {
+		return toBeRendered;
 	}
 
 	public VirtualFile getFile() {
