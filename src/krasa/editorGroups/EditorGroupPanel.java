@@ -57,7 +57,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private final VirtualFile file;
 	private volatile int myScrollOffset;
 	private int currentIndex = -1;
-	@Nullable
 	private volatile EditorGroup displayedGroup;
 	private volatile EditorGroup toBeRendered;
 	private VirtualFile fileFromTextEditor;
@@ -201,6 +200,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		tabs.doLayout();
 		tabs.scroll(myScrollOffset);
+
+		tabs.validate();
+		RepaintManager.currentManager(tabs).paintDirtyRegions();
 	}
 
 	private void createLinks() {
@@ -514,8 +516,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		fileEditorManager.updateFilePresentation(file);
 		toolbar.updateActionsImmediately();
 
-		revalidate();
-		repaint();
+
 		failed = 0;
 		groupManager.switching(false);
 		LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
