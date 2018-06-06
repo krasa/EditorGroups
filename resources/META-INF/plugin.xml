@@ -89,7 +89,7 @@
 
 
         <action class="krasa.editorGroups.actions.RefreshAction" id="krasa.editorGroups.Refresh"
-                text="Refresh Editor Groups">
+                text="Refresh" description="Refresh Editor Groups panel in current file">
             <keyboard-shortcut first-keystroke="ctrl alt Q" keymap="$default"/>
         </action>
 
@@ -106,19 +106,25 @@
 
         <action id="krasa.editorGroups.ToggleAutoSameNameGroups"
                 class="krasa.editorGroups.actions.ToggleAutoSameNameGroupsAction"
-                text="Automatic Editor Groups by a Current File Name (without extension)"/>
+                text="Automatic Groups by the Current File"
+                description="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"
+        />
 
         <action id="krasa.editorGroups.ToggleFolderEditorGroups"
                 class="krasa.editorGroups.actions.ToggleAutoFolderGroupsAction"
-                text="Automatic Editor Groups by a Current Folder"/>
+                text="Automatic Groups by the Current Folder"
+                description="Automatic Editor Groups by the Current Folder, if no manually defined exists"
+        />
 
         <action id="krasa.editorGroups.ToggleForce"
                 class="krasa.editorGroups.actions.ToggleForceAction"
-                text="Automatic Switching of Groups on Manual Refresh"/>
+                text="Switch Groups on Manual Refresh"
+                description="Switches from AutoGroups to manually defined one (if exists in this file)"
+        />
 
         <action id="krasa.editorGroups.ToggleHideEmpty"
                 class="krasa.editorGroups.actions.ToggleHideEmptyAction"
-                text="Hide the panel when the group is empty"/>
+                text="Hide the panel when no group exists or is empty"/>
 
 
         <action id="krasa.editorGroups.ToggleShowSize"
