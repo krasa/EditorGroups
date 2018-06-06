@@ -1,5 +1,6 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -207,8 +208,8 @@ public class EditorGroupManager {
 	}
 
 	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
-		LOG.debug("open " + "fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
-		
+		LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
+
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -227,16 +228,19 @@ public class EditorGroupManager {
 
 
 				LOG.debug("openFile " + fileToOpen);
-				FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+				FileEditor[] fileEditors = manager.openFile(fileToOpen, true, true);
 				if (fileEditors.length == 0) {  //directory or some fail
 					switching(false);
 					return;
 				}
 				for (FileEditor fileEditor : fileEditors) {
 					LOG.debug("opened fileEditor = " + fileEditor);
-				}  	      
-					
-					
+				}
+
+
+				if (UISettings.getInstance().getReuseNotModifiedTabs()) { //it is bugged, do no close files - bad workaround . 
+					return;
+				}  
 				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 				if (selectedFile != null && !newTab) {
 					LOG.debug("closeFile " + selectedFile);
