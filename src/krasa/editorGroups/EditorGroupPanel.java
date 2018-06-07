@@ -140,11 +140,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 		if (editorGroup == null) {
+			setVisible(false);
 			refresh(false, null);
 		} else {
 // TODO minimize flicker  - DOES NOT WORK
 //			render();
-
+			updateVisibility(editorGroup);
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
@@ -201,8 +202,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		tabs.doLayout();
 		tabs.scroll(myScrollOffset);
 
-		tabs.validate();
-		RepaintManager.currentManager(tabs).paintDirtyRegions();
+		if (tabs.getTabCount() > 0) { //premature optimization
+			tabs.validate();
+			RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
+		}
 	}
 
 	private void createLinks() {
@@ -503,13 +506,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		reloadTabs();
 
-		if (ApplicationConfiguration.state().hideEmpty) {
-			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty());
-			hide |= rendering == EditorGroup.EMPTY;
-			setVisible(!hide);
-		} else {
-			setVisible(true);
-		}
+		updateVisibility(rendering);
 
 		fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
@@ -520,6 +517,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		failed = 0;
 		groupManager.switching(false);
 		LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
+	}
+
+	private void updateVisibility(EditorGroup rendering) {
+		if (ApplicationConfiguration.state().hideEmpty) {
+			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
+			setVisible(!hide);
+		} else {
+			setVisible(true);
+		}
 	}
 
 

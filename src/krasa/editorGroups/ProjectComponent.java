@@ -73,7 +73,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			/**on EDT*/
 			@Override
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
-				LOG.debug("fileOpened file = [" + file + "]");
+				LOG.debug("fileOpened [" + file + "]");
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);

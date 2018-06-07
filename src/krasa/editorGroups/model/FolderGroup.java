@@ -34,4 +34,11 @@ public class FolderGroup extends AutoGroup {
 		return DIRECTORY;
 	}
 
+
+	@Override
+	public String toString() {
+		return "FolderGroup{" +
+			"links=" + links.size() +
+			'}';
+	}
 }
