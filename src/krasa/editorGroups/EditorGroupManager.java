@@ -210,6 +210,8 @@ public class EditorGroupManager {
 	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
 		LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
 
+		switching(true, group, fileToOpen, myScrollOffset);
+		
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -220,7 +222,6 @@ public class EditorGroupManager {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 
-			switching(true, group, fileToOpen, myScrollOffset);
 			if (newWindow) {
 				LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
