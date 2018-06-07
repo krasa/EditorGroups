@@ -59,6 +59,9 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 		return null;
 	}
 
+	/**
+	 * https://youtrack.jetbrains.com/issue/IDEA-193430
+	 */
 	@Nullable
 	@Override
 	public Color getEditorTabForegroundColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
