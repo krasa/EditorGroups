@@ -138,19 +138,33 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		addMouseListener(getPopupHandler());
 		tabs.addMouseListener(getPopupHandler());
 
-
+		//minimize flicker for the price of latency
+		if (editorGroup == null && ApplicationConfiguration.state().isPreferLatencyOverFlicker() && !DumbService.isDumb(project)) {
+			long start = System.currentTimeMillis();
+			try {
+				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
+			} catch (Exception e) {
+				LOG.error(e);
+			}
+			long delta = System.currentTimeMillis() - start;
+			if (delta > 500) {
+				LOG.warn("lag on editor opening - #getGroup took " + delta + " ms for " + file);
+			}
+		}
+		
+		
 		if (editorGroup == null) {
 			setVisible(false);
 			refresh(false, null);
 		} else {
-// TODO minimize flicker  - DOES NOT WORK
+// TODO minimize flicker  - DOES NOT WORK - tabs do not like being updated while not visible first - it really messes up scrolling
 //			render();
 			updateVisibility(editorGroup);
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						render();
+						render2();
 					} catch (Exception e) {
 						displayedGroup = EditorGroup.EMPTY;
 						LOG.error(e);
@@ -460,15 +474,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 
 			AtomicReference<Exception> ex = new AtomicReference<>();
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						render();
-					} catch (Exception e) {
-						LOG.debug(e);
-						ex.set(e);
-					}
+
+			SwingUtilities.invokeLater(() -> {
+				EditorGroup rendering = toBeRendered;
+				//tabs do not like being updated while not visible first - it really messes up scrolling
+				if (!isVisible() && rendering != null && updateVisibility(rendering)) {
+					SwingUtilities.invokeLater(() -> render(ex));
+				} else {
+					render(ex);
 				}
 			});
 			Exception o = ex.get();
@@ -493,7 +506,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private void render() {
+	private void render(AtomicReference<Exception> ex) {
+		try {
+			render2();
+		} catch (Exception e) {
+			LOG.debug(e);
+			ex.set(e);
+		}
+	}
+
+	private void render2() {
 		EditorGroup rendering = toBeRendered;
 		if (rendering == null) {
 			LOG.debug("skipping render toBeRendered =" + rendering);
@@ -519,13 +541,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
 	}
 
-	private void updateVisibility(EditorGroup rendering) {
+	private boolean updateVisibility(@NotNull EditorGroup rendering) {
+		boolean visible;
 		if (ApplicationConfiguration.state().hideEmpty) {
 			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
-			setVisible(!hide);
+			visible = !hide;
 		} else {
-			setVisible(true);
+			visible = true;
 		}
+		setVisible(visible);
+		return visible;
 	}
 
 

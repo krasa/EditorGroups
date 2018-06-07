@@ -42,6 +42,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean hideEmpty = true;
 		public boolean showSize = false;
 		private boolean continuousScrolling;
+		private boolean preferLatencyOverFlicker = true;
 
 
 		public boolean isAutoFolders() {
@@ -91,6 +92,14 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 
 		public void setContinuousScrolling(final boolean continuousScrolling) {
 			this.continuousScrolling = continuousScrolling;
+		}
+
+		public boolean isPreferLatencyOverFlicker() {
+			return preferLatencyOverFlicker;
+		}
+
+		public void setPreferLatencyOverFlicker(final boolean preferLatencyOverFlicker) {
+			this.preferLatencyOverFlicker = preferLatencyOverFlicker;
 		}
 	}
 }

@@ -16,6 +16,7 @@ public class SettingsForm {
 	private JCheckBox hideEmpty;
 	private JCheckBox showSize;
 	private JCheckBox continuousScrolling;
+	private JCheckBox latencyOverFlicker;
 
 
 	public JPanel getRoot() {
@@ -47,6 +48,7 @@ public class SettingsForm {
 		autoSwitch.setSelected(data.isForceSwitch());
 		byFolder.setSelected(data.isAutoFolders());
 		continuousScrolling.setSelected(data.isContinuousScrolling());
+		latencyOverFlicker.setSelected(data.isPreferLatencyOverFlicker());
 	}
 
 	public void getData(ApplicationConfiguration.State data) {
@@ -56,6 +58,7 @@ public class SettingsForm {
 		data.setForceSwitch(autoSwitch.isSelected());
 		data.setAutoFolders(byFolder.isSelected());
 		data.setContinuousScrolling(continuousScrolling.isSelected());
+		data.setPreferLatencyOverFlicker(latencyOverFlicker.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration.State data) {
@@ -65,6 +68,7 @@ public class SettingsForm {
 		if (autoSwitch.isSelected() != data.isForceSwitch()) return true;
 		if (byFolder.isSelected() != data.isAutoFolders()) return true;
 		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
+		if (latencyOverFlicker.isSelected() != data.isPreferLatencyOverFlicker()) return true;
 		return false;
 	}
 }

@@ -245,7 +245,7 @@ public class EditorGroupManager {
 
 
 					if (reuseNotModifiedTabs  //it is bugged, do no close files - bad workaround -> when switching to an already opened file, the previous tab would not close   
-//						&& !fileWasAlreadyOpen  //this mostly works, but not always - sometimes the current file gets closed and editor loses focus
+//						&& !fileWasAlreadyOpen  //this mostly works, but not always - sometimes current file gets closed and editor loses focus
 					) {
 						return;
 					}
