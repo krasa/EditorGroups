@@ -26,7 +26,9 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 			//WATCH OUT FOR HASHCODE AND EQUALS!!
 			out.writeUTF(value.getId());
 			out.writeUTF(value.getTitle());
-			out.writeUTF(value.getColorString());
+			out.writeUTF(value.getBackgroundColor());
+			out.writeUTF(value.getForegroundColor());
+			
 			out.writeInt(value.getRelatedPaths().size());
 			List<String> related = value.getRelatedPaths();
 			for (String s : related) {
@@ -41,7 +43,9 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 			EditorGroupIndexValue value = new EditorGroupIndexValue();
 			value.setId(in.readUTF());
 			value.setTitle(in.readUTF());
-			value.setColor(in.readUTF());
+			value.setBackgroundColor(in.readUTF());
+			value.setForegroundColor(in.readUTF());
+			
 			int i = in.readInt();
 			for (int j = 0; j < i; j++) {
 				value.addRelated(in.readUTF());
@@ -56,7 +60,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	@Override
 	public int getVersion() {
-		return 3;
+		return 4;
 	}
 
 	@Override

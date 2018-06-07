@@ -59,7 +59,7 @@ public class EditorGroupManager {
 		cache = IndexCache.getInstance(project);
 		panelRefresher = PanelRefresher.getInstance(project);
 		ideFocusManager = IdeFocusManager.getInstance(project);
-	
+
 		this.project = project;
 
 	}
@@ -214,7 +214,16 @@ public class EditorGroupManager {
 		String canonicalPath = file.getCanonicalPath();
 		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
 		if (group != null) {
-			return group.getColor();
+			return group.getBgColor();
+		}
+		return null;
+	}
+
+	public Color getFgColor(VirtualFile file) {
+		String canonicalPath = file.getCanonicalPath();
+		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
+		if (group != null) {
+			return group.getFgColor();
 		}
 		return null;
 	}
@@ -288,5 +297,6 @@ public class EditorGroupManager {
 			}
 		}, null, null);
 	}
+
 
 }

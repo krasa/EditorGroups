@@ -70,7 +70,7 @@ public abstract class EditorGroup {
 		return Utils.getFileByPath(getOwnerPath());
 	}
 
-	public Color getColor() {
+	public Color getBgColor() {
 		return null;
 	}
 
@@ -96,5 +96,9 @@ public abstract class EditorGroup {
 
 	public String getOwnerPath() {
 		return getId();
+	}
+
+	public Color getFgColor() {
+		return null;
 	}
 }

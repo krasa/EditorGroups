@@ -24,7 +24,7 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 		if (!file.isDirectory() && file.isInLocalFileSystem()) {
 			EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
 			if (userData != null) {
-				color = userData.getColor();
+				color = userData.getBgColor();
 			}
 			if (color == null) {
 				color = EditorGroupManager.getInstance(project).getColor(file);
@@ -60,6 +60,41 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 	}
 
 	@Nullable
+	@Override
+	public Color getEditorTabForegroundColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
+		long start = System.nanoTime();
+		if (editorWindow != null) {
+			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
+				if (editor.getFile().equals(file)) {
+					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
+					FileEditor first = pair.first;
+					Color fgColor = getFgColor(project, first, file);
+					System.err.println(fgColor + "xx " + (System.nanoTime() - start) + "ms");
+					return fgColor;
+				}
+			}
+		}
+		System.err.println("xxx " + (System.nanoTime() - start) + "ms");
+		return null;
+	}
+
+	private Color getFgColor(Project project, FileEditor textEditor, VirtualFile file) {
+		Color tabColor = null;
+
+		if (textEditor != null) {
+			EditorGroup group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+			if (group != null) {
+				tabColor = group.getFgColor();
+			}
+		} else {
+			tabColor = EditorGroupManager.getInstance(project).getFgColor(file);
+		}
+
+		return tabColor;
+	}
+
+
+	@Nullable
 	private Color getColor(Project project, FileEditor textEditor, VirtualFile file) {
 		Color tabColor = null;
 
@@ -67,11 +102,11 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 			EditorGroup group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
 
 			if (group != null) {
-				tabColor = group.getColor();
+				tabColor = group.getBgColor();
 			}
 		} else {
 			tabColor = EditorGroupManager.getInstance(project).getColor(file);
-		} 
+		}
 
 		return tabColor;
 	}

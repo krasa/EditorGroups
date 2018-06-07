@@ -9,6 +9,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
+import com.intellij.ui.ColorUtil;
 import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -266,4 +267,44 @@ public class Utils {
 		colorMap.put("white", new Color(0xffffff));
 	}
 
+	public static Color getColorInstance(String color) {
+		String colorName = color;
+		char[] modifier = new char[0];
+		int lighterIndex = color.indexOf("-");
+		if (lighterIndex > 0) {
+			colorName = color.substring(0, lighterIndex);
+			modifier = color.substring(lighterIndex).toCharArray();
+		}
+
+		int darkerIndex = color.indexOf("+");
+		if (darkerIndex > 0) {
+			colorName = color.substring(0, darkerIndex);
+			modifier = color.substring(darkerIndex).toCharArray();
+		}
+
+		Color myColor = colorMap.get(colorName);
+		String number = "";
+
+		for (int i = modifier.length - 1; i >= 0; i--) {
+			char c = modifier[i];
+			if (Character.isDigit(c)) {
+				number = number + c;
+			} else if (c == '+') {
+				int tones = 1;
+				if (!number.isEmpty()) {
+					tones = Integer.parseInt(number);
+					number = "";
+				}
+				myColor = ColorUtil.brighter(myColor, tones);
+			} else if (c == '-') {
+				int tones = 1;
+				if (!number.isEmpty()) {
+					tones = Integer.parseInt(number);
+					number = "";
+				}
+				myColor = ColorUtil.darker(myColor, tones);
+			}
+		}
+		return myColor;
+	}
 }

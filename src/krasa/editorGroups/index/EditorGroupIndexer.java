@@ -22,11 +22,12 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
-	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@idea\\.(disable|title|color|related)\\s.*", false);
+	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@idea\\.\\w+\\s.*", false);
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.title\\s(.*)", false), new TitleConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.color\\s(.*)", false), new ColorConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.related\\s(.*)", false), new RelatedFilesConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@idea\\.disable\\s.*)", false), new DisableConsumer())
 	};
@@ -129,7 +130,14 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	static class ColorConsumer extends Consumer {
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
-			return init(object).setColor(value);
+			return init(object).setBackgroundColor(value);
+		}
+	}
+
+	static class FgColorConsumer extends Consumer {
+		@Override
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
+			return init(object).setForegroundColor(value);
 		}
 	}
 

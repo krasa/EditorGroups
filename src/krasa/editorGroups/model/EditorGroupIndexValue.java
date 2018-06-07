@@ -2,7 +2,6 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.ui.ColorUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.apache.commons.lang3.StringUtils;
@@ -17,13 +16,15 @@ public class EditorGroupIndexValue extends EditorGroup {
 	/*definitions*/
 	private String id = "";
 	private String title = "";
-	private String color = "";
+	private String backgroundColor = "";
+	private String foregroundColor = "";
 	private List<String> relatedPaths = new ArrayList<>();
 
 	/*runtime data*/
 	private transient volatile List<String> links;
 	private transient volatile boolean valid = true;
-	private transient volatile Color colorInstance = null;
+	private transient volatile Color bgColorInstance = null;
+	private transient volatile Color fgColorInstance = null;
 
 	public EditorGroupIndexValue() {
 	}
@@ -85,10 +86,16 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return links;
 	}
 
-	public EditorGroupIndexValue setColor(String value) {
-		color = StringUtil.notNullize(value).toLowerCase();
+	public EditorGroupIndexValue setBackgroundColor(String value) {
+		backgroundColor = StringUtil.notNullize(value).toLowerCase();
 		return this;
 	}
+
+	public EditorGroupIndexValue setForegroundColor(String value) {
+		this.foregroundColor = StringUtil.notNullize(value).toLowerCase();
+		return this;
+	}
+
 
 	public EditorGroupIndexValue addRelated(String value) {
 		relatedPaths.add(value);
@@ -100,71 +107,56 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return id.equals(canonicalPath);
 	}
 
-	public String getColorString() {
-		return color;
+	public String getBackgroundColor() {
+		return backgroundColor;
 	}
 
 
 	@Override
-	public Color getColor() {
-		if (colorInstance == null) {
-			if (!color.isEmpty()) {
+	public Color getBgColor() {
+		if (bgColorInstance == null) {
+			if (!backgroundColor.isEmpty()) {
 				try {
-					if (color.startsWith("0x") || color.startsWith("#")) {
-						colorInstance = Color.decode(color);
+					if (backgroundColor.startsWith("0x") || backgroundColor.startsWith("#")) {
+						bgColorInstance = Color.decode(backgroundColor);
 					} else {
-						String colorName = color;
-						char[] modifier = new char[0];
-						int lighterIndex = color.indexOf("-");
-						if (lighterIndex > 0) {
-							colorName = color.substring(0, lighterIndex);
-							modifier = color.substring(lighterIndex).toCharArray();
-						}
-
-						int darkerIndex = color.indexOf("+");
-						if (darkerIndex > 0) {
-							colorName = color.substring(0, darkerIndex);
-							modifier = color.substring(darkerIndex).toCharArray();
-						}
-
-						Color myColor = Utils.colorMap.get(colorName);
-						String number = "";
-
-						for (int i = modifier.length - 1; i >= 0; i--) {
-							char c = modifier[i];
-							if (Character.isDigit(c)) {
-								number = number + c;
-							} else if (c == '+') {
-								int tones = 1;
-								if (!number.isEmpty()) {
-									tones = Integer.parseInt(number);
-									number = "";
-								}
-								myColor = ColorUtil.brighter(myColor, tones);
-							} else if (c == '-') {
-								int tones = 1;
-								if (!number.isEmpty()) {
-									tones = Integer.parseInt(number);
-									number = "";
-								}
-								myColor = ColorUtil.darker(myColor, tones);
-							}
-						}
-
-						colorInstance = myColor;
+						bgColorInstance = Utils.getColorInstance(backgroundColor);
 					}
 				} catch (Exception e) {
 				}
 			}
 		}
-		return colorInstance;
+		return bgColorInstance;
 	}
+
+	@Override
+	public Color getFgColor() {
+		if (fgColorInstance == null) {
+			if (!foregroundColor.isEmpty()) {
+				try {
+					if (foregroundColor.startsWith("0x") || foregroundColor.startsWith("#")) {
+						fgColorInstance = Color.decode(foregroundColor);
+					} else {
+						fgColorInstance = Utils.getColorInstance(foregroundColor);
+					}
+				} catch (Exception e) {
+				}
+			}
+		}
+		return fgColorInstance;
+	}
+
 
 	@Override
 	public String getOwnerPath() {
 		String ownerPath = super.getOwnerPath();
 		return StringUtils.substringBefore(ownerPath, ";");
 	}
+
+	public String getForegroundColor() {
+		return foregroundColor;
+	}
+
 
 	public EditorGroupIndexValue setLinks(List<String> links) {
 		this.links = links;
@@ -183,7 +175,10 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 		if (id != null ? !id.equals(that.id) : that.id != null) return false;
 		if (title != null ? !title.equals(that.title) : that.title != null) return false;
-		if (color != null ? !color.equals(that.color) : that.color != null) return false;
+		if (backgroundColor != null ? !backgroundColor.equals(that.backgroundColor) : that.backgroundColor != null)
+			return false;
+		if (foregroundColor != null ? !foregroundColor.equals(that.foregroundColor) : that.foregroundColor != null)
+			return false;
 		return relatedPaths != null ? relatedPaths.equals(that.relatedPaths) : that.relatedPaths == null;
 	}
 
@@ -194,7 +189,8 @@ public class EditorGroupIndexValue extends EditorGroup {
 	public int hashCode() {
 		int result = id != null ? id.hashCode() : 0;
 		result = 31 * result + (title != null ? title.hashCode() : 0);
-		result = 31 * result + (color != null ? color.hashCode() : 0);
+		result = 31 * result + (backgroundColor != null ? backgroundColor.hashCode() : 0);
+		result = 31 * result + (foregroundColor != null ? foregroundColor.hashCode() : 0);
 		result = 31 * result + (relatedPaths != null ? relatedPaths.hashCode() : 0);
 		return result;
 	}
