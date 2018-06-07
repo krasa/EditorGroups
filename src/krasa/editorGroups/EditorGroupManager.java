@@ -225,26 +225,37 @@ public class EditorGroupManager {
 				LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
 			} else {
+				boolean reuseNotModifiedTabs = UISettings.getInstance().getReuseNotModifiedTabs();
+//				boolean fileWasAlreadyOpen = currentWindow.isFileOpen(fileToOpen);
+
+				try {
+					if (newTab) {
+						UISettings.getInstance().setReuseNotModifiedTabs(false);
+					}
+
+					LOG.debug("openFile " + fileToOpen);
+					FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+					if (fileEditors.length == 0) {  //directory or some fail
+						switching(false);
+						return;
+					}
+					for (FileEditor fileEditor : fileEditors) {
+						LOG.debug("opened fileEditor = " + fileEditor);
+					}
 
 
-				LOG.debug("openFile " + fileToOpen);
-				FileEditor[] fileEditors = manager.openFile(fileToOpen, true, true);
-				if (fileEditors.length == 0) {  //directory or some fail
-					switching(false);
-					return;
-				}
-				for (FileEditor fileEditor : fileEditors) {
-					LOG.debug("opened fileEditor = " + fileEditor);
-				}
-
-
-				if (UISettings.getInstance().getReuseNotModifiedTabs()) { //it is bugged, do no close files - bad workaround . 
-					return;
-				}  
-				//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
-				if (selectedFile != null && !newTab) {
-					LOG.debug("closeFile " + selectedFile);
-					manager.closeFile(selectedFile, currentWindow, false);
+					if (reuseNotModifiedTabs  //it is bugged, do no close files - bad workaround -> when switching to an already opened file, the previous tab would not close   
+//						&& !fileWasAlreadyOpen  //this mostly works, but not always - sometimes the current file gets closed and editor loses focus
+					) {
+						return;
+					}
+					//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
+					if (selectedFile != null && !newTab) {
+						LOG.debug("closeFile " + selectedFile);
+						manager.closeFile(selectedFile, currentWindow, false);
+					}
+				} finally {
+					UISettings.getInstance().setReuseNotModifiedTabs(reuseNotModifiedTabs);
 				}
 
 
