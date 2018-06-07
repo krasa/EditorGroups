@@ -255,7 +255,8 @@ public class EditorGroupManager {
 				switching(false);
 				return;
 			}
-
+			fileToOpen.putUserData(EditorGroupPanel.EDITOR_GROUP, group); // for project view colors
+			
 			if (newWindow) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);

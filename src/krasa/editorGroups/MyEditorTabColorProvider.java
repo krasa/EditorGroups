@@ -56,6 +56,10 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 				}
 			}
 		}
+		EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		if (userData != null) {
+			return userData.getBgColor();
+		}
 		return null;
 	}
 
@@ -65,7 +69,6 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 	@Nullable
 	@Override
 	public Color getEditorTabForegroundColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
-		long start = System.nanoTime();
 		if (editorWindow != null) {
 			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
 				if (editor.getFile().equals(file)) {
@@ -77,7 +80,10 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 				}
 			}
 		}
-		System.err.println("xxx " + (System.nanoTime() - start) + "ms");
+		EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		if (userData != null) {
+			return userData.getFgColor();
+		}
 		return null;
 	}
 
