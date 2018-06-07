@@ -10,6 +10,7 @@ import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.wm.IdeFocusManager;
 import krasa.editorGroups.model.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,11 +51,13 @@ public class EditorGroupManager {
 	private volatile EditorGroup switchingGroup;
 	private volatile VirtualFile switchingFile;
 	public int myScrollOffset = 0;
+	private IdeFocusManager ideFocusManager;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
 		panelRefresher = PanelRefresher.getInstance(project);
-
+		ideFocusManager = IdeFocusManager.getInstance(project);
+	
 		this.project = project;
 
 	}
@@ -158,8 +161,10 @@ public class EditorGroupManager {
 	}
 
 	public void switching(boolean b) {
-		LOG.debug("switching " + " [" + b + "]");
-		switching = false;
+		ideFocusManager.doWhenFocusSettlesDown(() -> {
+			LOG.debug("switching " + " [" + b + "]");
+			switching = false;
+		});
 	}
 
 	public EditorGroup getSwitchingGroup(@NotNull VirtualFile file) {
