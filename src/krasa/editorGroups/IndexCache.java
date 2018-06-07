@@ -124,7 +124,7 @@ public class IndexCache {
 	}
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
-		LOG.debug("initGroup = [" + group + "]");
+		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
 		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRelatedPaths());
 		if (links.size() > 100) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
@@ -143,7 +143,7 @@ public class IndexCache {
 
 		if (groups != null) {
 			String last = groups.getLast();
-			LOG.debug("last = " + last);
+			if (LOG.isDebugEnabled()) LOG.debug("last = " + last);
 			if (last != null) {
 				if (includeAutogroups && state.autoSameName && AutoGroup.SAME_FILE_NAME.equals(last)) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
@@ -289,7 +289,8 @@ public class IndexCache {
 		if (t0 > 100) {
 			LOG.warn("getSameNameGroup took " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 		}
-		LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
+		if (LOG.isDebugEnabled())
+			LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
 		return new SameNameGroup(nameWithoutExtension, paths);
 	}
@@ -393,7 +394,7 @@ public class IndexCache {
 			for (EditorGroup editorGroup : value.getAll()) {
 				group = editorGroup;
 				if (group.isOwner(ownerPath)) {
-					LOG.debug("removeFromIndex invalidating" + "" + group);
+					if (LOG.isDebugEnabled()) LOG.debug("removeFromIndex invalidating" + "" + group);
 					group.invalidate();
 				}
 			}

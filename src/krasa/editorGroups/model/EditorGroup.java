@@ -37,7 +37,7 @@ public abstract class EditorGroup {
 	public abstract boolean isOwner(String ownerPath);
 
 	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
-		//			LOG.debug("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
+		//			if (LOG.isDebugEnabled()) LOG.debug("getEditorTabTitle "+textEditor.getName() + ": "+group.getTitle());
 
 		if (showSize) {
 			int size = size(project);

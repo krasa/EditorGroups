@@ -69,7 +69,8 @@ public class PanelRefresher {
 						panel.refresh(false, null);
 					}
 				}
-				LOG.debug("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+				if (LOG.isDebugEnabled())
+					LOG.debug("onSmartMode " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 			}
 		});
 
@@ -104,7 +105,8 @@ public class PanelRefresher {
 			}
 		}
 
-		LOG.debug("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+		if (LOG.isDebugEnabled())
+			LOG.debug("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 		return group;
 	}
 
@@ -128,7 +130,7 @@ public class PanelRefresher {
 						}
 					}, project);
 					cacheReady();
-					LOG.debug("initCache " + (System.currentTimeMillis() - start));
+					if (LOG.isDebugEnabled()) LOG.debug("initCache " + (System.currentTimeMillis() - start));
 				}
 			);
 		});

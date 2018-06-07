@@ -37,7 +37,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 			@Override
 			public void beforeFileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-				LOG.debug("beforeFileClosed [" + file + "]");
+				if (LOG.isDebugEnabled()) LOG.debug("beforeFileClosed [" + file + "]");
 			}
 		};
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.Before.FILE_EDITOR_MANAGER, before);	
@@ -47,7 +47,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			//IJ 2018.2
 			@Override
 			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
-				LOG.debug("fileOpenedSync [" + file + "], editors = [" + editors + "]");
+				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "], editors = [" + editors + "]");
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
@@ -63,7 +63,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("sync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
+						if (LOG.isDebugEnabled())
+							LOG.debug("sync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
 					}
 				}
 
@@ -73,7 +74,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			/**on EDT*/
 			@Override
 			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
-				LOG.debug("fileOpened [" + file + "]");
+				if (LOG.isDebugEnabled()) LOG.debug("fileOpened [" + file + "]");
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
@@ -91,7 +92,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("async EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
+						if (LOG.isDebugEnabled())
+							LOG.debug("async EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
 					}
 				}
 
@@ -107,7 +109,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
 						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(panel.getFile());
-						LOG.debug("selectionChanged, refresh");
+						if (LOG.isDebugEnabled()) LOG.debug("selectionChanged, refresh");
 						panel.refresh(false, switchingGroup);
 					}
 				}
@@ -115,7 +117,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 			@Override
 			public void fileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-				LOG.debug("fileClosed [" + file + "]");
+				if (LOG.isDebugEnabled()) LOG.debug("fileClosed [" + file + "]");
 			}
 		});
 	}
@@ -125,7 +127,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public State getState() {
 		long start = System.currentTimeMillis();
 		State state = IndexCache.getInstance(project).getState();
-		LOG.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		if (LOG.isDebugEnabled())
+			LOG.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 		return state;
 	}
 
@@ -133,7 +136,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void loadState(@NotNull State state) {
 		long start = System.currentTimeMillis();
 		IndexCache.getInstance(project).loadState(state);
-		LOG.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		if (LOG.isDebugEnabled())
+			LOG.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
 	}
 
 	public static class State {

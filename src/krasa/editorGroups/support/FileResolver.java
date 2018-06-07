@@ -74,10 +74,11 @@ public class FileResolver {
 			}
 			long delta = System.currentTimeMillis() - start1;
 			if (delta > 100) {
-				LOG.debug("resolveLink " + filePath + " " + delta + "ms");
+				if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
 			}
 		}
-		LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
+		if (LOG.isDebugEnabled())
+			LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
 		return new ArrayList<>(links);
 	}
 

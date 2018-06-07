@@ -32,7 +32,7 @@ public class SettingsForm {
 	}
 
 	public void apply() {
-		LOG.debug("apply " + "");
+		if (LOG.isDebugEnabled()) LOG.debug("apply " + "");
 		ApplicationConfiguration.State state = ApplicationConfiguration.state();
 		getData(state);
 	}

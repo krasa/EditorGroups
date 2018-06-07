@@ -71,7 +71,9 @@ public class EditorGroupManager {
 
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
-		LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
+
+		if (LOG.isDebugEnabled())
+			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
 
@@ -149,13 +151,15 @@ public class EditorGroupManager {
 //		}
 
 
-		LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
+		if (LOG.isDebugEnabled())
+			LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
 		cache.setLast(currentFilePath, result);
 		return result;
 	}
 
 	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen, int myScrollOffset) {
-		LOG.debug("switching " + "switching = [" + switching + "], group = [" + group + "], fileToOpen = [" + fileToOpen + "], myScrollOffset = [" + myScrollOffset + "]");
+		if (LOG.isDebugEnabled())
+			LOG.debug("switching " + "switching = [" + switching + "], group = [" + group + "], fileToOpen = [" + fileToOpen + "], myScrollOffset = [" + myScrollOffset + "]");
 		this.myScrollOffset = myScrollOffset;
 		switchingFile = fileToOpen;
 		this.switching = switching;
@@ -164,7 +168,7 @@ public class EditorGroupManager {
 
 	public void switching(boolean b) {
 		ideFocusManager.doWhenFocusSettlesDown(() -> {
-			LOG.debug("switching " + " [" + b + "]");
+			if (LOG.isDebugEnabled()) LOG.debug("switching " + " [" + b + "]");
 			switching = false;
 		});
 	}
@@ -175,7 +179,8 @@ public class EditorGroupManager {
 			this.switchingGroup = null;
 			return switchingGroup;
 		}
-		LOG.debug("getSwitchingGroup returning null for " + "file = [" + file + "], switchingFile=" + switchingFile);
+		if (LOG.isDebugEnabled())
+			LOG.debug("getSwitchingGroup returning null for " + "file = [" + file + "], switchingFile=" + switchingFile);
 		return null;
 	}
 
@@ -197,7 +202,7 @@ public class EditorGroupManager {
 				return o1.getTitle().compareTo(o2.getTitle());
 			}
 		});
-		LOG.debug("getAllGroups " + (System.currentTimeMillis() - start));
+		if (LOG.isDebugEnabled()) LOG.debug("getAllGroups " + (System.currentTimeMillis() - start));
 		return allGroups;
 	}
 
@@ -215,7 +220,8 @@ public class EditorGroupManager {
 	}
 
 	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
-		LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
+		if (LOG.isDebugEnabled())
+			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
 
 		switching(true, group, fileToOpen, myScrollOffset);
 
@@ -223,8 +229,8 @@ public class EditorGroupManager {
 			Notifications.notifyBugs();
 			warningShown = true;
 		}
-		
-		
+
+
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -240,9 +246,9 @@ public class EditorGroupManager {
 				switching(false);
 				return;
 			}
-			     
+
 			if (newWindow) {
-				LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
+				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
 			} else {
 				boolean reuseNotModifiedTabs = UISettings.getInstance().getReuseNotModifiedTabs();
@@ -253,14 +259,14 @@ public class EditorGroupManager {
 						UISettings.getInstance().setReuseNotModifiedTabs(false);
 					}
 
-					LOG.debug("openFile " + fileToOpen);
+					if (LOG.isDebugEnabled()) LOG.debug("openFile " + fileToOpen);
 					FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 					if (fileEditors.length == 0) {  //directory or some fail
 						switching(false);
 						return;
 					}
 					for (FileEditor fileEditor : fileEditors) {
-						LOG.debug("opened fileEditor = " + fileEditor);
+						if (LOG.isDebugEnabled()) LOG.debug("opened fileEditor = " + fileEditor);
 					}
 
 
@@ -271,7 +277,7 @@ public class EditorGroupManager {
 					}
 					//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 					if (selectedFile != null && !newTab) {
-						LOG.debug("closeFile " + selectedFile);
+						if (LOG.isDebugEnabled()) LOG.debug("closeFile " + selectedFile);
 						manager.closeFile(selectedFile, currentWindow, false);
 					}
 				} finally {

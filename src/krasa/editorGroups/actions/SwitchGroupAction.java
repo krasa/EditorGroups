@@ -155,7 +155,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 				if (fileByPath != null) {
 					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null, 0);
 				} else {
-					LOG.debug("opening failed, file does not exists " + editorGroup);
+					if (LOG.isDebugEnabled()) LOG.debug("opening failed, file does not exists " + editorGroup);
 				} 
 			}
 		};
