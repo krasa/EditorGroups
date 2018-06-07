@@ -222,6 +222,12 @@ public class EditorGroupManager {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 
+			if (fileToOpen.equals(selectedFile)) {
+				LOG.error("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
+				switching(false);
+				return;
+			}
+			     
 			if (newWindow) {
 				LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
