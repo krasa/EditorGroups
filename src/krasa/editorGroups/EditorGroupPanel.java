@@ -64,11 +64,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private FileEditorManagerImpl fileEditorManager;
 	public EditorGroupManager groupManager;
 	private ActionToolbar toolbar;
+	private boolean disposed;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
 		LOG.debug("EditorGroupPanel " + "fileEditor = [" + fileEditor + "], project = [" + project + "], editorGroup = [" + editorGroup + "], file = [" + file + "], myScrollOffset = [" + myScrollOffset + "]");
 		this.fileEditor = fileEditor;
+		Disposer.register(fileEditor, this);
 		this.project = project;
 		this.file = file;
 		this.myScrollOffset = myScrollOffset;
@@ -76,7 +78,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		fileEditor.putUserData(EDITOR_PANEL, this);
-
 		if (fileEditor instanceof TextEditorImpl) {
 			Editor editor = ((TextEditorImpl) fileEditor).getEditor();
 			if (editor instanceof EditorImpl) {
@@ -343,6 +344,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
+		if (disposed) {
+			LOG.debug("openFile fail - already disposed");
+			return;
+		}
+		
 		if (fileToOpen == null) {
 			LOG.debug("openFile fail - file is null");
 			return;
@@ -428,6 +434,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
 			@Override
 			public void run() {
+				if (disposed) {
+					return;
+				}
 				DumbService.getInstance(project).waitForSmartMode();
 				refresh3();
 			}
@@ -437,6 +446,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private volatile int failed = 0;
 
 	private void refresh3() {
+		if (disposed) {
+			return;
+		}
 		if (SwingUtilities.isEventDispatchThread()) {
 			LOG.error("do not execute it on EDT");
 		}
@@ -476,6 +488,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			AtomicReference<Exception> ex = new AtomicReference<>();
 
 			SwingUtilities.invokeLater(() -> {
+				if (disposed) {
+					return;
+				}
 				EditorGroup rendering = toBeRendered;
 				//tabs do not like being updated while not visible first - it really messes up scrolling
 				if (!isVisible() && rendering != null && updateVisibility(rendering)) {
@@ -516,6 +531,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void render2() {
+		if (disposed) {
+			return;
+		}
 		EditorGroup rendering = toBeRendered;
 		if (rendering == null) {
 			LOG.debug("skipping render toBeRendered =" + rendering);
@@ -556,6 +574,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	@Override
 	public void dispose() {
+		disposed = true;
 	}
 
 	public void onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {
