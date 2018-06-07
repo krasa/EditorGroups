@@ -12,6 +12,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.Notifications;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -52,6 +53,7 @@ public class EditorGroupManager {
 	private volatile VirtualFile switchingFile;
 	public int myScrollOffset = 0;
 	private IdeFocusManager ideFocusManager;
+	private boolean warningShown;
 
 	public EditorGroupManager(Project project) {
 		cache = IndexCache.getInstance(project);
@@ -216,6 +218,12 @@ public class EditorGroupManager {
 		LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
 
 		switching(true, group, fileToOpen, myScrollOffset);
+
+		if (!warningShown && UISettings.getInstance().getReuseNotModifiedTabs()) {
+			Notifications.notifyBugs();
+			warningShown = true;
+		}
+		
 		
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
