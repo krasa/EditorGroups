@@ -16,7 +16,6 @@ import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
-import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.model.*;
@@ -174,7 +173,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		} else {
 			String ownerPath = groupLink.getOwnerPath();
 			String name = Utils.toPresentableName(ownerPath);
-			title = groupLink.getPresentableTitle(project, name, ApplicationConfiguration.state().showSize);
+			title = groupLink.getPresentableTitle(project, name, false);   //never show size - initializes links and lags
 
 			description = groupLink.getPresentableDescription();
 		}
