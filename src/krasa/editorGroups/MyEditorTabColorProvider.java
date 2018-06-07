@@ -74,9 +74,7 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 				if (editor.getFile().equals(file)) {
 					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
 					FileEditor first = pair.first;
-					Color fgColor = getFgColor(project, first, file);
-					System.err.println(fgColor + "xx " + (System.nanoTime() - start) + "ms");
-					return fgColor;
+					return getFgColor(project, first, file);
 				}
 			}
 		}
