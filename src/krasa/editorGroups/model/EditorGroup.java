@@ -2,7 +2,9 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.support.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -58,17 +60,17 @@ public abstract class EditorGroup {
 		return presentableNameForUI;
 	}
 
-	public String getPresentableDescription() {
+	public String getSwitchDescription() {   
+		
 		if (this instanceof AutoGroup) {
 			return null;
 		}
-		return "Owner:" + getOwnerPath();
+		if (!(this instanceof FavoritesGroup)) {
+			return "Owner:" + getRootPath();
+		}
+		return null;
 	}
 
-
-	public VirtualFile getOwnerFile() {
-		return Utils.getFileByPath(getOwnerPath());
-	}
 
 	public Color getBgColor() {
 		return null;
@@ -94,11 +96,52 @@ public abstract class EditorGroup {
 		return true;
 	}
 
-	public String getOwnerPath() {
+	public String getRootPath() {
 		return getId();
 	}
 
 	public Color getFgColor() {
 		return null;
+	}
+
+	public VirtualFile getFirstExistingFile(Project project) {
+		List<String> links = getLinks(project);
+		for (String link : links) {
+			VirtualFile fileByPath = Utils.getFileByPath(link);
+			if (fileByPath != null && fileByPath.exists() && !fileByPath.isDirectory()) {
+				return fileByPath;
+			}
+		}
+
+		return null;
+	}
+
+	@NotNull
+	public String tabTitle(Project project) {
+		String title = getTitle();
+		if (title.isEmpty()) {
+			title = Utils.toPresentableName(getRootPath());
+		}
+		if (ApplicationConfiguration.state().showSize) {
+			title += ":" + size(project);
+		}
+		return title;
+	}
+
+	public String switchTitle(Project project) {
+		String title;
+		if (this instanceof FavoritesGroup) {
+			title = getTitle();
+		} else {
+			String ownerPath = getRootPath();
+			String name = Utils.toPresentableName(ownerPath);
+			title = getPresentableTitle(project, name, false);   //never show size - initializes links and lags
+
+		}
+		return title;
+	}
+
+	public String getTabGroupTooltipText(Project project) {
+		return getPresentableTitle(project, "Owner: " + getRootPath(), true);
 	}
 }

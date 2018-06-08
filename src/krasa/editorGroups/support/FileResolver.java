@@ -11,6 +11,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.index.MyFileNameIndexService;
+import krasa.editorGroups.language.EditorGroupsLanguage;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -46,7 +47,9 @@ public class FileResolver {
 
 
 		try {
-			add(links, ownerPath);
+			if (!EditorGroupsLanguage.isEditorGroupsLanguage(ownerPath)) {
+				add(links, ownerPath);
+			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}

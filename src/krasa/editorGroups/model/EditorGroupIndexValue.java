@@ -4,7 +4,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
-import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -15,6 +14,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 	/*definitions*/
 	private String id = "";
+	private String root = "";
 	private String title = "";
 	private String backgroundColor = "";
 	private String foregroundColor = "";
@@ -45,12 +45,19 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return id;
 	}
 
-	public void setId(String ownerPath, int index) {
-		this.id = ownerPath + ";" + index;
+
+	public EditorGroupIndexValue setId(String id) {
+		this.id = StringUtil.notNullize(id);
+		return this;
 	}
 
-	public void setId(String id) {
-		this.id = StringUtil.notNullize(id);
+	public String getRoot() {
+		return root;
+	}
+
+	public EditorGroupIndexValue setRoot(String root) {
+		this.root = root;
+		return this;
 	}
 
 	public List<String> getRelatedPaths() {
@@ -148,9 +155,8 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 
 	@Override
-	public String getOwnerPath() {
-		String ownerPath = super.getOwnerPath();
-		return StringUtils.substringBefore(ownerPath, ";");
+	public String getRootPath() {
+		return root;
 	}
 
 	public String getForegroundColor() {
@@ -174,6 +180,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
 		if (id != null ? !id.equals(that.id) : that.id != null) return false;
+		if (root != null ? !root.equals(that.root) : that.root != null) return false;
 		if (title != null ? !title.equals(that.title) : that.title != null) return false;
 		if (backgroundColor != null ? !backgroundColor.equals(that.backgroundColor) : that.backgroundColor != null)
 			return false;
@@ -188,6 +195,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	@Override
 	public int hashCode() {
 		int result = id != null ? id.hashCode() : 0;
+		result = 31 * result + (root != null ? root.hashCode() : 0);
 		result = 31 * result + (title != null ? title.hashCode() : 0);
 		result = 31 * result + (backgroundColor != null ? backgroundColor.hashCode() : 0);
 		result = 31 * result + (foregroundColor != null ? foregroundColor.hashCode() : 0);
@@ -195,14 +203,17 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return result;
 	}
 
+
 	@Override
 	public String toString() {
 		return "EditorGroupIndexValue{" +
-			"title='" + title + '\'' +
 			"id='" + id + '\'' +
-			"related='" + relatedPaths + '\'' +
+			", root='" + root + '\'' +
+			", title='" + title + '\'' +
+			", backgroundColor='" + backgroundColor + '\'' +
+			", foregroundColor='" + foregroundColor + '\'' +
+			", relatedPaths=" + relatedPaths +
+			", valid=" + valid +
 			'}';
 	}
-
-
 }

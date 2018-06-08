@@ -19,7 +19,6 @@ import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.model.*;
-import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -83,7 +82,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		for (EditorGroup g : groups) {
 			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
-		defaultActionGroup.add(new Separator("Other groups"));        
+		defaultActionGroup.add(new Separator("Other groups"));
 	}
 
 	private void fillOtherGroup(DefaultActionGroup defaultActionGroup, @Nullable EditorGroupPanel panel, Project project) {
@@ -151,12 +150,12 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return new Handler() {
 			@Override
 			void run(EditorGroup editorGroup) {
-				VirtualFile fileByPath = editorGroup.getOwnerFile();
-				if (fileByPath != null) {
-					EditorGroupManager.getInstance(project).open(fileByPath, editorGroup, false, true, null, 0);
+				VirtualFile file = editorGroup.getFirstExistingFile(project);
+				if (file != null) {
+					EditorGroupManager.getInstance(project).open(file, editorGroup, false, true, null, 0);
 				} else {
-					if (LOG.isDebugEnabled()) LOG.debug("opening failed, file does not exists " + editorGroup);
-				} 
+					if (LOG.isDebugEnabled()) LOG.debug("opening failed, no file exists " + editorGroup);
+				}
 			}
 		};
 	}
@@ -164,20 +163,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	@NotNull
 	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler, final Icon icon) {
 		boolean isSelected = displayedGroup.equals(groupLink);
-		String description = null;
-		String title;
-
-
-		if (groupLink instanceof FavoritesGroup) {
-			title = groupLink.getTitle();
-		} else {
-			String ownerPath = groupLink.getOwnerPath();
-			String name = Utils.toPresentableName(ownerPath);
-			title = groupLink.getPresentableTitle(project, name, false);   //never show size - initializes links and lags
-
-			description = groupLink.getPresentableDescription();
-		}
-
+		String title = groupLink.switchTitle(project);
+		String description = groupLink.getSwitchDescription();
 
 		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : icon) {
 			@Override

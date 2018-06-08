@@ -30,10 +30,12 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	public static final int INDEX_PATTERN_GROUP = 2;
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.root\\s(.*)", false), new RootConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.color\\s(.*)", false), new ColorConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.related\\s(.*)", false), new RelatedFilesConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.id\\s(.*)", false), new IdConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@(idea|group)\\.disable\\s.*)", false), new DisableConsumer())
 	};
 
@@ -77,7 +79,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 				}
 			}
 
-			if (currentGroup != null && isEmpty(currentGroup.getId())) {
+			if (currentGroup != null) {
 				add(inputData, ownerPath, currentGroup, index, map);
 			}
 			return map;
@@ -93,7 +95,13 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	}
 
 	public int add(@NotNull FileContent inputData, String ownerPath, EditorGroupIndexValue lastGroup, int index, HashMap<String, EditorGroupIndexValue> map) {
-		lastGroup.setId(ownerPath, index++);
+		if (isEmpty(lastGroup.getId())) {
+			lastGroup.setId(ownerPath + ";" + index++);
+		}
+		if (isEmpty(lastGroup.getRoot())) {
+			lastGroup.setRoot(ownerPath);
+		}
+		
 		lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
 		map.put(lastGroup.getId(), lastGroup);
 		return index;
@@ -130,11 +138,14 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	static class TitleConsumer extends Consumer {
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
-			EditorGroupIndexValue group = init(object);
-			if (isNotEmpty(group.getTitle())) {
-				group = new EditorGroupIndexValue();
-			}
-			return group.setTitle(value);
+			return init(object).setTitle(value);
+		}
+	}
+
+	static class RootConsumer extends Consumer {
+		@Override
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
+			return init(object).setRoot(value);
 		}
 	}
 
@@ -149,6 +160,20 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 		@Override
 		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
 			return init(object).setForegroundColor(value);
+		}
+	}
+
+	static class IdConsumer extends Consumer {
+		@Override
+		EditorGroupIndexValue consume(FileContent inputData, EditorGroupIndexValue object, File folder, String value) {
+			EditorGroupIndexValue group = init(object);
+			if (isNotEmpty(group.getId())) {
+				group = new EditorGroupIndexValue();
+			}
+			if (isEmpty(group.getTitle())) {
+				group.setTitle(value);
+			}
+			return group.setId(value);
 		}
 	}
 

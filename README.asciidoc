@@ -13,7 +13,7 @@ image::example.jpg[]
 - anywhere else (can be disabled in settings)
                         
 === Title customization
-- @group.title yourTitle (creates a new group if there is more than one)
+- @group.title yourTitle
 - @group.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
 - @group.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
 - @group.color #FF0096
@@ -46,6 +46,8 @@ image::example.jpg[]
 
 === Other
 - @group.disable (disables indexing of the current file)
+- @group.id - must be unique across the project, creates a new group if there is more than one (otherwise path+index is used, which breaks references on refactoring)
+- @group.root - root directory, by default the current file's one
                   
 == Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           

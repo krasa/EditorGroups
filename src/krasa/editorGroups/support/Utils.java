@@ -10,7 +10,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
-import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -90,13 +89,6 @@ public class Utils {
 		return file;
 	}
 
-	@Nullable
-	public static VirtualFile getFileByPath(@NotNull String path, @NotNull EditorGroup group) {
-		String ownerPath = group.getOwnerPath();
-		VirtualFile virtualFile = getFileByPath(ownerPath);
-
-		return getFileByPath(path, virtualFile);
-	}
 
 	public static boolean isTheSameFile(@NotNull String path, @NotNull VirtualFile file) {
 		if (file != null) {

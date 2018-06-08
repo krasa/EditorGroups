@@ -13,6 +13,8 @@ public enum LanguagePatternHolder {
 	INSTANCE;
 
 	public final Collection<String> keywords = Arrays.asList(
+		"id",
+		"root",
 		"related",
 		"color",
 		"disable",

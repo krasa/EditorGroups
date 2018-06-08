@@ -270,15 +270,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		public MyGroupTabInfo(EditorGroup editorGroup) {
 			this.editorGroup = editorGroup;
-			String title = editorGroup.getTitle();
-			if (title.isEmpty()) {
-				title = Utils.toPresentableName(editorGroup.getOwnerPath());
-			}
-			if (ApplicationConfiguration.state().showSize) {
-				title += ":" + editorGroup.size(project);
-			}
+			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
 			setText("[ " + title + " ]");
-			setToolTipText(editorGroup.getPresentableTitle(project, "Owner: " + editorGroup.getOwnerPath(), true));
+			setToolTipText(editorGroup.getTabGroupTooltipText(EditorGroupPanel.this.project));
 
 		}
 	}

@@ -2,6 +2,7 @@ package krasa.editorGroups.language;
 
 import com.intellij.lang.Language;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.Nullable;
@@ -24,5 +25,10 @@ public class EditorGroupsLanguage extends Language {
 	@Nullable
 	public static Language getFileTypeLanguage(@Nullable FileType fileType) {
 		return fileType instanceof LanguageFileType ? ((LanguageFileType) fileType).getLanguage() : null;
+	}
+
+	public static boolean isEditorGroupsLanguage(String ownerPath) {
+		FileType sd = FileTypeManager.getInstance().getFileTypeByFileName(ownerPath);
+		return getFileTypeLanguage(sd) == INSTANCE;
 	}
 }

@@ -89,7 +89,7 @@ public class IndexCache {
 	private EditorGroup getGroupFromIndexById(String id) {
 		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, id, GlobalSearchScope.projectScope(project));
 		if (values.size() > 1) {
-			LOG.error(String.valueOf(values));
+			LOG.error("More than one group with id=" + id + " " + String.valueOf(values));
 		}
 		return values.size() == 0 ? EditorGroup.EMPTY : values.get(0);
 	}
@@ -109,14 +109,14 @@ public class IndexCache {
 	}
 
 	public EditorGroupIndexValue onIndexingDone(EditorGroupIndexValue group) {
-		//return cached group
-		EditorGroups editorGroups = groupsByLinks.get(group.getOwnerPath());
-		if (editorGroups != null) {
-			EditorGroup editorGroup = editorGroups.getById(group.getId());
-			if (group.equals(editorGroup)) {
-				return (EditorGroupIndexValue) editorGroup;
-			}
-		}
+		//return cached group TODO
+//		EditorGroups editorGroups = groupsByLinks.get(group.getOwnerPath());
+//		if (editorGroups != null) {
+//			EditorGroup editorGroup = editorGroups.getById(group.getId());
+//			if (group.equals(editorGroup)) {
+//				return (EditorGroupIndexValue) editorGroup;
+//			}
+//		}
 
 
 		initGroup(group);
@@ -125,7 +125,7 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRelatedPaths());
+		List<String> links = fileResolver.resolveLinks(project, group.getRootPath(), group.getRelatedPaths());
 		if (links.size() > 100) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
 			links = new ArrayList<>(links.subList(0, 100));
