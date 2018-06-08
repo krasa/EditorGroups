@@ -1,21 +1,13 @@
 package krasa.editorGroups;
 
-import com.intellij.ide.favoritesTreeView.FavoritesManager;
-import com.intellij.ide.projectView.impl.AbstractUrl;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.project.ProjectCoreUtil;
-import com.intellij.openapi.roots.ProjectFileIndex;
-import com.intellij.openapi.roots.ProjectRootManager;
-import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.TreeItem;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
-import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
 import org.jetbrains.annotations.NotNull;
@@ -37,13 +29,11 @@ public class IndexCache {
 	private FileResolver fileResolver;
 	private Map<String, EditorGroups> groupsByLinks = new ConcurrentHashMap<>();
 
-	private FavoritesManager favoritesManager;
-	private ProjectFileIndex fileIndex;
+	private final ExternalGroupProvider externalGroupProvider;
 
-	public IndexCache(@NotNull Project project) {
+	public IndexCache(@NotNull Project project, ExternalGroupProvider externalGroupProvider) {
 		this.project = project;
-		favoritesManager = FavoritesManager.getInstance(project);
-		fileIndex = ProjectRootManager.getInstance(project).getFileIndex();
+		this.externalGroupProvider = externalGroupProvider;
 		fileResolver = new FileResolver();
 	}
 
@@ -176,7 +166,7 @@ public class IndexCache {
 				} else if (includeAutogroups && state.autoFolders && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
-					EditorGroup favoritesGroup = getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
+					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
 					if (favoritesGroup.containsLink(project, currentFilePath)) {
 						result = favoritesGroup;
 					}
@@ -256,16 +246,6 @@ public class IndexCache {
 		editorGroups.setLast(result.getId());
 	}
 
-	public EditorGroup getFolderGroup(VirtualFile file) {
-		if (!file.isInLocalFileSystem()) {
-			return EditorGroup.EMPTY;
-		}
-
-		VirtualFile parent = file.getParent();
-		String folder = parent.getCanonicalPath();
-		List<String> links = fileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"));
-		return new FolderGroup(folder, links);
-	}
 
 
 	public Collection<EditorGroup> getGroups(String canonicalPath) {
@@ -278,48 +258,6 @@ public class IndexCache {
 		return result;
 	}
 
-	public EditorGroup getSameNameGroup(VirtualFile currentFile) {
-		if (!currentFile.isInLocalFileSystem()) {
-			return EditorGroup.EMPTY;
-		}
-		String nameWithoutExtension = currentFile.getNameWithoutExtension();
-		long start = System.currentTimeMillis();
-
-		Collection<VirtualFile> virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, nameWithoutExtension, true, GlobalSearchScope.projectScope(project));
-
-
-		boolean containsCurrent = virtualFilesByName.contains(currentFile);
-		int size = virtualFilesByName.size();
-		List<String> paths = new ArrayList<>(Math.max(containsCurrent ? size : size + 1, LIMIT_SAME_NAME));
-
-		if (!containsCurrent) {
-			paths.add(currentFile.getCanonicalPath());
-		}
-		for (VirtualFile file : virtualFilesByName) {
-			if (ProjectCoreUtil.isProjectOrWorkspaceFile(file)) {
-				continue;
-			}
-			if (file.isDirectory()) {
-				continue;
-			}
-			if (paths.size() == LIMIT_SAME_NAME) {
-				LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
-				break;
-			}
-			paths.add(file.getCanonicalPath());
-		}
-
-		Collections.sort(paths);
-
-		long t0 = System.currentTimeMillis() - start;
-		if (t0 > LINKS_LIMIT) {
-			LOG.warn("getSameNameGroup took " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
-		}
-		if (LOG.isDebugEnabled())
-			LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
-
-		return new SameNameGroup(nameWithoutExtension, paths);
-	}
 
 	public List<EditorGroupIndexValue> getAllGroups() {
 		FileBasedIndex instance = FileBasedIndex.getInstance();
@@ -385,33 +323,6 @@ public class IndexCache {
 		return result.setGroups(getGroups(currentFilePath));
 	}
 
-	public EditorGroup getFavoritesGroup(String title) {
-		List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(title);
-		if (favoritesListRootUrls.isEmpty()) {
-			return EditorGroup.EMPTY;
-		}
-
-		return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
-	}
-
-	public Collection<FavoritesGroup> getFavoritesGroups() {
-		List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
-
-		ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
-		for (String name : availableFavoritesListNames) {
-			List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
-			if (favoritesListRootUrls.isEmpty()) {
-				continue;
-
-			}
-			FavoritesGroup e = new FavoritesGroup(name, favoritesListRootUrls, project, fileIndex);
-			if (e.size(project) > 0) {
-				favoritesGroups.add(e);
-			}
-		}
-
-		return favoritesGroups;
-	}
 
 	public void removeGroup(String ownerPath) {
 		EditorGroup group = null;

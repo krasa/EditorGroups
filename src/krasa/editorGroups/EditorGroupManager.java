@@ -54,14 +54,16 @@ public class EditorGroupManager {
 	public int myScrollOffset = 0;
 	private IdeFocusManager ideFocusManager;
 	private boolean warningShown;
+	private ExternalGroupProvider externalGroupProvider;
+	private AutoGroupProvider autogroupProvider;
 
-	public EditorGroupManager(Project project) {
-		cache = IndexCache.getInstance(project);
-		panelRefresher = PanelRefresher.getInstance(project);
-		ideFocusManager = IdeFocusManager.getInstance(project);
-
+	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, IndexCache cache) {
+		this.cache = cache;
+		this.panelRefresher = panelRefresher;
+		this.ideFocusManager = ideFocusManager;
 		this.project = project;
-
+		this.externalGroupProvider = externalGroupProvider;
+		this.autogroupProvider = autogroupProvider;
 	}
 
 
@@ -127,11 +129,11 @@ public class EditorGroupManager {
 			if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
 				cache.initGroup((EditorGroupIndexValue) result);
 			} else if (result instanceof SameNameGroup) {
-				result = cache.getSameNameGroup(currentFile);
+				result = autogroupProvider.getSameNameGroup(currentFile);
 			} else if (result instanceof FolderGroup) {
-				result = cache.getFolderGroup(currentFile);
+				result = autogroupProvider.getFolderGroup(currentFile);
 			} else if (result instanceof FavoritesGroup) {
-				result = cache.getFavoritesGroup(result.getTitle());
+				result = externalGroupProvider.getFavoritesGroup(result.getTitle());
 			}
 
 
@@ -141,7 +143,7 @@ public class EditorGroupManager {
 					result = slaveGroup;
 				} else if (applicationConfiguration.getState().autoFolders
 					&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
-					result = cache.getFolderGroup(currentFile);
+					result = autogroupProvider.getFolderGroup(currentFile);
 				}
 			}
 		}

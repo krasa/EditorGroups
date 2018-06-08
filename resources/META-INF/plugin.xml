@@ -29,6 +29,8 @@
         <editorNotificationProvider implementation="krasa.editorGroups.support.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
         <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>
+        <projectService serviceImplementation="krasa.editorGroups.AutoGroupProvider"/>
+        <projectService serviceImplementation="krasa.editorGroups.ExternalGroupProvider"/>
         <projectService serviceImplementation="krasa.editorGroups.IndexCache"/>
         <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
         <editorTabColorProvider implementation="krasa.editorGroups.MyEditorTabColorProvider" order="first"/>

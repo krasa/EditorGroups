@@ -18,6 +18,7 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
+import krasa.editorGroups.ExternalGroupProvider;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -122,7 +123,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		}
 
 
-		Collection<FavoritesGroup> favoritesGroups = manager.cache.getFavoritesGroups();
+		Collection<FavoritesGroup> favoritesGroups = ExternalGroupProvider.getInstance(project).getFavoritesGroups();
 		if (!favoritesGroups.isEmpty()) {
 			Separator favourites = new Separator("Favourites");
 			defaultActionGroup.add(favourites);
