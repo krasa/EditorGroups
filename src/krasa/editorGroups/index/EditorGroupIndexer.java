@@ -26,6 +26,8 @@ import static org.apache.commons.lang3.StringUtils.*;
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
 	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@(idea|group)\\.\\w+\\s.*", false);
+
+	public static final int INDEX_PATTERN_GROUP = 2;
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
@@ -105,7 +107,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 				Matcher subMatcher = pattern.matcher(trim);
 				while (subMatcher.find()) {
 					if (subMatcher.start() != subMatcher.end()) {
-						value = consumer.consume(inputData, value, folder, subMatcher.group(1).trim());
+						value = consumer.consume(inputData, value, folder, subMatcher.group(INDEX_PATTERN_GROUP).trim());
 					}
 				}
 			}
