@@ -43,6 +43,7 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public boolean showSize = false;
 		private boolean continuousScrolling;
 		private boolean preferLatencyOverFlicker = true;
+		private boolean indexOnlyEditorGroupsFiles;
 
 
 		public boolean isAutoFolders() {
@@ -100,6 +101,14 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 
 		public void setPreferLatencyOverFlicker(final boolean preferLatencyOverFlicker) {
 			this.preferLatencyOverFlicker = preferLatencyOverFlicker;
+		}
+
+		public boolean isIndexOnlyEditorGroupsFiles() {
+			return indexOnlyEditorGroupsFiles;
+		}
+
+		public void setIndexOnlyEditorGroupsFiles(final boolean indexOnlyEditorGroupsFiles) {
+			this.indexOnlyEditorGroupsFiles = indexOnlyEditorGroupsFiles;
 		}
 	}
 }

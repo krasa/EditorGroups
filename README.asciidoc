@@ -9,7 +9,8 @@ image::example.jpg[]
 - manually defined in any file
 
 == Definitions
-Add anywhere in the file:
+- in *.egroups - with language support
+- anywhere else (can be disabled in settings)
                         
 === Title customization
 - @group.title yourTitle (creates a new group if there is more than one)

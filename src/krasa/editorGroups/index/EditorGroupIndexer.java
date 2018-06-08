@@ -2,12 +2,15 @@ package krasa.editorGroups.index;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.StringPattern;
 import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
+import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.PanelRefresher;
+import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +38,13 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	@Override
 	@NotNull
 	public Map<String, EditorGroupIndexValue> map(@NotNull final FileContent inputData) {
-		String ownerPath = inputData.getFile().getCanonicalPath();
+		VirtualFile file = inputData.getFile();
+		boolean isEGroup = EditorGroupsLanguage.isEditorGroupsLanguage(file);
+		if (ApplicationConfiguration.state().isIndexOnlyEditorGroupsFiles() && !isEGroup) {
+			return Collections.emptyMap();
+		}
+
+		String ownerPath = file.getCanonicalPath();
 		try {
 			String chars = inputData.getContentAsText().toString(); // matching strings is faster than HeapCharBuffer
 			File folder = null;
