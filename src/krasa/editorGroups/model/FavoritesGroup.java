@@ -10,6 +10,7 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.SmartPsiElementPointer;
 import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.TreeItem;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -73,6 +74,7 @@ public class FavoritesGroup extends EditorGroup {
 		return files.get(0);
 	}
 
+	@NotNull
 	@Override
 	public String getId() {
 		return OWNER_PREFIX + getTitle();

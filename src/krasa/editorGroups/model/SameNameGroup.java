@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -13,6 +14,7 @@ public class SameNameGroup extends AutoGroup {
 		this.fileNameWithoutExtension = fileNameWithoutExtension;
 	}
 
+	@NotNull
 	@Override
 	public String getId() {
 		return SAME_FILE_NAME;

@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import krasa.editorGroups.IndexCache;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -37,6 +38,7 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		return map;
 	}
 
+	@NotNull
 	@Override
 	public String getId() {
 		return "EDITOR_GROUPS";
@@ -105,7 +107,8 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		return EMPTY;
 	}
 
-	public EditorGroup getById(String id) {
+	@NotNull
+	public EditorGroup getById(@NotNull String id) {
 		EditorGroup editorGroup = map.get(id);
 		if (editorGroup == null) {
 			editorGroup = EMPTY;

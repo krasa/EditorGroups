@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtilRt;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -29,6 +30,7 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 		return groups;
 	}
 
+	@NotNull
 	@Override
 	public abstract String getId();
 

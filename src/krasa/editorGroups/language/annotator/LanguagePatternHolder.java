@@ -11,7 +11,9 @@ import java.util.regex.Pattern;
 
 public enum LanguagePatternHolder {
 	INSTANCE;
-
+	/**
+	 * @see krasa.editorGroups.index.EditorGroupIndexer
+	 */
 	public final Collection<String> keywords = Arrays.asList(
 		"id",
 		"root",

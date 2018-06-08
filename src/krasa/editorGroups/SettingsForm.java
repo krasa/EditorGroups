@@ -18,6 +18,7 @@ public class SettingsForm {
 	private JCheckBox continuousScrolling;
 	private JCheckBox latencyOverFlicker;
 	private JCheckBox indexOnlyEditorGroupsFileCheckBox;
+	private JCheckBox excludeEGroups;
 
 
 	public JPanel getRoot() {
@@ -51,6 +52,7 @@ public class SettingsForm {
 		continuousScrolling.setSelected(data.isContinuousScrolling());
 		latencyOverFlicker.setSelected(data.isPreferLatencyOverFlicker());
 		indexOnlyEditorGroupsFileCheckBox.setSelected(data.isIndexOnlyEditorGroupsFiles());
+		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
 	}
 
 	public void getData(ApplicationConfiguration.State data) {
@@ -62,6 +64,7 @@ public class SettingsForm {
 		data.setContinuousScrolling(continuousScrolling.isSelected());
 		data.setPreferLatencyOverFlicker(latencyOverFlicker.isSelected());
 		data.setIndexOnlyEditorGroupsFiles(indexOnlyEditorGroupsFileCheckBox.isSelected());
+		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration.State data) {
@@ -73,6 +76,7 @@ public class SettingsForm {
 		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
 		if (latencyOverFlicker.isSelected() != data.isPreferLatencyOverFlicker()) return true;
 		if (indexOnlyEditorGroupsFileCheckBox.isSelected() != data.isIndexOnlyEditorGroupsFiles()) return true;
+		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
 		return false;
 	}
 }

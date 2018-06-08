@@ -11,6 +11,7 @@ import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.PanelRefresher;
 import krasa.editorGroups.language.EditorGroupsLanguage;
+import krasa.editorGroups.language.annotator.LanguagePatternHolder;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.support.Notifications;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 
 	public static final int INDEX_PATTERN_GROUP = 2;
 	@SuppressWarnings("unchecked")
+	/** @see LanguagePatternHolder#keywords */
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.root\\s(.*)", false), new RootConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
@@ -110,7 +112,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 			Notifications.duplicateId(lastGroup, inputData.getFile(), inputData.getProject());
 		} else {
 			map.put(lastGroup.getId(), lastGroup);
-		} 
+		}
 		return index;
 	}
 

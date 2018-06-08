@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.List;
@@ -24,6 +25,7 @@ public class FolderGroup extends AutoGroup {
 		return "Current folder";
 	}
 
+	@NotNull
 	@Override
 	public String getId() {
 		return DIRECTORY;

@@ -22,19 +22,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-/*
- * @group.title CORE
- * @group.color black
- * @group.related ./*
- *
- *
- * @group.title CORE2
- * @group.color black
- * @group.related EditorGroupPanel
- * @group.related IndexCache
- *
- *
- */
 public class EditorGroupManager {
 	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(EditorGroupManager.class);
 

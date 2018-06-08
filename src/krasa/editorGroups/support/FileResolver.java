@@ -10,6 +10,7 @@ import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
+import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import org.apache.commons.io.IOCase;
@@ -28,22 +29,23 @@ import java.util.*;
 
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
+
 public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
+	private boolean excludeEditorGroupsFiles;
+
+	public static List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
+		return new FileResolver().resolve(project, ownerFilePath, root, relatedPaths);
+	}
+
+	protected FileResolver() {
+		excludeEditorGroupsFiles = ApplicationConfiguration.state().isExcludeEditorGroupsFiles();
+	}
+
 	@NotNull
-	public List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
+	private List<String> resolve(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
 		long start = System.currentTimeMillis();
-
-		VirtualFile ownerFile = null;
-		if (ownerFilePath != null) {
-			ownerFile = Utils.getFileByPath(ownerFilePath);
-		}
-		root = useMacros(project, ownerFile, root);
-
-
-		File file1 = new File(root);
-		String rootFolder = file1.isFile() ? file1.getParent() : root;
 
 		Set<String> links = new LinkedHashSet<String>() {
 			@Override
@@ -54,39 +56,50 @@ public class FileResolver {
 
 
 		try {
-			if (ownerFile != null && !EditorGroupsLanguage.isEditorGroupsLanguage(ownerFile)) {
-				add(links, root);
+
+			VirtualFile ownerFile = null;
+			if (ownerFilePath != null) {
+				ownerFile = Utils.getFileByPath(ownerFilePath);
+			}
+			root = useMacros(project, ownerFile, root);
+
+
+			File rootFile = new File(root);
+			String rootFolder = rootFile.isFile() ? rootFile.getParent() : root;
+
+
+			add(links, rootFile, false);
+
+
+			for (String filePath : relatedPaths) {
+				long start1 = System.currentTimeMillis();
+				try {
+					filePath = useMacros(project, ownerFile, filePath);
+					filePath = sanitize(filePath);
+
+
+					if (filePath.startsWith("*/") && filePath.endsWith(".*")) {
+						resolveSameNameProjectFiles(project, links, filePath);
+					} else if (filePath.startsWith("*/")) {
+						resolveProjectFiles(project, links, filePath);
+					} else if (FileUtil.isAbsolute(filePath)) {
+						File file = new File(filePath);
+						resolve(links, file);
+					} else {
+						File file = new File(rootFolder, filePath);
+						resolve(links, file);
+					}
+
+				} catch (Exception e) {
+					LOG.warn("filePath='" + filePath + "'; owner=" + root, e);
+				}
+				long delta = System.currentTimeMillis() - start1;
+				if (delta > 100) {
+					if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
+				}
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
-		}
-
-		for (String filePath : relatedPaths) {
-			long start1 = System.currentTimeMillis();
-			try {
-				filePath = useMacros(project, ownerFile, filePath);
-				filePath = sanitize(filePath);
-
-
-				if (filePath.startsWith("*/") && filePath.endsWith(".*")) {
-					resolveSameNameProjectFiles(project, links, filePath);
-				} else if (filePath.startsWith("*/")) {
-					resolveProjectFiles(project, links, filePath);
-				} else if (FileUtil.isAbsolute(filePath)) {
-					File file = new File(filePath);
-					resolve(links, file);
-				} else {
-					File file = new File(rootFolder, filePath);
-					resolve(links, file);
-				}
-
-			} catch (Exception e) {
-				LOG.warn("filePath='" + filePath + "'; owner=" + root, e);
-			}
-			long delta = System.currentTimeMillis() - start1;
-			if (delta > 100) {
-				if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
-			}
 		}
 		if (LOG.isDebugEnabled())
 			LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + root);
@@ -114,7 +127,7 @@ public class FileResolver {
 		}
 	}
 
-	protected static void resolveProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
+	protected void resolveProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
 		String sanitizedPath = filePath.substring("*/".length());
 		String fileName = sanitizedPath;
 		if (fileName.contains("/")) {
@@ -141,9 +154,9 @@ public class FileResolver {
 		return replace;
 	}
 
-	protected static void resolve(Set<String> links, File file) throws IOException {
+	protected void resolve(Set<String> links, File file) throws IOException {
 		if (file.isFile()) {
-			add(links, file);
+			add(links, file, true);
 		} else if (file.isDirectory()) {
 			addChilds(links, file);
 		} else {
@@ -151,14 +164,21 @@ public class FileResolver {
 		}
 	}
 
-	protected static void addChilds(Set<String> links, File parentDir) throws IOException {
+	private boolean excluded(File file) throws IOException {
+		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(file.getCanonicalPath())) {
+			return true;
+		}
+		return false;
+	}
+
+	protected void addChilds(Set<String> links, File parentDir) throws IOException {
 		File[] foundFiles = parentDir.listFiles((FileFilter) FileFileFilter.FILE);
 		for (File foundFile : foundFiles) {
-			add(links, foundFile);
+			add(links, foundFile, false);
 		}
 	}
 
-	protected static void addMatching(Set<String> links, File file) throws IOException {
+	protected void addMatching(Set<String> links, File file) throws IOException {
 		File parentDir = file.getParentFile();
 		String canonicalPath = sanitize(file.getAbsolutePath());
 		String fileName = StringUtils.substringAfterLast(canonicalPath, "/");
@@ -168,27 +188,27 @@ public class FileResolver {
 			File[] foundFiles = parentDir.listFiles(filter);
 			for (File f : foundFiles) {
 				if (f.isFile()) {
-					add(links, f);
+					add(links, f, false);
 				}
 			}
 
 			if (foundFiles.length == 0) {
 				foundFiles = parentDir.listFiles((FilenameFilter) new PrefixFileFilter(fileName + ".", IOCase.SYSTEM));
 				for (File f : foundFiles) {
-					add(links, f);
+					add(links, f, false);
 				}
 			}
 		}
 	}
 
-	protected static void add(Set<String> links, File file) throws IOException {
-		if (file.isFile()) {
-			links.add(file.getCanonicalPath());
-		}
+	protected void add(Set<String> links, String canonicalPath) throws IOException {
+		add(links, new File(canonicalPath), false);
 	}
 
-	protected static void add(Set<String> links, String canonicalPath) throws IOException {
-		add(links, new File(canonicalPath));
+	protected void add(Set<String> links, File file, boolean definedManually) throws IOException {
+		if (file.isFile() && !(!definedManually && excluded(file))) {
+			links.add(file.getCanonicalPath());
+		}
 	}
 
 	protected static String useMacros(Project project, VirtualFile virtualFile, String folder) {

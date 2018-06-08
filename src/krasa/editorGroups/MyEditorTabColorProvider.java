@@ -17,28 +17,28 @@ import java.awt.*;
 
 public class MyEditorTabColorProvider implements EditorTabColorProvider {
 
-	@Nullable
-	@Override
-	public Color getProjectViewColor(@NotNull Project project, @NotNull VirtualFile file) {
-		Color color = null;
-		if (!file.isDirectory() && file.isInLocalFileSystem()) {
-			EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
-			if (userData != null) {
-				color = userData.getBgColor();
-			}
-			if (color == null) {
-				color = EditorGroupManager.getInstance(project).getColor(file);
-			}
-		}
-		return color;
-	}
+//	@Nullable
+//	@Override
+//	public Color getProjectViewColor(@NotNull Project project, @NotNull VirtualFile file) {
+//		Color color = null;
+//		if (!file.isDirectory() && file.isInLocalFileSystem()) {
+//			EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
+//			if (userData != null) {
+//				color = userData.getBgColor();
+//			}
+//			if (color == null) {
+//				color = EditorGroupManager.getInstance(project).getColor(file);
+//			}
+//		}
+//		return color;
+//	}
 
 	@Nullable
 	@Override
 	public Color getEditorTabColor(@NotNull Project project, @NotNull VirtualFile file) {
 		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
 
-		return getColor(project, textEditor, file);
+		return getBgColor(project, textEditor, file);
 	}
 
 	/**
@@ -52,7 +52,7 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 				if (editor.getFile().equals(file)) {
 					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
 					FileEditor first = pair.first;
-					return getColor(project, first, file);
+					return getBgColor(project, first, file);
 				}
 			}
 		}
@@ -84,37 +84,34 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 		}
 		return null;
 	}
-
 	private Color getFgColor(Project project, FileEditor textEditor, VirtualFile file) {
-		Color tabColor = null;
+		Color fgColor = null;
 
+		EditorGroup group = null;
 		if (textEditor != null) {
-			EditorGroup group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-			if (group != null) {
-				tabColor = group.getFgColor();
-			}
-		} else {
-			tabColor = EditorGroupManager.getInstance(project).getFgColor(file);
+			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		}
+		if (group != null) {
+			fgColor = group.getFgColor();
 		}
 
-		return tabColor;
+		return fgColor;
 	}
 
 
 	@Nullable
-	private Color getColor(Project project, FileEditor textEditor, VirtualFile file) {
-		Color tabColor = null;
+	private Color getBgColor(Project project, FileEditor textEditor, VirtualFile file) {
+		Color bgColor = null;
 
+		EditorGroup group = null;
 		if (textEditor != null) {
-			EditorGroup group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
-
-			if (group != null) {
-				tabColor = group.getBgColor();
-			}
-		} else {
-			tabColor = EditorGroupManager.getInstance(project).getColor(file);
+			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		}
+		if (group != null) {
+			bgColor = group.getBgColor();
 		}
 
-		return tabColor;
+		return bgColor;
 	}
+
 }

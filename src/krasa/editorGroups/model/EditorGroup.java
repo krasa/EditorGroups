@@ -5,7 +5,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.util.Collections;
@@ -19,7 +18,7 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 public abstract class EditorGroup {
 	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
-	@Nullable
+	@NotNull
 	public abstract String getId();
 
 	public String getOwnerPath() {
@@ -91,7 +90,7 @@ public abstract class EditorGroup {
 		if (this == group) {
 			return true;
 		}
-		if (!group.getClass().equals(this.getClass())) {
+		if (!this.equals(group)) {
 			return false;
 		}
 		if (!this.getLinks(project).equals(group.getLinks(project))) {

@@ -25,6 +25,7 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import krasa.editorGroups.actions.PopupMenu;
+import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.AutoGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
@@ -49,6 +50,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	public static final Key<EditorGroupPanel> EDITOR_PANEL = Key.create("EDITOR_GROUPS_PANEL");
 	public static final Key<EditorGroup> EDITOR_GROUP = Key.create("EDITOR_GROUP");
+	public static final int NOT_INITIALIZED = -10000;
 
 	@NotNull
 	private final FileEditor fileEditor;
@@ -56,7 +58,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private Project project;
 	private final VirtualFile file;
 	private volatile int myScrollOffset;
-	private int currentIndex = -1;
+	private int currentIndex = NOT_INITIALIZED;
 	private volatile EditorGroup displayedGroup;
 	private volatile EditorGroup toBeRendered;
 	private VirtualFile fileFromTextEditor;
@@ -153,8 +155,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.warn("lag on editor opening - #getGroup took " + delta + " ms for " + file);
 			}
 		}
-		
-		
+
+
 		if (editorGroup == null) {
 			setVisible(false);
 			refresh(false, null);
@@ -239,6 +241,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				currentIndex = i1;
 			}
 		}
+		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
+			MyTabInfo info = new MyTabInfo(file.getCanonicalPath());
+			currentIndex = -1;
+			tabs.addTab(info, 0);
+			tabs.setMySelectedInfo(info);
+		} else if (currentIndex < 0) {
+			LOG.error("current file is not contained in group " + file + " " + displayedGroup);
+		}
 	}
 
 	private void createGroupLinks(Collection<EditorGroup> groups) {
@@ -278,7 +288,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void previous(boolean newTab, boolean newWindow) {
-		if (currentIndex == -1) { //group was not refreshed
+		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
 		}
@@ -314,7 +324,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void next(boolean newTab, boolean newWindow) {
-		if (currentIndex == -1) { //group was not refreshed
+		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
 		}
@@ -349,7 +359,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - already disposed");
 			return;
 		}
-		
+
 		if (fileToOpen == null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - file is null");
 			return;

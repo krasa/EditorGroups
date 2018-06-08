@@ -27,11 +27,9 @@ public class AutoGroupProvider {
 
 	@NotNull
 	private Project project;
-	private FileResolver fileResolver;
 
 	public AutoGroupProvider(@NotNull Project project) {
 		this.project = project;
-		fileResolver = new FileResolver();
 	}
 
 
@@ -42,7 +40,7 @@ public class AutoGroupProvider {
 
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
-		List<String> links = fileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"));
+		List<String> links = FileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"));
 		return new FolderGroup(folder, links);
 	}
 

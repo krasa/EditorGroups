@@ -26,7 +26,6 @@ public class IndexCache {
 
 	@NotNull
 	private Project project;
-	private FileResolver fileResolver;
 	private Map<String, EditorGroups> groupsByLinks = new ConcurrentHashMap<>();
 
 	private final ExternalGroupProvider externalGroupProvider;
@@ -34,7 +33,6 @@ public class IndexCache {
 	public IndexCache(@NotNull Project project, ExternalGroupProvider externalGroupProvider) {
 		this.project = project;
 		this.externalGroupProvider = externalGroupProvider;
-		fileResolver = new FileResolver();
 	}
 
 	public EditorGroup getOwningOrSingleGroup(@NotNull String canonicalPath) {
@@ -141,7 +139,7 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths());
+		List<String> links = FileResolver.resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths());
 		if (links.size() > LINKS_LIMIT) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
 			links = new ArrayList<>(links.subList(0, LINKS_LIMIT));
@@ -351,4 +349,12 @@ public class IndexCache {
 	}
 
 
+	@NotNull
+	public EditorGroup getCached(@NotNull EditorGroup userData) {
+		EditorGroups editorGroups = groupsByLinks.get(userData.getOwnerPath());
+		if (editorGroups != null) {
+			return editorGroups.getById(userData.getId());
+		}
+		return EditorGroup.EMPTY;
+	}
 }

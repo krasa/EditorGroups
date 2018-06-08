@@ -1,0 +1,12 @@
+@group.id CORE
+@group.color black
+@group.related ./*
+
+
+@group.id CORE2
+@group.color black
+@group.related EditorGroupManager
+@group.related EditorGroupPanel
+@group.related IndexCache
+
+
