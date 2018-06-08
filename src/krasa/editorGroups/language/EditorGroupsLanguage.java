@@ -5,6 +5,7 @@ import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class EditorGroupsLanguage extends Language {
@@ -27,7 +28,7 @@ public class EditorGroupsLanguage extends Language {
 		return fileType instanceof LanguageFileType ? ((LanguageFileType) fileType).getLanguage() : null;
 	}
 
-	public static boolean isEditorGroupsLanguage(String ownerPath) {
+	public static boolean isEditorGroupsLanguage(@NotNull String ownerPath) {
 		FileType sd = FileTypeManager.getInstance().getFileTypeByFileName(ownerPath);
 		return getFileTypeLanguage(sd) == INSTANCE;
 	}

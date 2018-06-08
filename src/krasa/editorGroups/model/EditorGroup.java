@@ -22,6 +22,10 @@ public abstract class EditorGroup {
 	@Nullable
 	public abstract String getId();
 
+	public String getOwnerPath() {
+		return getId();
+	}
+	
 	public abstract String getTitle();
 
 	public abstract boolean isValid();
@@ -66,7 +70,7 @@ public abstract class EditorGroup {
 			return null;
 		}
 		if (!(this instanceof FavoritesGroup)) {
-			return "Owner:" + getRootPath();
+			return "Owner:" + getOwnerPath();
 		}
 		return null;
 	}
@@ -96,9 +100,6 @@ public abstract class EditorGroup {
 		return true;
 	}
 
-	public String getRootPath() {
-		return getId();
-	}
 
 	public Color getFgColor() {
 		return null;
@@ -120,7 +121,7 @@ public abstract class EditorGroup {
 	public String tabTitle(Project project) {
 		String title = getTitle();
 		if (title.isEmpty()) {
-			title = Utils.toPresentableName(getRootPath());
+			title = Utils.toPresentableName(getOwnerPath());
 		}
 		if (ApplicationConfiguration.state().showSize) {
 			title += ":" + size(project);
@@ -133,7 +134,7 @@ public abstract class EditorGroup {
 		if (this instanceof FavoritesGroup) {
 			title = getTitle();
 		} else {
-			String ownerPath = getRootPath();
+			String ownerPath = getOwnerPath();
 			String name = Utils.toPresentableName(ownerPath);
 			title = getPresentableTitle(project, name, false);   //never show size - initializes links and lags
 
@@ -142,6 +143,6 @@ public abstract class EditorGroup {
 	}
 
 	public String getTabGroupTooltipText(Project project) {
-		return getPresentableTitle(project, "Owner: " + getRootPath(), true);
+		return getPresentableTitle(project, "Owner: " + getOwnerPath(), true);
 	}
 }

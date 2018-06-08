@@ -12,6 +12,7 @@ import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.PanelRefresher;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.support.Notifications;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -95,15 +96,21 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	}
 
 	public int add(@NotNull FileContent inputData, String ownerPath, EditorGroupIndexValue lastGroup, int index, HashMap<String, EditorGroupIndexValue> map) {
+		lastGroup.setOwnerPath(ownerPath);
 		if (isEmpty(lastGroup.getId())) {
 			lastGroup.setId(ownerPath + ";" + index++);
 		}
 		if (isEmpty(lastGroup.getRoot())) {
 			lastGroup.setRoot(ownerPath);
 		}
-		
+
 		lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
-		map.put(lastGroup.getId(), lastGroup);
+
+		if (map.containsKey(lastGroup.getId())) {
+			Notifications.duplicateId(lastGroup, inputData.getFile(), inputData.getProject());
+		} else {
+			map.put(lastGroup.getId(), lastGroup);
+		} 
 		return index;
 	}
 

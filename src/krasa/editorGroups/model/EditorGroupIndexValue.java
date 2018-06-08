@@ -13,6 +13,8 @@ import java.util.List;
 public class EditorGroupIndexValue extends EditorGroup {
 
 	/*definitions*/
+	private String ownerPath = "";
+	;
 	private String id = "";
 	private String root = "";
 	private String title = "";
@@ -38,6 +40,15 @@ public class EditorGroupIndexValue extends EditorGroup {
 	public EditorGroupIndexValue setTitle(String title) {
 		this.title = StringUtil.notNullize(title);
 		return this;
+	}
+
+	@Override
+	public String getOwnerPath() {
+		return ownerPath;
+	}
+
+	public void setOwnerPath(String ownerPath) {
+		this.ownerPath = ownerPath;
 	}
 
 	@NotNull
@@ -111,7 +122,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 	@Override
 	public boolean isOwner(@NotNull String canonicalPath) {
-		return id.equals(canonicalPath);
+		return ownerPath.equals(canonicalPath);
 	}
 
 	public String getBackgroundColor() {
@@ -154,10 +165,6 @@ public class EditorGroupIndexValue extends EditorGroup {
 	}
 
 
-	@Override
-	public String getRootPath() {
-		return root;
-	}
 
 	public String getForegroundColor() {
 		return foregroundColor;
@@ -180,6 +187,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 		EditorGroupIndexValue that = (EditorGroupIndexValue) o;
 
 		if (id != null ? !id.equals(that.id) : that.id != null) return false;
+		if (ownerPath != null ? !ownerPath.equals(that.ownerPath) : that.ownerPath != null) return false;
 		if (root != null ? !root.equals(that.root) : that.root != null) return false;
 		if (title != null ? !title.equals(that.title) : that.title != null) return false;
 		if (backgroundColor != null ? !backgroundColor.equals(that.backgroundColor) : that.backgroundColor != null)
@@ -195,6 +203,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	@Override
 	public int hashCode() {
 		int result = id != null ? id.hashCode() : 0;
+		result = 31 * result + (ownerPath != null ? ownerPath.hashCode() : 0);
 		result = 31 * result + (root != null ? root.hashCode() : 0);
 		result = 31 * result + (title != null ? title.hashCode() : 0);
 		result = 31 * result + (backgroundColor != null ? backgroundColor.hashCode() : 0);
@@ -208,6 +217,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	public String toString() {
 		return "EditorGroupIndexValue{" +
 			"id='" + id + '\'' +
+			", ownerFile='" + ownerPath + '\'' +
 			", root='" + root + '\'' +
 			", title='" + title + '\'' +
 			", backgroundColor='" + backgroundColor + '\'' +
@@ -216,4 +226,5 @@ public class EditorGroupIndexValue extends EditorGroup {
 			", valid=" + valid +
 			'}';
 	}
+
 }

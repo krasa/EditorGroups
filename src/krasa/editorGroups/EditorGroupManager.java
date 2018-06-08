@@ -89,7 +89,7 @@ public class EditorGroupManager {
 		boolean force = refresh && ApplicationConfiguration.state().forceSwitch;
 		if (force) {
 			if (result.isInvalid()) {
-				result = cache.getByOwner(currentFilePath);
+				result = cache.getOwningOrSingleGroup(currentFilePath);
 			}
 			if (result.isInvalid()) {
 				result = cache.getLastEditorGroup(currentFilePath, false, true);
@@ -99,14 +99,14 @@ public class EditorGroupManager {
 		if (result.isInvalid()) {
 			cache.validate(requestedGroup);
 			if (requestedGroup.isValid()
-				&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath))) {
+				&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath) || requestedGroup.isOwner(currentFilePath))) {
 				result = requestedGroup;
 			}
 		}
 
 		if (!force) {
 			if (result.isInvalid()) {
-				result = cache.getByOwner(currentFilePath);
+				result = cache.getOwningOrSingleGroup(currentFilePath);
 			}
 
 			if (result.isInvalid()) {

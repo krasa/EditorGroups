@@ -18,6 +18,7 @@ import org.apache.commons.io.filefilter.PrefixFileFilter;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
 import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -31,12 +32,18 @@ public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
 	@NotNull
-	public List<String> resolveLinks(Project project, String ownerPath, List<String> relatedPaths) {
+	public List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
 		long start = System.currentTimeMillis();
-		File file1 = new File(ownerPath);
-		String folder = file1.isFile() ? file1.getParent() : ownerPath;
 
-		VirtualFile virtualFile = Utils.getFileByPath(ownerPath);
+		VirtualFile ownerFile = null;
+		if (ownerFilePath != null) {
+			ownerFile = Utils.getFileByPath(ownerFilePath);
+		}
+		root = useMacros(project, ownerFile, root);
+
+
+		File file1 = new File(root);
+		String rootFolder = file1.isFile() ? file1.getParent() : root;
 
 		Set<String> links = new LinkedHashSet<String>() {
 			@Override
@@ -47,16 +54,17 @@ public class FileResolver {
 
 
 		try {
-			if (!EditorGroupsLanguage.isEditorGroupsLanguage(ownerPath)) {
-				add(links, ownerPath);
+			if (ownerFile != null && !EditorGroupsLanguage.isEditorGroupsLanguage(ownerFile)) {
+				add(links, root);
 			}
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+
 		for (String filePath : relatedPaths) {
 			long start1 = System.currentTimeMillis();
 			try {
-				filePath = useMacros(project, virtualFile, filePath);
+				filePath = useMacros(project, ownerFile, filePath);
 				filePath = sanitize(filePath);
 
 
@@ -68,12 +76,12 @@ public class FileResolver {
 					File file = new File(filePath);
 					resolve(links, file);
 				} else {
-					File file = new File(folder, filePath);
+					File file = new File(rootFolder, filePath);
 					resolve(links, file);
 				}
 
 			} catch (Exception e) {
-				LOG.warn("filePath='" + filePath + "'; owner=" + ownerPath, e);
+				LOG.warn("filePath='" + filePath + "'; owner=" + root, e);
 			}
 			long delta = System.currentTimeMillis() - start1;
 			if (delta > 100) {
@@ -81,7 +89,7 @@ public class FileResolver {
 			}
 		}
 		if (LOG.isDebugEnabled())
-			LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + ownerPath);
+			LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + root);
 		return new ArrayList<>(links);
 	}
 
@@ -188,7 +196,7 @@ public class FileResolver {
 			VirtualFile baseDir = project.getBaseDir();
 			String canonicalPath = baseDir.getCanonicalPath();
 			folder = folder.replaceAll("^PROJECT", canonicalPath);
-		} else if (folder.startsWith("MODULE")) {
+		} else if (virtualFile != null && folder.startsWith("MODULE")) {
 			Module moduleForFile = ProjectRootManager.getInstance(project).getFileIndex().getModuleForFile(virtualFile);
 			String moduleDirPath = ModuleUtilCore.getModuleDirPath(moduleForFile);
 			folder = folder.replaceAll("^MODULE", moduleDirPath);

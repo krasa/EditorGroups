@@ -25,7 +25,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
-	public static final int LIMIT_SAME_NAME = 100;
+	public static final int LINKS_LIMIT = 100;
+	public static final int LIMIT_SAME_NAME = LINKS_LIMIT;
 
 	public static IndexCache getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, IndexCache.class);
@@ -46,8 +47,27 @@ public class IndexCache {
 		fileResolver = new FileResolver();
 	}
 
-	public EditorGroup getByOwner(@NotNull String canonicalPath) {
-		EditorGroup result = getGroupFromIndexById(canonicalPath + ";0");
+	public EditorGroup getOwningOrSingleGroup(@NotNull String canonicalPath) {
+		EditorGroup result = EditorGroup.EMPTY;
+
+		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
+		if (editorGroups != null) {
+			Map<String, EditorGroup> map = editorGroups.getMap();
+			Collection<EditorGroup> values = map.values();
+			if (map.size() == 1) {
+				result = (EditorGroup) values.toArray()[0];
+			} else {
+				for (EditorGroup value : values) {
+					if (value.getOwnerPath().equals(canonicalPath)) {
+						if (result != EditorGroup.EMPTY) {//more than one group in file
+							result = EditorGroup.EMPTY;
+							break;
+						}
+						result = value;
+					}
+				}
+			}
+		}
 		//init
 		result.getLinks(project);
 
@@ -96,27 +116,33 @@ public class IndexCache {
 
 
 	private void addToCache(List<String> links, EditorGroupIndexValue group) {
+		add(group, group.getOwnerPath());
+
 		for (String link : links) {
-			EditorGroups editorGroups = groupsByLinks.get(link);
-			if (editorGroups == null) {
-				EditorGroups value = new EditorGroups();
-				value.add(group);
-				groupsByLinks.put(link, value);
-			} else {
-				editorGroups.add(group);
-			}
+			add(group, link);
 		}
 	}
 
-	public EditorGroupIndexValue onIndexingDone(EditorGroupIndexValue group) {
-		//return cached group TODO
-//		EditorGroups editorGroups = groupsByLinks.get(group.getOwnerPath());
-//		if (editorGroups != null) {
-//			EditorGroup editorGroup = editorGroups.getById(group.getId());
-//			if (group.equals(editorGroup)) {
-//				return (EditorGroupIndexValue) editorGroup;
-//			}
-//		}
+
+	private void add(@NotNull EditorGroupIndexValue group, @NotNull String link) {
+		EditorGroups editorGroups = groupsByLinks.get(link);
+		if (editorGroups == null) {
+			EditorGroups value = new EditorGroups();
+			value.add(group);
+			groupsByLinks.put(link, value);
+		} else {
+			editorGroups.add(group);
+		}
+	}
+
+	public EditorGroupIndexValue onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {
+		EditorGroups editorGroups = groupsByLinks.get(ownerPath);
+		if (editorGroups != null) {
+			EditorGroup editorGroup = editorGroups.getById(group.getId());
+			if (group.equals(editorGroup)) {
+				return (EditorGroupIndexValue) editorGroup;
+			}
+		}
 
 
 		initGroup(group);
@@ -125,10 +151,10 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		List<String> links = fileResolver.resolveLinks(project, group.getRootPath(), group.getRelatedPaths());
-		if (links.size() > 100) {
+		List<String> links = fileResolver.resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths());
+		if (links.size() > LINKS_LIMIT) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
-			links = new ArrayList<>(links.subList(0, 100));
+			links = new ArrayList<>(links.subList(0, LINKS_LIMIT));
 		}
 		group.setLinks(links);
 
@@ -156,7 +182,7 @@ public class IndexCache {
 					}
 				} else {
 					EditorGroup lastGroup = getById(last);
-					if (lastGroup.containsLink(project, currentFilePath)) {
+					if (lastGroup.containsLink(project, currentFilePath) || lastGroup.isOwner(currentFilePath)) {
 						result = lastGroup;
 					}
 				}
@@ -237,7 +263,7 @@ public class IndexCache {
 
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
-		List<String> links = fileResolver.resolveLinks(project, folder, Collections.singletonList("./"));
+		List<String> links = fileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"));
 		return new FolderGroup(folder, links);
 	}
 
@@ -286,7 +312,7 @@ public class IndexCache {
 		Collections.sort(paths);
 
 		long t0 = System.currentTimeMillis() - start;
-		if (t0 > 100) {
+		if (t0 > LINKS_LIMIT) {
 			LOG.warn("getSameNameGroup took " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 		}
 		if (LOG.isDebugEnabled())

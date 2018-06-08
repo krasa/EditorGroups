@@ -33,6 +33,10 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		map.remove(editorGroup.getId());
 	}
 
+	public Map<String, EditorGroup> getMap() {
+		return map;
+	}
+
 	@Override
 	public String getId() {
 		return "EDITOR_GROUPS";
@@ -125,4 +129,5 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		}
 		return group;
 	}
+
 }

@@ -90,8 +90,8 @@ public class PanelRefresher {
 
 	}
 
-	public EditorGroupIndexValue onIndexingDone(String ownerPath, EditorGroupIndexValue group) {
-		group = cache.onIndexingDone(group);
+	public EditorGroupIndexValue onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {
+		group = cache.onIndexingDone(ownerPath, group);
 		if (DumbService.isDumb(project)) { //optimization
 			return group;
 		}

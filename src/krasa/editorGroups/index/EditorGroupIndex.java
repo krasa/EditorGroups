@@ -25,6 +25,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 		public void save(@NotNull DataOutput out, EditorGroupIndexValue value) throws IOException {
 			//WATCH OUT FOR HASHCODE AND EQUALS!!
 			out.writeUTF(value.getId());
+			out.writeUTF(value.getOwnerPath());
 			out.writeUTF(value.getRoot());
 			out.writeUTF(value.getTitle());
 			out.writeUTF(value.getBackgroundColor());
@@ -43,6 +44,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 			//WATCH OUT FOR HASHCODE AND EQUALS!!
 			EditorGroupIndexValue value = new EditorGroupIndexValue();
 			value.setId(in.readUTF());
+			value.setOwnerPath(in.readUTF());
 			value.setRoot(in.readUTF());
 			value.setTitle(in.readUTF());
 			value.setBackgroundColor(in.readUTF());
@@ -62,7 +64,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 
 	@Override
 	public int getVersion() {
-		return 5;
+		return 6;
 	}
 
 	@Override
