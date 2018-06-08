@@ -1,0 +1,8 @@
+@group.title group1
+@group.related ./*
+@group.color black
+
+
+@group.title group2
+@group.related ./*
+@group.color red

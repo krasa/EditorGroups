@@ -44,6 +44,13 @@
         <applicationConfigurable instance="krasa.editorGroups.MyConfigurable" id="EditorGroups"
                                  displayName="Editor Groups"/>
 
+        <fileTypeFactory implementation="krasa.editorGroups.language.EditorGroupsTypeFactory"/>
+        <lang.parserDefinition language="EditorGroups"
+                               implementationClass="krasa.editorGroups.language.EditorGroupsParserDefinition"/>
+        <lang.commenter language="EditorGroups"
+                        implementationClass="krasa.editorGroups.language.EditorGroupsCommenter"/>
+        <externalAnnotator implementationClass="krasa.editorGroups.language.annotator.EditorGroupsExternalAnnotator"
+                           language="EditorGroups"/>
     </extensions>
 
     <project-components>

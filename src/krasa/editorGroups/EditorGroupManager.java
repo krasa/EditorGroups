@@ -23,15 +23,15 @@ import java.util.Comparator;
 import java.util.List;
 
 /*
- * @idea.title CORE
- * @idea.color black
- * @idea.related ./*
+ * @group.title CORE
+ * @group.color black
+ * @group.related ./*
  *
  *
- * @idea.title CORE2
- * @idea.color black
- * @idea.related EditorGroupPanel
- * @idea.related IndexCache
+ * @group.title CORE2
+ * @group.color black
+ * @group.related EditorGroupPanel
+ * @group.related IndexCache
  *
  *
  */

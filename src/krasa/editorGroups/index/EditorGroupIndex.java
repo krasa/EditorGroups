@@ -13,8 +13,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.util.List;
 
-//@idea.title Index
-//@idea.related PlainTextIndexer.java
+//@group.title Index
+//@group.related PlainTextIndexer.java
 public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGroupIndexValue> {
 	@NonNls
 	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("krasa.EditorGroupIndex");

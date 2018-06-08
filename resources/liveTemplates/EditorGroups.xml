@@ -1,19 +1,19 @@
 <templateSet group="EditorGroups">
-    <template name="@ic" value="@idea.color $CARET$" description="Group color - EditorGroups plugin" toReformat="true"
+    <template name="@gc" value="@group.color $CARET$" description="Group color - EditorGroups plugin" toReformat="true"
               toShortenFQNames="true">
         <variable name="CARET" expression="" defaultValue="" alwaysStopAt="true"/>
         <context>
             <option name="OTHER" value="true"/>
         </context>
     </template>
-    <template name="@ir" value="@idea.related $CARET$" description="Related files - EditorGroups plugin"
+    <template name="@gr" value="@group.related $CARET$" description="Related files - EditorGroups plugin"
               toReformat="true" toShortenFQNames="true">
         <variable name="CARET" expression="" defaultValue="" alwaysStopAt="true"/>
         <context>
             <option name="OTHER" value="true"/>
         </context>
     </template>
-    <template name="@it" value="@idea.title $CARET$" description="Group title - EditorGroups plugin" toReformat="true"
+    <template name="@gt" value="@group.title $CARET$" description="Group title - EditorGroups plugin" toReformat="true"
               toShortenFQNames="true">
         <variable name="CARET" expression="" defaultValue="" alwaysStopAt="true"/>
         <context>

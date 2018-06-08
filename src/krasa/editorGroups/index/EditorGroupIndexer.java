@@ -22,14 +22,14 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
-	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@idea\\.\\w+\\s.*", false);
+	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@(idea|group)\\.\\w+\\s.*", false);
 	@SuppressWarnings("unchecked")
 	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.title\\s(.*)", false), new TitleConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.color\\s(.*)", false), new ColorConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@idea\\.related\\s(.*)", false), new RelatedFilesConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@idea\\.disable\\s.*)", false), new DisableConsumer())
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.color\\s(.*)", false), new ColorConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.related\\s(.*)", false), new RelatedFilesConsumer()),
+		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@(idea|group)\\.disable\\s.*)", false), new DisableConsumer())
 	};
 
 	@Override

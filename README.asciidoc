@@ -12,39 +12,39 @@ image::example.jpg[]
 Add anywhere in the file:
                         
 === Title customization
-- @idea.title yourTitle (creates a new group if there is more than one)
-- @idea.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
-- @idea.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
-- @idea.color #FF0096
-- @idea.color 0xFF0096
+- @group.title yourTitle (creates a new group if there is more than one)
+- @group.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
+- @group.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
+- @group.color #FF0096
+- @group.color 0xFF0096
 
 === Relative paths to the current file
-- @idea.related file.txt
-- @idea.related ../file.txt
+- @group.related file.txt
+- @group.related ../file.txt
 
 === Absolute paths
-- @idea.related C:/file.txt
-- @idea.related /file.txt
+- @group.related C:/file.txt
+- @group.related /file.txt
 
 === Macros
-- @idea.related MODULE/src/file.txt
-- @idea.related PROJECT/myModule/src/file.txt
+- @group.related MODULE/src/file.txt
+- @group.related PROJECT/myModule/src/file.txt
 
 === Wildcards
-- @idea.related ./*
-- @idea.related *.txt
-- @idea.related file.*
-- @idea.related f??e.txt
-- @idea.related fileName (with all extensions, unless the file exists)
+- @group.related ./*
+- @group.related *.txt
+- @group.related file.*
+- @group.related f??e.txt
+- @group.related fileName (with all extensions, unless the file exists)
 
 === Exact filename anywhere in the project
-- @idea.related */foo/file.txt
+- @group.related */foo/file.txt
 
 === All files with the same name anywhere in the project
-- @idea.related \*/foo/file.*
+- @group.related \*/foo/file.*
 
 === Other
-- @idea.disable (disables indexing of the current file)
+- @group.disable (disables indexing of the current file)
                   
 == Shortcuts 
 - [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           

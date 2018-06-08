@@ -12,8 +12,8 @@ import java.util.List;
 import static com.intellij.openapi.util.text.StringUtil.isEmpty;
 import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
-// @idea.title EditorGroup
-// @idea.related EditorGroupIndexValue.java
+// @group.title EditorGroup
+// @group.related EditorGroupIndexValue.java
 public abstract class EditorGroup {
 	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 
