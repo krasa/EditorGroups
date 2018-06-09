@@ -1,5 +1,6 @@
 package krasa.editorGroups;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -13,6 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
@@ -268,11 +270,31 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			String name = Utils.toPresentableName(path);
 			setText(name);
 			setTooltipText(path);
-
+			setIcon(getFileIcon(path));
 			if (!new File(path).exists()) {
 				setEnabled(false);
 			}
 		}
+	}
+
+	@Nullable
+	private Icon getFileIcon(String path) {
+//		final VirtualFile file1 = Utils.getVirtualFileByAbsolutePath(path);
+//		if (file1 == null) {
+//			return null;
+//		}
+//		if (!file1.isValid()) {
+//			Icon fakeIcon = FileTypes.UNKNOWN.getIcon();
+//			assert fakeIcon != null : "Can't find the icon for unknown file type";
+//			return fakeIcon;
+//		}
+//
+//		Icon lastIcon = Iconable.LastComputedIcon.get(file1, Iconable.ICON_FLAG_READ_STATUS);
+//
+//		final Icon base = lastIcon != null ? lastIcon : VirtualFilePresentation.getIconImpl(file1);
+
+		//10x faster than the right thing
+		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
 	}
 
 	class MyGroupTabInfo extends TabInfo {
@@ -283,7 +305,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
 			setText("[ " + title + " ]");
 			setToolTipText(editorGroup.getTabGroupTooltipText(EditorGroupPanel.this.project));
-
+			setIcon(AllIcons.Actions.GroupByModule);
 		}
 	}
 
