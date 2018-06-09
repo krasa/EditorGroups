@@ -148,7 +148,9 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		}
 
 		public void setTabBgColor(Color color) {
-			this.tabBgColor = color.getRGB();
+			if (color != null) {
+				this.tabBgColor = color.getRGB();
+			}
 		}
 
 		public boolean isTabBgColorEnabled() {
@@ -164,7 +166,9 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		}
 
 		public void setTabFgColor(Color color) {
-			this.tabFgColor = color.getRGB();
+			if (color != null) {
+				this.tabFgColor = color.getRGB();
+			}
 		}
 
 		public boolean isTabFgColorEnabled() {
