@@ -246,7 +246,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			currentIndex = -1;
 			tabs.addTab(info, 0);
 			tabs.setMySelectedInfo(info);
-		} else if (currentIndex < 0) {
+		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY) {
 			LOG.error("current file is not contained in group " + file + " " + displayedGroup);
 		}
 	}
