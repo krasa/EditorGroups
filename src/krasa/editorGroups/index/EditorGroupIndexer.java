@@ -27,7 +27,7 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
-	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@(idea|group)\\.\\w+\\s.*", false);
+	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@(idea|group)\\.\\w+.*", false);
 
 	public static final int INDEX_PATTERN_GROUP = 2;
 	@SuppressWarnings("unchecked")

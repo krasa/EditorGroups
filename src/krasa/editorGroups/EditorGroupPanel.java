@@ -244,7 +244,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			MyTabInfo tab = new MyTabInfo(path);
 
 			tabs.addTab(tab);
-
+//			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
+//				tab.setText("[" + displayedGroup.getTitle() + "]");
+//			}
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
 

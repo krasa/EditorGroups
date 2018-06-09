@@ -10,6 +10,7 @@ import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
+import krasa.editorGroups.support.Notifications;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -97,7 +98,7 @@ public class IndexCache {
 	private EditorGroup getGroupFromIndexById(String id) {
 		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, id, GlobalSearchScope.projectScope(project));
 		if (values.size() > 1) {
-			LOG.error("More than one group with id=" + id + " " + String.valueOf(values));
+			Notifications.duplicateId(id, values);
 		}
 		return values.size() == 0 ? EditorGroup.EMPTY : values.get(0);
 	}
@@ -139,7 +140,7 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		List<String> links = FileResolver.resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths());
+		List<String> links = FileResolver.resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths(), group);
 		if (links.size() > LINKS_LIMIT) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
 			links = new ArrayList<>(links.subList(0, LINKS_LIMIT));

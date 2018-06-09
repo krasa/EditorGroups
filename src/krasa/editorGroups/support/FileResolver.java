@@ -13,6 +13,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.language.EditorGroupsLanguage;
+import krasa.editorGroups.model.EditorGroupIndexValue;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -35,8 +36,8 @@ public class FileResolver {
 
 	private boolean excludeEditorGroupsFiles;
 
-	public static List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
-		return new FileResolver().resolve(project, ownerFilePath, root, relatedPaths);
+	public static List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
+		return new FileResolver().resolve(project, ownerFilePath, root, relatedPaths, group);
 	}
 
 	protected FileResolver() {
@@ -44,7 +45,7 @@ public class FileResolver {
 	}
 
 	@NotNull
-	private List<String> resolve(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths) {
+	private List<String> resolve(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
 		long start = System.currentTimeMillis();
 
 		Set<String> links = new LinkedHashSet<String>() {
@@ -60,15 +61,26 @@ public class FileResolver {
 			VirtualFile ownerFile = null;
 			if (ownerFilePath != null) {
 				ownerFile = Utils.getFileByPath(ownerFilePath);
+				if (root.startsWith("..")) {
+
+					File file = new File(new File(ownerFilePath).getParentFile(), root);
+					LOG.debug("root " + file + "  exists=" + file.exists());
+					root = file.getCanonicalPath();
+				}
 			}
 			root = useMacros(project, ownerFile, root);
 
 
 			File rootFile = new File(root);
+			if (!rootFile.exists()) {
+				Notifications.notify2("Root does not exist [" + root + "] >>> " + group);
+			}
 			String rootFolder = rootFile.isFile() ? rootFile.getParent() : root;
 
 
-			add(links, rootFile, false);
+			if (ownerFilePath != null) {
+				add(links, new File(ownerFilePath), false);
+			}
 
 
 			for (String filePath : relatedPaths) {
