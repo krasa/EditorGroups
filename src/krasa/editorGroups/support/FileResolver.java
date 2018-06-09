@@ -45,6 +45,15 @@ public class FileResolver {
 	}
 
 	@NotNull
+	public static List<String> resolveLinks(@NotNull EditorGroupIndexValue group, Project project) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug(">resolveLinks [" + group + "], project = [" + project + "]");
+		}
+
+		return resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths(), group);
+	}
+
+	@NotNull
 	private List<String> resolve(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
 		long start = System.currentTimeMillis();
 
@@ -64,7 +73,9 @@ public class FileResolver {
 				if (root.startsWith("..")) {
 
 					File file = new File(new File(ownerFilePath).getParentFile(), root);
-					LOG.debug("root " + file + "  exists=" + file.exists());
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("root " + file + "  exists=" + file.exists());
+					}
 					root = file.getCanonicalPath();
 				}
 			}
@@ -114,7 +125,7 @@ public class FileResolver {
 			throw new RuntimeException(e);
 		}
 		if (LOG.isDebugEnabled())
-			LOG.debug("resolveLinks " + (System.currentTimeMillis() - start) + "ms ownerPath=" + root);
+			LOG.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
 		return new ArrayList<>(links);
 	}
 
