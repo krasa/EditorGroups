@@ -222,6 +222,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					presentation.setIcon(AllIcons.Actions.Copy);
 				} else if (displayedGroup instanceof FavoritesGroup) {
 					presentation.setIcon(AllIcons.Toolwindows.ToolWindowFavorites);
+				} else if (displayedGroup instanceof EditorGroups) {
+					presentation.setIcon(AllIcons.Actions.GroupBy);
 				} else {
 					presentation.setIcon(AllIcons.Actions.GroupByModule);
 				}
