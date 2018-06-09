@@ -47,6 +47,10 @@ public class EditorGroupsExternalAnnotator extends ExternalAnnotator<EditorGroup
 			DefaultLanguageHighlighterColors.STATIC_FIELD));
 
 		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
+			LanguagePatternHolder.INSTANCE.macrosPattern,
+			DefaultLanguageHighlighterColors.STATIC_METHOD));
+
+		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
 			LanguagePatternHolder.INSTANCE.metadataPattern,
 			DefaultLanguageHighlighterColors.METADATA));
 

@@ -16,4 +16,12 @@ public class EditorGroupsPsiFile extends PsiFileBase {
 	public FileType getFileType() {
 		return EditorGroupsFileType.EDITOR_GROUPS_FILE_TYPE;
 	}
+
+
+	@Override
+	public String toString() {
+		return "EditorGroupsPsiFile{" +
+			"myOriginalFile=" + myOriginalFile +
+			'}';
+	}
 }

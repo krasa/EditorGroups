@@ -53,6 +53,13 @@
                         implementationClass="krasa.editorGroups.language.EditorGroupsCommenter"/>
         <externalAnnotator implementationClass="krasa.editorGroups.language.annotator.EditorGroupsExternalAnnotator"
                            language="EditorGroups"/>
+
+        <completion.contributor language="EditorGroups"
+                                implementationClass="krasa.editorGroups.language.MyFilePathCompletionContributor"
+                                id="EditorGroups_filePath"/>
+        <completion.contributor language="EditorGroups"
+                                implementationClass="krasa.editorGroups.language.MyCompletionContributor"
+                                id="EditorGroups_MyCompletionContributor"/>
     </extensions>
 
     <project-components>
