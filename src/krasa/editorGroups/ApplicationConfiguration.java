@@ -5,6 +5,9 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.awt.*;
 
 @State(
 	name = "EditorGroups",
@@ -45,6 +48,10 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		private boolean preferLatencyOverFlicker = true;
 		private boolean indexOnlyEditorGroupsFiles;
 		private boolean excludeEditorGroupsFiles;
+		private Integer tabBgColor;
+		private boolean tabBgColorEnabled;
+		private Integer tabFgColor;
+		private boolean tabFgColorEnabled;
 
 
 		public boolean isAutoFolders() {
@@ -119,5 +126,63 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public void setExcludeEditorGroupsFiles(final boolean excludeEditorGroupsFiles) {
 			this.excludeEditorGroupsFiles = excludeEditorGroupsFiles;
 		}
+
+		public void setTabBgColor(Integer tabBgColor) {
+			this.tabBgColor = tabBgColor;
+		}
+
+		public void setTabFgColor(Integer tabFgColor) {
+			this.tabFgColor = tabFgColor;
+		}
+
+		public Integer getTabBgColor() {
+			return tabBgColor;
+		}
+
+		public Integer getTabFgColor() {
+			return tabFgColor;
+		}
+
+		public Color getTabBgColorAsAWT() {
+			return asAWT(tabBgColor);
+		}
+
+		public void setTabBgColor(Color color) {
+			this.tabBgColor = color.getRGB();
+		}
+
+		public boolean isTabBgColorEnabled() {
+			return tabBgColorEnabled;
+		}
+
+		public void setTabBgColorEnabled(boolean tabBgColorEnabled) {
+			this.tabBgColorEnabled = tabBgColorEnabled;
+		}
+
+		public Color getTabFgColorAsAWT() {
+			return asAWT(tabFgColor);
+		}
+
+		public void setTabFgColor(Color color) {
+			this.tabFgColor = color.getRGB();
+		}
+
+		public boolean isTabFgColorEnabled() {
+			return tabFgColorEnabled;
+		}
+
+		public void setTabFgColorEnabled(boolean tabFgColorEnabled) {
+			this.tabFgColorEnabled = tabFgColorEnabled;
+		}
+
+	}
+
+
+	@Nullable
+	private static Color asAWT(Integer color) {
+		if (color == null) {
+			return null;
+		}
+		return new Color(color);
 	}
 }

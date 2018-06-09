@@ -105,7 +105,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		addButtons();
 
 //		groupsPanel.setLayout(new HorizontalLayout(0));
-		tabs = new krasa.editorGroups.tabs.impl.JBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor);
+		tabs = new krasa.editorGroups.tabs.impl.JBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor) {
+
+			@Override
+			public boolean hasUnderlineSelection() {
+				return true;
+			}
+		};
 		tabs.setSelectionChangeHandler(new JBTabs.SelectionChangeHandler() {
 			@NotNull
 			@Override
@@ -137,9 +143,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				return ActionCallback.DONE;
 			}
 		});
+		setPreferredSize(new Dimension(0, 26));
+		tabs.setAlwaysPaintSelectedTab(false);
 		JComponent component = tabs.getComponent();
 		add(component, BorderLayout.CENTER);
-
 
 		addMouseListener(getPopupHandler());
 		tabs.addMouseListener(getPopupHandler());
@@ -240,6 +247,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
+
+				ApplicationConfiguration.State state = ApplicationConfiguration.state();
+				if (state.isTabBgColorEnabled()) {
+					tab.setTabColor(state.getTabBgColorAsAWT());
+				}
+				if (state.isTabFgColorEnabled()) {
+					tab.setDefaultForeground(state.getTabFgColorAsAWT());
+				}
+
 				currentIndex = i1;
 			}
 		}
@@ -590,6 +606,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 		failed = 0;
+
 		groupManager.switching(false);
 		if (LOG.isDebugEnabled())
 			LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
