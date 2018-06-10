@@ -14,6 +14,7 @@ import com.intellij.ui.tabs.impl.JBEditorTabsPainter;
 import com.intellij.util.ReflectionUtil;
 import com.intellij.util.messages.MessageBus;
 import com.intellij.util.messages.MessageBusConnection;
+import com.intellij.util.ui.UIUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.awt.*;
@@ -94,14 +95,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 	}
 
 	private void patchPainter(final JBEditorTabs component) {
-		final JBEditorTabsPainter painter = ReflectionUtil.getField(JBEditorTabs.class, component, JBEditorTabsPainter.class, "myDarkPainter");
-
-		if (painter instanceof EditorGroupsTabsPainter) {
-			return;
-		}
-		if (!painter.getClass().getPackage().getName().startsWith("com.intellij")) {         //some other plugin
-			return;
-		}
+		if (alreadyPatched(component)) return;
 
 		final EditorGroupsTabsPainter tabsPainter = new EditorGroupsTabsPainter(component);
 		init(tabsPainter);
@@ -113,6 +107,27 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 		LOG.info("HACK: Overriding JBEditorTabsPainters");
 		ReflectionUtil.setField(JBEditorTabs.class, component, JBEditorTabsPainter.class, "myDefaultPainter", tabsPainter);
 		ReflectionUtil.setField(JBEditorTabs.class, component, JBEditorTabsPainter.class, "myDarkPainter", darculaTabsPainter);
+	}
+
+	private boolean alreadyPatched(JBEditorTabs component) {
+		if (UIUtil.isUnderDarcula()) {
+			JBEditorTabsPainter painter = ReflectionUtil.getField(JBEditorTabs.class, component, JBEditorTabsPainter.class, "myDarkPainter");
+			if (painter instanceof EditorGroupsTabsPainter) {
+				return true;
+			}
+			if (!painter.getClass().getPackage().getName().startsWith("com.intellij")) { //some other plugin
+				return true;
+			}
+		} else {
+			JBEditorTabsPainter painter = ReflectionUtil.getField(JBEditorTabs.class, component, JBEditorTabsPainter.class, "myDefaultPainter");
+			if (painter instanceof EditorGroupsTabsPainter) {
+				return true;
+			}
+			if (!painter.getClass().getPackage().getName().startsWith("com.intellij")) { //some other plugin
+				return true;
+			}
+		}
+		return false;
 	}
 
 
