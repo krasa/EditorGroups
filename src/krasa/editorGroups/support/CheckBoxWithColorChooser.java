@@ -94,8 +94,10 @@ public class CheckBoxWithColorChooser extends JPanel {
 		return myColor.getRGB();
 	}
 
-	public void setColor(int color) {
-		myColor = new Color(color);
+	public void setColor(Integer color) {
+		if (color != null) {
+			myColor = new Color(color);
+		}
 	}
 
 	public void setColor(Color color) {
