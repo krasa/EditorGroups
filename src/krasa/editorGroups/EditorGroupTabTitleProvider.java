@@ -80,7 +80,7 @@ public class EditorGroupTabTitleProvider implements EditorTabTitleProvider {
 		}
 
 		if (group != null && group.isValid() && !(group instanceof AutoGroup)) {
-			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI, ApplicationConfiguration.state().showSize);
+			presentableNameForUI = group.getPresentableTitle(project, presentableNameForUI, ApplicationConfiguration.state().isShowSize());
 		}
 		return presentableNameForUI;
 	}

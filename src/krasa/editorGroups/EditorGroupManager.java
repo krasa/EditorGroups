@@ -30,7 +30,7 @@ public class EditorGroupManager {
 //	private EditorGroup currentGroup = EditorGroup.EMPTY;
 	public IndexCache cache;
 
-	private ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.getInstance();
+	private ApplicationConfigurationComponent config = ApplicationConfigurationComponent.getInstance();
 	private PanelRefresher panelRefresher;
 	/**
 	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
@@ -75,7 +75,7 @@ public class EditorGroupManager {
 		String currentFilePath = currentFile.getCanonicalPath();
 
 
-		boolean force = refresh && ApplicationConfiguration.state().forceSwitch;
+		boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
 		if (force) {
 			if (result.isInvalid()) {
 				result = cache.getOwningOrSingleGroup(currentFilePath);
@@ -104,9 +104,9 @@ public class EditorGroupManager {
 		}
 
 		if (result.isInvalid()) {
-			if (applicationConfiguration.getState().autoSameName) {
+			if (config.getState().isAutoSameName()) {
 				result = AutoGroup.SAME_NAME_INSTANCE;
-			} else if (applicationConfiguration.getState().autoFolders) {
+			} else if (config.getState().isAutoFolders()) {
 				result = AutoGroup.DIRECTORY_INSTANCE;
 			}
 		}
@@ -128,7 +128,7 @@ public class EditorGroupManager {
 				EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
 				if (slaveGroup.isValid()) {
 					result = slaveGroup;
-				} else if (applicationConfiguration.getState().autoFolders
+				} else if (config.getState().isAutoFolders()
 					&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 					result = autogroupProvider.getFolderGroup(currentFile);
 				}

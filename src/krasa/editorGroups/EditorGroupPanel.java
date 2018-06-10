@@ -588,7 +588,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {
 		boolean visible;
-		if (ApplicationConfiguration.state().hideEmpty) {
+		if (ApplicationConfiguration.state().isHideEmpty()) {
 			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
 			visible = !hide;
 		} else {
@@ -637,12 +637,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private static void customizeSelectedColor(MyTabInfo tab) {
-		ApplicationConfiguration.State state = ApplicationConfiguration.state();
-		if (state.isTabBgColorEnabled()) {
-			tab.setTabColor(state.getTabBgColorAsAWT());
+		ApplicationConfiguration config = ApplicationConfiguration.state();
+		if (config.isTabBgColorEnabled()) {
+			tab.setTabColor(config.getTabBgColorAsAWT());
 		}
-		if (state.isTabFgColorEnabled()) {
-			tab.setDefaultForeground(state.getTabFgColorAsAWT());
+		if (config.isTabFgColorEnabled()) {
+			tab.setDefaultForeground(config.getTabFgColorAsAWT());
 		}
 	}
 }

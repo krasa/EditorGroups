@@ -44,6 +44,7 @@ public class MyConfigurable implements Configurable {
 	public void apply() throws ConfigurationException {
 		if (form != null) {
 			form.apply();
+			EditorGroupsTabsPainterPatcherComponent.onColorsChanged(ApplicationConfiguration.state());
 		}
 	}
 

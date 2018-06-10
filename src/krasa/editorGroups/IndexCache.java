@@ -154,15 +154,15 @@ public class IndexCache {
 	public EditorGroup getLastEditorGroup(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
-		ApplicationConfiguration.State state = ApplicationConfiguration.state();
+		ApplicationConfiguration config = ApplicationConfiguration.state();
 
 		if (groups != null) {
 			String last = groups.getLast();
 			if (LOG.isDebugEnabled()) LOG.debug("last = " + last);
 			if (last != null) {
-				if (includeAutogroups && state.autoSameName && AutoGroup.SAME_FILE_NAME.equals(last)) {
+				if (includeAutogroups && config.isAutoSameName() && AutoGroup.SAME_FILE_NAME.equals(last)) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
-				} else if (includeAutogroups && state.autoFolders && AutoGroup.DIRECTORY.equals(last)) {
+				} else if (includeAutogroups && config.isAutoFolders() && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
 					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
@@ -298,8 +298,8 @@ public class IndexCache {
 	public ProjectComponent.State getState() {
 		ProjectComponent.State state = new ProjectComponent.State();
 		Set<Map.Entry<String, EditorGroups>> entries = groupsByLinks.entrySet();
-		boolean autoSameName = ApplicationConfiguration.state().autoSameName;
-		boolean autoFolders = ApplicationConfiguration.state().autoFolders;
+		boolean autoSameName = ApplicationConfiguration.state().isAutoSameName();
+		boolean autoFolders = ApplicationConfiguration.state().isAutoFolders();
 
 		for (Map.Entry<String, EditorGroups> entry : entries) {
 			String last = entry.getValue().getLast();

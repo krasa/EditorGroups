@@ -38,7 +38,7 @@
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
 
-        <applicationService serviceImplementation="krasa.editorGroups.ApplicationConfiguration"/>
+        <applicationService serviceImplementation="krasa.editorGroups.ApplicationConfigurationComponent"/>
         <fileBasedIndex implementation="krasa.editorGroups.index.EditorGroupIndex"/>
         <fileBasedIndex implementation="krasa.editorGroups.index.FilenameWithoutExtensionIndex"/>
         <projectService serviceImplementation="krasa.editorGroups.PanelRefresher"/>
@@ -62,6 +62,11 @@
                                 id="EditorGroups_MyCompletionContributor"/>
     </extensions>
 
+    <application-components>
+        <component>
+            <implementation-class>krasa.editorGroups.EditorGroupsTabsPainterPatcherComponent</implementation-class>
+        </component>
+    </application-components>
     <project-components>
         <component>
             <implementation-class>krasa.editorGroups.ProjectComponent</implementation-class>

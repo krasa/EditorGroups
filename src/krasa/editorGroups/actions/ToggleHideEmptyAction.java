@@ -9,11 +9,11 @@ public class ToggleHideEmptyAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.state().hideEmpty;
+		return ApplicationConfiguration.state().isHideEmpty();
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.state().hideEmpty = state;
+		ApplicationConfiguration.state().setHideEmpty(state);
 	}
 }

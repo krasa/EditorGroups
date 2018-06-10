@@ -9,11 +9,11 @@ public class ToggleAutoSameNameGroupsAction extends ToggleAction implements Dumb
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.state().autoSameName;
+		return ApplicationConfiguration.state().isAutoSameName();
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.state().autoSameName = state;
+		ApplicationConfiguration.state().setAutoSameName(state);
 	}
 }

@@ -122,7 +122,7 @@ public abstract class EditorGroup {
 		if (title.isEmpty()) {
 			title = Utils.toPresentableName(getOwnerPath());
 		}
-		if (ApplicationConfiguration.state().showSize) {
+		if (ApplicationConfiguration.state().isShowSize()) {
 			title += ":" + size(project);
 		}
 		return title;

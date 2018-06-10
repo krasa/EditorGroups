@@ -21,6 +21,8 @@ import com.intellij.ui.JBColor;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -28,23 +30,27 @@ import java.awt.event.MouseEvent;
  * @author Konstantin Bulenkov
  */
 public class CheckBoxWithColorChooser extends JPanel {
-	private final JCheckBox myCheckbox;
+	private JCheckBox myCheckbox;
 	protected MyColorButton myColorButton;
 	private Color myColor;
+	private JButton defaultButton;
+	private Dimension colorDimension;
 
-	public CheckBoxWithColorChooser(String text, boolean selected) {
-		this(text, selected, Color.WHITE);
+	public CheckBoxWithColorChooser(String text, Boolean selected, Color defaultColor) {
+		this(text, selected, Color.WHITE, defaultColor);
 	}
 
-	public CheckBoxWithColorChooser(String text) {
-		this(text, false);
+	public CheckBoxWithColorChooser(String text, Color defaultColor) {
+		this(text, false, defaultColor);
 	}
 
-	public CheckBoxWithColorChooser(String text, boolean selected, Color color) {
+	public CheckBoxWithColorChooser(String text, Boolean selected, Color color, Color defaultColor) {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 		myColor = color;
-		myCheckbox = new JCheckBox(text, selected);
-		add(myCheckbox);
+		if (selected != null) {
+			myCheckbox = new JCheckBox(text, selected);
+			add(myCheckbox);
+		}
 		myColorButton = new MyColorButton();
 		add(myColorButton);
 		addMouseListener(new MouseAdapter() {
@@ -53,6 +59,27 @@ public class CheckBoxWithColorChooser extends JPanel {
 				myColorButton.mouseAdapter.mousePressed(e);
 			}
 		});
+
+		if (defaultColor != null) {
+			JPanel comp = new JPanel();
+			comp.setSize(20, 0);
+			add(comp);
+			defaultButton = new JButton("Reset to default");
+			add(defaultButton);
+			defaultButton.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					setColor(defaultColor);
+					CheckBoxWithColorChooser.this.repaint();
+				}
+			});
+		}
+		colorDimension = new Dimension(18, 18);
+	}
+
+	public CheckBoxWithColorChooser setColorDimension(Dimension colorDimension) {
+		this.colorDimension = colorDimension;
+		return this;
 	}
 
 	public void setMnemonic(char c) {
@@ -61,6 +88,14 @@ public class CheckBoxWithColorChooser extends JPanel {
 
 	public Color getColor() {
 		return myColor;
+	}
+
+	public int getColorAsRGB() {
+		return myColor.getRGB();
+	}
+
+	public void setColor(int color) {
+		myColor = new Color(color);
 	}
 
 	public void setColor(Color color) {
@@ -95,10 +130,10 @@ public class CheckBoxWithColorChooser extends JPanel {
 			mouseAdapter = new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent e) {
-					final Color color = ColorChooser.chooseColor(myCheckbox, "Chose color",
+					final Color color = ColorChooser.chooseColor(MyColorButton.this, "Chose color",
 						CheckBoxWithColorChooser.this.myColor);
 					if (color != null) {
-						if (!myCheckbox.isSelected()) {
+						if (myCheckbox != null && !myCheckbox.isSelected()) {
 							myCheckbox.setSelected(true);
 						}
 						myColor = color;
@@ -136,7 +171,7 @@ public class CheckBoxWithColorChooser extends JPanel {
 
 		@Override
 		public Dimension getPreferredSize() {
-			return new Dimension(12, 12);
+			return colorDimension;
 		}
 	}
 }

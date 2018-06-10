@@ -9,11 +9,11 @@ public class ToggleForceAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.state().forceSwitch;
+		return ApplicationConfiguration.state().isForceSwitch();
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.state().forceSwitch = state;
+		ApplicationConfiguration.state().setForceSwitch(state);
 	}
 }

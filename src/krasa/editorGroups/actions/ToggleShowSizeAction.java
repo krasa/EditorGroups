@@ -9,11 +9,11 @@ public class ToggleShowSizeAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(AnActionEvent e) {
-		return ApplicationConfiguration.state().showSize;
+		return ApplicationConfiguration.state().isShowSize();
 	}
 
 	@Override
 	public void setSelected(AnActionEvent e, boolean state) {
-		ApplicationConfiguration.state().showSize = state;
+		ApplicationConfiguration.state().setShowSize(state);
 	}
 }

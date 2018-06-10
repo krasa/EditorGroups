@@ -1,10 +1,8 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.diagnostic.Logger;
-import krasa.editorGroups.support.CheckBoxWithColorChooser;
 
 import javax.swing.*;
-import java.util.Objects;
 
 public class SettingsForm {
 
@@ -21,50 +19,39 @@ public class SettingsForm {
 	private JCheckBox latencyOverFlicker;
 	private JCheckBox indexOnlyEditorGroupsFileCheckBox;
 	private JCheckBox excludeEGroups;
-	private CheckBoxWithColorChooser tabBgColor;
-	private CheckBoxWithColorChooser tabFgColor;
+	private JPanel tabColors;
+	private TabsColors tabsColors;
 
 
 	public JPanel getRoot() {
 		return root;
 	}
 
-	public boolean isSettingsModified(ApplicationConfiguration.State data) {
-		if (tabBgColor.isSelected() != data.isTabBgColorEnabled()) return true;
-		if (!Objects.equals(tabBgColor.getColor(), data.getTabBgColorAsAWT())) return true;
-
-		if (tabFgColor.isSelected() != data.isTabFgColorEnabled()) return true;
-		if (!Objects.equals(tabFgColor.getColor(), data.getTabFgColorAsAWT())) return true;
+	public boolean isSettingsModified(ApplicationConfiguration data) {
+		if (tabsColors.isModified(data, data.getTabs())) return true;
 		return isModified(data);
 	}
 
-	public void importFrom(ApplicationConfiguration.State state) {
-		setData(state);
-		tabBgColor.setColor(state.getTabBgColorAsAWT());
-		tabBgColor.setSelected(state.isTabBgColorEnabled());
-
-		tabFgColor.setColor(state.getTabFgColorAsAWT());
-		tabFgColor.setSelected(state.isTabFgColorEnabled());
+	public void importFrom(ApplicationConfiguration applicationConfiguration) {
+		setData(applicationConfiguration);
+		tabsColors.setData(applicationConfiguration, applicationConfiguration.getTabs());
 	}
 
 	public void apply() {
 		if (LOG.isDebugEnabled()) LOG.debug("apply " + "");
-		ApplicationConfiguration.State state = ApplicationConfiguration.state();
-		getData(state);
-		state.setTabBgColorAWT(tabBgColor.getColor());
-		state.setTabBgColorEnabled(tabBgColor.isSelected());
+		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
 
-		state.setTabFgColorAWT(tabFgColor.getColor());
-		state.setTabFgColorEnabled(tabFgColor.isSelected());
+		getData(applicationConfiguration);
+		tabsColors.getData(applicationConfiguration, applicationConfiguration.getTabs());
 	}
 
 
 	private void createUIComponents() {
-		tabFgColor = new CheckBoxWithColorChooser("Custom selected tab foreground color ");
-		tabBgColor = new CheckBoxWithColorChooser("Custom selected tab background color ");
+		tabsColors = new TabsColors();
+		tabColors = tabsColors.getRoot();
 	}
 
-	public void setData(ApplicationConfiguration.State data) {
+	public void setData(ApplicationConfiguration data) {
 		byName.setSelected(data.isAutoSameName());
 		showSize.setSelected(data.isShowSize());
 		hideEmpty.setSelected(data.isHideEmpty());
@@ -76,7 +63,7 @@ public class SettingsForm {
 		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
 	}
 
-	public void getData(ApplicationConfiguration.State data) {
+	public void getData(ApplicationConfiguration data) {
 		data.setAutoSameName(byName.isSelected());
 		data.setShowSize(showSize.isSelected());
 		data.setHideEmpty(hideEmpty.isSelected());
@@ -88,7 +75,7 @@ public class SettingsForm {
 		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
 	}
 
-	public boolean isModified(ApplicationConfiguration.State data) {
+	public boolean isModified(ApplicationConfiguration data) {
 		if (byName.isSelected() != data.isAutoSameName()) return true;
 		if (showSize.isSelected() != data.isShowSize()) return true;
 		if (hideEmpty.isSelected() != data.isHideEmpty()) return true;
