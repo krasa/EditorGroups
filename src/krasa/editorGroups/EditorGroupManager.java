@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import krasa.editorGroups.model.*;
@@ -43,6 +44,7 @@ public class EditorGroupManager {
 	private boolean warningShown;
 	private ExternalGroupProvider externalGroupProvider;
 	private AutoGroupProvider autogroupProvider;
+	private Key<?> initial_editor_index;
 
 	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, IndexCache cache) {
 		this.cache = cache;
@@ -51,6 +53,14 @@ public class EditorGroupManager {
 		this.project = project;
 		this.externalGroupProvider = externalGroupProvider;
 		this.autogroupProvider = autogroupProvider;
+
+		//TODO 
+		try {
+			//noinspection deprecation
+			initial_editor_index = Key.findKeyByName("initial editor index");
+		} catch (Exception e) {
+			LOG.error(e);
+		}
 	}
 
 
@@ -228,7 +238,6 @@ public class EditorGroupManager {
 			warningShown = true;
 		}
 
-
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -245,7 +254,11 @@ public class EditorGroupManager {
 				return;
 			}
 			fileToOpen.putUserData(EditorGroupPanel.EDITOR_GROUP, group); // for project view colors
-			
+
+			if (initial_editor_index != null) {
+				fileToOpen.putUserData(initial_editor_index, null);
+			}
+
 			if (newWindow) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				manager.openFileInNewWindow(fileToOpen);
