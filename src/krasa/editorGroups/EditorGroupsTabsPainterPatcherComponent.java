@@ -181,7 +181,6 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 			super(component);
 			mask = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_MASK;
 			opacity = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_OPACITY;
-			myDefaultTabColor = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_TAB_COLOR;
 		}
 
 		@Override
