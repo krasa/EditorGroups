@@ -1,5 +1,8 @@
 package krasa.editorGroups.support;
 
+import com.intellij.ide.actions.OpenFileAction;
+import com.intellij.notification.Notification;
+import com.intellij.notification.NotificationListener;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
@@ -22,6 +25,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.event.HyperlinkEvent;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
@@ -150,7 +154,13 @@ public class FileResolver {
 
 		File rootFile = new File(root);
 		if (!rootFile.exists()) {
-			Notifications.warning("Root does not exist [" + root + "] >>> " + group);
+			Notifications.warning("Root does not exist [" + root + "] in " + Notifications.href(ownerFile) + "<br\\>" + group, new NotificationListener.Adapter() {
+				@Override
+				protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
+					OpenFileAction.openFile(ownerFile, project);
+					notification.expire();
+				}
+			});
 		}
 		return rootFile.isFile() ? rootFile.getParent() : root;
 	}

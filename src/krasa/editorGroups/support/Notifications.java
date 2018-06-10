@@ -42,7 +42,7 @@ public class Notifications {
 	}
 
 	public static void duplicateId(EditorGroupIndexValue lastGroup, VirtualFile file, Project project) {
-		String content = "Duplicate Group ID '" + lastGroup.getId() + "' in <a href=\"#\">" + file.getName() + "<a/>";
+		String content = "Duplicate Group ID '" + lastGroup.getId() + "' in " + href(file);
 		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
@@ -51,6 +51,18 @@ public class Notifications {
 			}
 		});
 		show(notification);
+	}
+
+	public static String href(VirtualFile file) {
+		if (file == null) {
+			return null;
+		}
+		return href(file.getName());
+	}
+
+	@NotNull
+	public static String href(String name) {
+		return "<a href=\"#\">" + name + "<a/>";
 	}
 
 
@@ -72,13 +84,11 @@ public class Notifications {
 		}
 		sb.append("]");
 		String content = sb.toString();
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, null);
-		LOG.warn(new RuntimeException(content));                
-		show(notification);
+		warning(content, null);
 	}
 
-	public static void warning(String content) {
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, null);
+	public static void warning(String content, NotificationListener listener) {
+		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, listener);
 		LOG.warn(new RuntimeException(content));                
 		show(notification);
 	}
