@@ -52,11 +52,9 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 			if (editorGroupsTabsPainter instanceof DarculaEditorGroupsTabsPainter) {
 				editorGroupsTabsPainter.setOpacity(tabs.getDarcula_opacity());
 				editorGroupsTabsPainter.setMask(new Color(tabs.getDarcula_mask()));
-				editorGroupsTabsPainter.setDefaultTabColor(new Color(tabs.getDarcula_defaultTabColor()));
 			} else {
 				editorGroupsTabsPainter.setOpacity(tabs.getOpacity());
 				editorGroupsTabsPainter.setMask(new Color(tabs.getMask()));
-				editorGroupsTabsPainter.setDefaultTabColor(new Color(tabs.getDefaultTabColor()));
 			}
 			JBEditorTabs painterTabs = editorGroupsTabsPainter.getTabs();
 			if (!painterTabs.isDisposed()) {
@@ -139,11 +137,10 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 
 	public static class EditorGroupsTabsPainter extends DefaultEditorTabsPainter {
 
-		private final JBEditorTabs tabs;
+		private JBEditorTabs tabs;
 
 		protected Color mask;
 		protected int opacity;
-		protected Color defaultTabColor;
 
 		/**
 		 * @see DefaultEditorTabsPainter#getInactiveMaskColor()
@@ -153,19 +150,10 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 			this.tabs = tabs;
 			mask = ApplicationConfiguration.Tabs.DEFAULT_MASK;
 			opacity = ApplicationConfiguration.Tabs.DEFAULT_OPACITY;
-			defaultTabColor = ApplicationConfiguration.Tabs.DEFAULT_TAB_COLOR;
 		}
 
 		public JBEditorTabs getTabs() {
 			return tabs;
-		}
-
-		@Override
-		protected Color getDefaultTabColor() {
-			if (myDefaultTabColor != null) {
-				return myDefaultTabColor;
-			}
-			return defaultTabColor;
 		}
 
 
@@ -193,7 +181,6 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 			super(component);
 			mask = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_MASK;
 			opacity = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_OPACITY;
-			defaultTabColor = ApplicationConfiguration.Tabs.DEFAULT_DARCULA_TAB_COLOR;
 		}
 
 	}

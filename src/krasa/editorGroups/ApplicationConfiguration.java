@@ -180,11 +180,9 @@ public class ApplicationConfiguration {
 
 		private Integer mask = DEFAULT_MASK.getRGB();
 		private int opacity = DEFAULT_OPACITY;
-		private Integer defaultTabColor = DEFAULT_TAB_COLOR.getRGB();
 
 		private Integer darcula_mask = DEFAULT_DARCULA_MASK.getRGB();
 		private int darcula_opacity = DEFAULT_DARCULA_OPACITY;
-		private Integer darcula_defaultTabColor = DEFAULT_DARCULA_TAB_COLOR.getRGB();
 
 		public Integer getMask() {
 			return mask;
@@ -202,14 +200,6 @@ public class ApplicationConfiguration {
 			this.opacity = opacity;
 		}
 
-		public Integer getDefaultTabColor() {
-			return defaultTabColor;
-		}
-
-		public void setDefaultTabColor(Integer defaultTabColor) {
-			this.defaultTabColor = defaultTabColor;
-		}
-
 		public Integer getDarcula_mask() {
 			return darcula_mask;
 		}
@@ -224,14 +214,6 @@ public class ApplicationConfiguration {
 
 		public void setDarcula_opacity(int darcula_opacity) {
 			this.darcula_opacity = darcula_opacity;
-		}
-
-		public Integer getDarcula_defaultTabColor() {
-			return darcula_defaultTabColor;
-		}
-
-		public void setDarcula_defaultTabColor(Integer darcula_defaultTabColor) {
-			this.darcula_defaultTabColor = darcula_defaultTabColor;
 		}
 
 		public boolean isPatchPainter() {

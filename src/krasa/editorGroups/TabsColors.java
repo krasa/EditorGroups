@@ -77,11 +77,9 @@ public class TabsColors {
 		enabledCheckBox.setSelected(data.isPatchPainter());
 
 		mask.setColor(data.getMask());
-		defaultTabColor.setColor(data.getDefaultTabColor());
 		opacity.setText(String.valueOf(data.getOpacity()));
 
 		darcula_mask.setColor(data.getDarcula_mask());
-		darcula_defaultTabColor.setColor(data.getDarcula_defaultTabColor());
 		darcula_opacity.setText(String.valueOf(data.getDarcula_opacity()));
 	}
 
@@ -96,11 +94,9 @@ public class TabsColors {
 		data.setPatchPainter(enabledCheckBox.isSelected());
 
 		data.setMask(mask.getColorAsRGB());
-		data.setDefaultTabColor(defaultTabColor.getColorAsRGB());
 		data.setOpacity(opacity.getText());
 
 		data.setDarcula_mask(darcula_mask.getColorAsRGB());
-		data.setDarcula_defaultTabColor(darcula_defaultTabColor.getColorAsRGB());
 		data.setDarcula_opacity(darcula_opacity.getText());
 
 		setData(applicationConfiguration, data);
@@ -120,11 +116,9 @@ public class TabsColors {
 
 		if (!Objects.equals(mask.getColorAsRGB(), data.getMask())) return true;
 		if (!Objects.equals(opacity.getText(), String.valueOf(data.getOpacity()))) return true;
-		if (!Objects.equals(defaultTabColor.getColorAsRGB(), data.getDefaultTabColor())) return true;
 
 		if (!Objects.equals(darcula_mask.getColorAsRGB(), data.getDarcula_mask())) return true;
 		if (!Objects.equals(darcula_opacity.getText(), String.valueOf(data.getDarcula_opacity()))) return true;
-		if (!Objects.equals(darcula_defaultTabColor.getColorAsRGB(), data.getDarcula_defaultTabColor())) return true;
 
 		return false;
 	}
