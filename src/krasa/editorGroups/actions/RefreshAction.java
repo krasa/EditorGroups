@@ -4,6 +4,9 @@ import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
+import com.intellij.openapi.editor.Document;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.PopupHandler;
@@ -15,6 +18,11 @@ import java.awt.*;
 public class RefreshAction extends DumbAwareAction implements CustomComponentAction {
 	@Override
 	public void actionPerformed(AnActionEvent anActionEvent) {
+		Document doc = getDocument(anActionEvent);
+		if (doc != null) {
+			FileDocumentManager.getInstance().saveDocument(doc);
+		}
+		
 		FileEditor data = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
 		if (data != null) {
 			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
@@ -37,4 +45,8 @@ public class RefreshAction extends DumbAwareAction implements CustomComponentAct
 		return refresh;
 	}
 
+	private static Document getDocument(AnActionEvent e) {
+		Editor editor = e.getData(CommonDataKeys.EDITOR);
+		return editor != null ? editor.getDocument() : null;
+	}
 }
