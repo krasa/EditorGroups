@@ -28,10 +28,7 @@ import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.language.EditorGroupsLanguage;
-import krasa.editorGroups.model.AutoGroup;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.GroupsHolder;
+import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import krasa.editorGroups.tabs.JBTabs;
 import krasa.editorGroups.tabs.TabInfo;
@@ -202,13 +199,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void addButtons() {
 		DefaultActionGroup actionGroup = new DefaultActionGroup();
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
-//		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Previous"));
-//		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));
 		actionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.SwitchGroup"));
-
-
-		DefaultActionGroup action = new DefaultActionGroup();
-		actionGroup.add(action);
 
 		toolbar = ActionManager.getInstance().createActionToolbar("krasa.editorGroups.EditorGroupPanel", actionGroup, true);
 		toolbar.setTargetComponent(this);
@@ -220,7 +211,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void reloadTabs() {
 		tabs.removeAllTabs();
+
 		createLinks();
+
+		addCurrentFileTab();
+		
 		if (displayedGroup instanceof GroupsHolder) {
 			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 		}
@@ -249,32 +244,28 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //			}
 			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
-
-				ApplicationConfiguration.State state = ApplicationConfiguration.state();
-				if (state.isTabBgColorEnabled()) {
-					tab.setTabColor(state.getTabBgColorAsAWT());
-				}
-				if (state.isTabFgColorEnabled()) {
-					tab.setDefaultForeground(state.getTabFgColorAsAWT());
-				}
-
+				customizeSelectedColor(tab);
 				currentIndex = i1;
 			}
 		}
+
+
+	}
+
+	private void addCurrentFileTab() {
 		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
 			MyTabInfo info = new MyTabInfo(file.getCanonicalPath());
+			customizeSelectedColor(info);
 			currentIndex = -1;
 			tabs.addTab(info, 0);
 			tabs.setMySelectedInfo(info);
-		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY) {
+		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY && !(displayedGroup instanceof EditorGroups)) {
 			LOG.error("current file is not contained in group " + file + " " + displayedGroup);
 		}
 	}
 
+
 	private void createGroupLinks(Collection<EditorGroup> groups) {
-		if (tabs.getTabCount() == 0) {
-			tabs.addTab(new MyTabInfo(file.getCanonicalPath()));
-		}
 		for (EditorGroup editorGroup : groups) {
 			tabs.addTab(new MyGroupTabInfo(editorGroup));
 		}
@@ -295,25 +286,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	@Nullable
-	private Icon getFileIcon(String path) {
-//		final VirtualFile file1 = Utils.getVirtualFileByAbsolutePath(path);
-//		if (file1 == null) {
-//			return null;
-//		}
-//		if (!file1.isValid()) {
-//			Icon fakeIcon = FileTypes.UNKNOWN.getIcon();
-//			assert fakeIcon != null : "Can't find the icon for unknown file type";
-//			return fakeIcon;
-//		}
-//
-//		Icon lastIcon = Iconable.LastComputedIcon.get(file1, Iconable.ICON_FLAG_READ_STATUS);
-//
-//		final Icon base = lastIcon != null ? lastIcon : VirtualFilePresentation.getIconImpl(file1);
-
-		//10x faster than the right thing
-		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
-	}
 
 	class MyGroupTabInfo extends TabInfo {
 		EditorGroup editorGroup;
@@ -321,7 +293,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		public MyGroupTabInfo(EditorGroup editorGroup) {
 			this.editorGroup = editorGroup;
 			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
-			setText("[ " + title + " ]");
+			setText("[" + title + "]");
 			setToolTipText(editorGroup.getTabGroupTooltipText(EditorGroupPanel.this.project));
 			setIcon(AllIcons.Actions.GroupByModule);
 		}
@@ -656,5 +628,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	public VirtualFile getFile() {
 		return file;
+	}
+
+
+	@Nullable
+	private static Icon getFileIcon(String path) {
+		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
+	}
+
+	private static void customizeSelectedColor(MyTabInfo tab) {
+		ApplicationConfiguration.State state = ApplicationConfiguration.state();
+		if (state.isTabBgColorEnabled()) {
+			tab.setTabColor(state.getTabBgColorAsAWT());
+		}
+		if (state.isTabFgColorEnabled()) {
+			tab.setDefaultForeground(state.getTabFgColorAsAWT());
+		}
 	}
 }

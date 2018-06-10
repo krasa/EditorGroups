@@ -4,6 +4,7 @@ import com.intellij.ide.actions.OpenFileAction;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.notification.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
@@ -14,6 +15,9 @@ import javax.swing.event.HyperlinkEvent;
 import java.util.List;
 
 public class Notifications {
+
+	private static final Logger LOG = Logger.getInstance(Notifications.class);
+
 	public static final NotificationGroup NOTIFICATION = new NotificationGroup("Editor Groups", NotificationDisplayType.BALLOON, true);
 
 	public static void notifyMissingFile(EditorGroup group, String path) {
@@ -67,12 +71,15 @@ public class Notifications {
 			}
 		}
 		sb.append("]");
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", sb.toString(), NotificationType.WARNING, null);
+		String content = sb.toString();
+		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, null);
+		LOG.warn(new RuntimeException(content));                
 		show(notification);
 	}
 
-	public static void notify2(String content) {
+	public static void warning(String content) {
 		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, null);
+		LOG.warn(new RuntimeException(content));                
 		show(notification);
 	}
 }

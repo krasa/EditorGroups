@@ -133,4 +133,11 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		return group;
 	}
 
+	@Override
+	public String toString() {
+		return "EditorGroups{" +
+			"map=" + map +
+			", last='" + last + '\'' +
+			'}';
+	}
 }

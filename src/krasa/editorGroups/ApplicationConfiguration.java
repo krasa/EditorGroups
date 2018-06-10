@@ -4,6 +4,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
+import com.intellij.util.xmlb.annotations.Transient;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -143,15 +144,6 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 			return tabFgColor;
 		}
 
-		public Color getTabBgColorAsAWT() {
-			return asAWT(tabBgColor);
-		}
-
-		public void setTabBgColor(Color color) {
-			if (color != null) {
-				this.tabBgColor = color.getRGB();
-			}
-		}
 
 		public boolean isTabBgColorEnabled() {
 			return tabBgColorEnabled;
@@ -161,16 +153,6 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 			this.tabBgColorEnabled = tabBgColorEnabled;
 		}
 
-		public Color getTabFgColorAsAWT() {
-			return asAWT(tabFgColor);
-		}
-
-		public void setTabFgColor(Color color) {
-			if (color != null) {
-				this.tabFgColor = color.getRGB();
-			}
-		}
-
 		public boolean isTabFgColorEnabled() {
 			return tabFgColorEnabled;
 		}
@@ -178,6 +160,31 @@ public class ApplicationConfiguration implements PersistentStateComponent<Applic
 		public void setTabFgColorEnabled(boolean tabFgColorEnabled) {
 			this.tabFgColorEnabled = tabFgColorEnabled;
 		}
+
+		@Transient
+		public Color getTabBgColorAsAWT() {
+			return asAWT(tabBgColor);
+		}
+
+		@Transient
+		public void setTabBgColorAWT(Color color) {
+			if (color != null) {
+				this.tabBgColor = color.getRGB();
+			}
+		}
+
+		@Transient
+		public Color getTabFgColorAsAWT() {
+			return asAWT(tabFgColor);
+		}
+
+		@Transient
+		public void setTabFgColorAWT(Color color) {
+			if (color != null) {
+				this.tabFgColor = color.getRGB();
+			}
+		}
+
 
 	}
 

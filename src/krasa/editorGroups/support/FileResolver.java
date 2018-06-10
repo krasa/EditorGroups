@@ -34,18 +34,13 @@ import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 public class FileResolver {
 	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
 
-	private boolean excludeEditorGroupsFiles;
+	private final Project project;
+	private final boolean excludeEditorGroupsFiles;
+	private final Set<String> links;
 
-	public static List<String> resolveLinks(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
-		return new FileResolver().resolve(project, ownerFilePath, root, relatedPaths, group);
-	}
-
-	protected FileResolver() {
-		excludeEditorGroupsFiles = ApplicationConfiguration.state().isExcludeEditorGroupsFiles();
-	}
 
 	@NotNull
-	public static List<String> resolveLinks(@NotNull EditorGroupIndexValue group, Project project) {
+	public static List<String> resolveLinks(@NotNull EditorGroupIndexValue group, @NotNull Project project) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(">resolveLinks [" + group + "], project = [" + project + "]");
 		}
@@ -54,82 +49,113 @@ public class FileResolver {
 	}
 
 	@NotNull
-	private List<String> resolve(Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
-		long start = System.currentTimeMillis();
+	public static List<String> resolveLinks(@NotNull Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
+		return new FileResolver(project).resolve(ownerFilePath, root, relatedPaths, group);
+	}
 
-		Set<String> links = new LinkedHashSet<String>() {
+	protected FileResolver(Project project) {
+		this.project = project;
+		excludeEditorGroupsFiles = ApplicationConfiguration.state().isExcludeEditorGroupsFiles();
+		links = new LinkedHashSet<String>() {
 			@Override
 			public boolean add(String o) {
 				return super.add(sanitize(o));
 			}
 		};
+	}
 
+	protected FileResolver() {
+		this.project = null;
+		excludeEditorGroupsFiles = false;
+		links = new LinkedHashSet<String>() {
+			@Override
+			public boolean add(String o) {
+				return super.add(sanitize(o));
+			}
+		};
+	}
 
+	public Set<String> getLinks() {
+		return links;
+	}
+
+	@NotNull
+	private List<String> resolve(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
 		try {
-
-			VirtualFile ownerFile = null;
-			if (ownerFilePath != null) {
-				ownerFile = Utils.getFileByPath(ownerFilePath);
-				if (root.startsWith("..")) {
-
-					File file = new File(new File(ownerFilePath).getParentFile(), root);
-					if (LOG.isDebugEnabled()) {
-						LOG.debug("root " + file + "  exists=" + file.exists());
-					}
-					root = file.getCanonicalPath();
-				}
-			}
-			root = useMacros(project, ownerFile, root);
-
-
-			File rootFile = new File(root);
-			if (!rootFile.exists()) {
-				Notifications.notify2("Root does not exist [" + root + "] >>> " + group);
-			}
-			String rootFolder = rootFile.isFile() ? rootFile.getParent() : root;
-
-
-			if (ownerFilePath != null) {
-				add(links, new File(ownerFilePath), false);
-			}
-
-
-			for (String filePath : relatedPaths) {
-				long start1 = System.currentTimeMillis();
-				try {
-					filePath = useMacros(project, ownerFile, filePath);
-					filePath = sanitize(filePath);
-
-
-					if (filePath.startsWith("*/") && filePath.endsWith(".*")) {
-						resolveSameNameProjectFiles(project, links, filePath);
-					} else if (filePath.startsWith("*/")) {
-						resolveProjectFiles(project, links, filePath);
-					} else if (FileUtil.isAbsolute(filePath)) {
-						File file = new File(filePath);
-						resolve(links, file);
-					} else {
-						File file = new File(rootFolder, filePath);
-						resolve(links, file);
-					}
-
-				} catch (Exception e) {
-					LOG.warn("filePath='" + filePath + "'; owner=" + root, e);
-				}
-				long delta = System.currentTimeMillis() - start1;
-				if (delta > 100) {
-					if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
-				}
-			}
+			return resolve2(ownerFilePath, root, relatedPaths, group);
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@NotNull
+	private List<String> resolve2(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) throws IOException {
+		long start = System.currentTimeMillis();
+
+
+		VirtualFile ownerFile = Utils.getNullableFileByPath(ownerFilePath);
+
+		String rootFolder = resolveRootFolder(ownerFilePath, root, group, ownerFile);
+
+
+		if (ownerFilePath != null) {
+			add(new File(ownerFilePath), false);
+		}
+
+
+		for (String filePath : relatedPaths) {
+			long t0 = System.currentTimeMillis();
+			try {
+				filePath = useMacros(ownerFile, filePath);
+				filePath = sanitize(filePath);
+
+
+				if (filePath.startsWith("*/") && filePath.endsWith(".*")) {
+					resolveSameNameProjectFiles(filePath);
+				} else if (filePath.startsWith("*/")) {
+					resolveProjectFiles(filePath);
+				} else if (FileUtil.isAbsolute(filePath)) {
+					File file = new File(filePath);
+					resolve(file);
+				} else {
+					File file = new File(rootFolder, filePath);
+					resolve(file);
+				}
+
+			} catch (Exception e) {
+				LOG.error("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", e);
+			}
+			long delta = System.currentTimeMillis() - t0;
+			if (delta > 100) {
+				if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
+			}
+		}
 		if (LOG.isDebugEnabled())
 			LOG.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
+
 		return new ArrayList<>(links);
 	}
 
-	private void resolveSameNameProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
+	private String resolveRootFolder(@Nullable String ownerFilePath, String root, EditorGroupIndexValue group, VirtualFile ownerFile) throws IOException {
+		if (ownerFilePath != null && root.startsWith("..")) {
+			File file = new File(new File(ownerFilePath).getParentFile(), root);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("root " + file + "  exists=" + file.exists());
+			}
+			root = file.getCanonicalPath();
+		}
+
+		root = useMacros(ownerFile, root);
+
+
+		File rootFile = new File(root);
+		if (!rootFile.exists()) {
+			Notifications.warning("Root does not exist [" + root + "] >>> " + group);
+		}
+		return rootFile.isFile() ? rootFile.getParent() : root;
+	}
+
+	private void resolveSameNameProjectFiles(String filePath) throws IOException {
 		String sanitizedPath = filePath.substring("*/".length());
 		sanitizedPath = StringUtils.substringBefore(sanitizedPath, ".*");
 		String fileName = sanitizedPath;
@@ -144,13 +170,13 @@ public class FileResolver {
 			String canonicalPath = file.getCanonicalPath();
 			if (canonicalPath != null) {
 				if (substringBeforeLast(file.getCanonicalPath(), ".").endsWith(sanitizedPath)) {
-					add(links, canonicalPath);
+					add(canonicalPath);
 				}
 			}
 		}
 	}
 
-	protected void resolveProjectFiles(Project project, Set<String> links, String filePath) throws IOException {
+	protected void resolveProjectFiles(String filePath) throws IOException {
 		String sanitizedPath = filePath.substring("*/".length());
 		String fileName = sanitizedPath;
 		if (fileName.contains("/")) {
@@ -164,7 +190,7 @@ public class FileResolver {
 			String canonicalPath = file.getCanonicalPath();
 			if (canonicalPath != null) {
 				if (canonicalPath.endsWith(sanitizedPath)) {
-					add(links, canonicalPath);
+					add(canonicalPath);
 				}
 			}
 		}
@@ -177,13 +203,13 @@ public class FileResolver {
 		return replace;
 	}
 
-	protected void resolve(Set<String> links, File file) throws IOException {
+	protected void resolve(File file) throws IOException {
 		if (file.isFile()) {
-			add(links, file, true);
+			add(file, true);
 		} else if (file.isDirectory()) {
-			addChilds(links, file);
+			addChilds(file);
 		} else {
-			addMatching(links, file);
+			addMatching(file);
 		}
 	}
 
@@ -194,14 +220,14 @@ public class FileResolver {
 		return false;
 	}
 
-	protected void addChilds(Set<String> links, File parentDir) throws IOException {
+	protected void addChilds(File parentDir) throws IOException {
 		File[] foundFiles = parentDir.listFiles((FileFilter) FileFileFilter.FILE);
 		for (File foundFile : foundFiles) {
-			add(links, foundFile, false);
+			add(foundFile, false);
 		}
 	}
 
-	protected void addMatching(Set<String> links, File file) throws IOException {
+	protected void addMatching(File file) throws IOException {
 		File parentDir = file.getParentFile();
 		String canonicalPath = sanitize(file.getAbsolutePath());
 		String fileName = StringUtils.substringAfterLast(canonicalPath, "/");
@@ -211,30 +237,30 @@ public class FileResolver {
 			File[] foundFiles = parentDir.listFiles(filter);
 			for (File f : foundFiles) {
 				if (f.isFile()) {
-					add(links, f, false);
+					add(f, false);
 				}
 			}
 
 			if (foundFiles.length == 0) {
 				foundFiles = parentDir.listFiles((FilenameFilter) new PrefixFileFilter(fileName + ".", IOCase.SYSTEM));
 				for (File f : foundFiles) {
-					add(links, f, false);
+					add(f, false);
 				}
 			}
 		}
 	}
 
-	protected void add(Set<String> links, String canonicalPath) throws IOException {
-		add(links, new File(canonicalPath), false);
+	protected void add(String canonicalPath) throws IOException {
+		add(new File(canonicalPath), false);
 	}
 
-	protected void add(Set<String> links, File file, boolean definedManually) throws IOException {
+	protected void add(File file, boolean definedManually) throws IOException {
 		if (file.isFile() && !(!definedManually && excluded(file))) {
 			links.add(file.getCanonicalPath());
 		}
 	}
 
-	protected static String useMacros(Project project, VirtualFile virtualFile, String folder) {
+	protected String useMacros(VirtualFile virtualFile, String folder) {
 		if (folder.startsWith("PROJECT")) {
 			VirtualFile baseDir = project.getBaseDir();
 			String canonicalPath = baseDir.getCanonicalPath();

@@ -51,10 +51,10 @@ public class SettingsForm {
 		if (LOG.isDebugEnabled()) LOG.debug("apply " + "");
 		ApplicationConfiguration.State state = ApplicationConfiguration.state();
 		getData(state);
-		state.setTabBgColor(tabBgColor.getColor());
+		state.setTabBgColorAWT(tabBgColor.getColor());
 		state.setTabBgColorEnabled(tabBgColor.isSelected());
 
-		state.setTabFgColor(tabFgColor.getColor());
+		state.setTabFgColorAWT(tabFgColor.getColor());
 		state.setTabFgColorEnabled(tabFgColor.isSelected());
 	}
 

@@ -75,6 +75,14 @@ public class Utils {
 	}
 
 	@Nullable
+	public static VirtualFile getNullableFileByPath(@Nullable String path) {
+		if (path == null) {
+			return null;
+		}
+		return getFileByPath(path, (VirtualFile) null);
+	}
+
+	@Nullable
 	public static VirtualFile getFileByPath(@NotNull String path, @Nullable VirtualFile currentFile) {
 		VirtualFile file = null;
 		if (FileUtil.isUnixAbsolutePath(path) || FileUtil.isWindowsAbsolutePath(path)) {
