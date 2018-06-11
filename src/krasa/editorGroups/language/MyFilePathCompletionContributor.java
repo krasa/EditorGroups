@@ -45,6 +45,7 @@ import java.util.*;
 
 import static com.intellij.patterns.PlatformPatterns.psiElement;
 
+/* @group.disable */
 public class MyFilePathCompletionContributor extends CompletionContributor {
 	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(MyFilePathCompletionContributor.class);
 

@@ -39,7 +39,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.related\\s(.*)", false), new RelatedFilesConsumer()),
 		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.id\\s(.*)", false), new IdConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@(idea|group)\\.disable\\s.*)", false), new DisableConsumer())
+		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@(idea|group)\\.disable.*)", false), new DisableConsumer())
 	};
 
 	@Override

@@ -17,12 +17,11 @@ public enum LanguagePatternHolder {
 	 * @see krasa.editorGroups.index.EditorGroupIndexer
 	 */
 	public static final Collection<String> keywords = Arrays.asList(
-		"id",
-		"root",
-		"related",
-		"color",
-		"disable",
-		"title"
+		"group.root",
+		"group.related",
+		"group.color",
+		"group.disable",
+		"group.title"
 	);
 
 	public static final Map<String, String> keywordsWithDescription = new HashMap<String, String>() {{
@@ -40,7 +39,7 @@ public enum LanguagePatternHolder {
 
 
 	public static final Collection<String> metadata = Arrays.asList(
-		"group"
+		"group.id"
 	);
 
 
@@ -61,7 +60,7 @@ public enum LanguagePatternHolder {
 		"MODULE"
 	);
 
-	public static final Pattern keywordsPattern = createPattern(keywords, "", true);
+	public static final Pattern keywordsPattern = createPattern(keywords, "[@]", true);
 	public static final Pattern colorPattern = createPattern(colors, "", false);
 	public static final Pattern metadataPattern = createPattern(metadata, "[@]", true);
 	public static final Pattern macrosPattern = createPattern(macros, "", true);

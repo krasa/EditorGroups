@@ -1,3 +1,4 @@
+<!-- @group.disable -->
 <templateSet group="EditorGroups">
     <template name="@gc" value="@group.color $CARET$" description="Group color - EditorGroups plugin" toReformat="true"
               toShortenFQNames="true">

@@ -53,14 +53,6 @@ public class EditorGroupManager {
 		this.project = project;
 		this.externalGroupProvider = externalGroupProvider;
 		this.autogroupProvider = autogroupProvider;
-
-		//TODO 
-		try {
-			//noinspection deprecation
-			initial_editor_index = Key.findKeyByName("initial editor index");
-		} catch (Exception e) {
-			LOG.error(e);
-		}
 	}
 
 
@@ -238,6 +230,19 @@ public class EditorGroupManager {
 			warningShown = true;
 		}
 
+
+		if (initial_editor_index == null) {
+			//TODO it does not work in constructor 
+			try {
+				//noinspection deprecation
+				initial_editor_index = Key.findKeyByName("initial editor index");
+			} catch (Exception e) {
+				LOG.error(e);
+				initial_editor_index = Key.create("initial editor index not found");
+			}
+		}
+		
+
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
@@ -249,7 +254,9 @@ public class EditorGroupManager {
 			}
 
 			if (fileToOpen.equals(selectedFile)) {
-				LOG.error("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
+				}
 				switching(false);
 				return;
 			}
