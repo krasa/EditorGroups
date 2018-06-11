@@ -17,7 +17,6 @@ import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.stream.Collectors;
 
 public class FavoritesGroup extends EditorGroup {
 	public static final String ID_PREFIX = "Favorites: ";
@@ -113,7 +112,11 @@ public class FavoritesGroup extends EditorGroup {
 
 	@Override
 	public List<String> getLinks(Project project) {
-		return files.stream().map(VirtualFile::getCanonicalPath).collect(Collectors.toList());
+		ArrayList<String> paths = new ArrayList<>(files.size());
+		for (VirtualFile file : files) {
+			paths.add(file.getCanonicalPath());
+		}
+		return paths;
 	}
 
 	@Override

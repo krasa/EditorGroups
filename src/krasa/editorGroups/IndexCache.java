@@ -191,6 +191,10 @@ public class IndexCache {
 			result.addAll(editorGroups.getAll());
 		}
 		result.addAll(externalGroupProvider.findGroups(canonicalPath));
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<findGroups " + result);
+		}
 		return result;
 	}
 

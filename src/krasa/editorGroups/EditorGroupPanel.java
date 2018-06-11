@@ -318,19 +318,24 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		List<String> paths = displayedGroup.getLinks(project);
 		VirtualFile fileByPath = null;
 
-		if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex == 0) {
-			return;
-		}
 		while (fileByPath == null && iterations < paths.size()) {
 			iterations++;
 
-			int i = currentIndex - iterations;
-			if (i < 0) {
-				i = paths.size() - Math.abs(i);
+			int index = currentIndex - iterations;
+
+			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex - iterations < 0) {
+				return;
 			}
-			String s = paths.get(i);
+
+			if (index < 0) {
+				index = paths.size() - Math.abs(index);
+			}
+			String s = paths.get(index);
 
 			fileByPath = Utils.getVirtualFileByAbsolutePath(s);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("previous: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
+			}
 		}
 		openFile(fileByPath, newTab, newWindow);
 
@@ -353,15 +358,20 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		int iterations = 0;
 		List<String> paths = displayedGroup.getLinks(project);
 
-		if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex == paths.size() - 1) {
-			return;
-		}
 		while (fileByPath == null && iterations < paths.size()) {
 			iterations++;
 
-			String s = paths.get((currentIndex + iterations) % paths.size());
+			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex + iterations >= paths.size()) {
+				return;
+			}
 
+			int index = (currentIndex + iterations) % paths.size();
+			String s = paths.get(index);
 			fileByPath = Utils.getVirtualFileByAbsolutePath(s);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("next: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
+			}
+			
 		}
 
 		openFile(fileByPath, newTab, newWindow);
