@@ -55,8 +55,8 @@ public class TabsColors {
 	}
 
 	private void createUIComponents() {
-		tabFgColor = new CheckBoxWithColorChooser("Selected tab foreground color ", null);
-		tabBgColor = new CheckBoxWithColorChooser("Selected tab background color ", null);
+		tabFgColor = new CheckBoxWithColorChooser("Default selected tab foreground color ", null);
+		tabBgColor = new CheckBoxWithColorChooser("Default selected tab background color ", null);
 
 		Dimension colorDimension = new JBDimension(30, 30);
 		mask = new CheckBoxWithColorChooser(null, null, ApplicationConfiguration.Tabs.DEFAULT_MASK).setColorDimension(colorDimension);

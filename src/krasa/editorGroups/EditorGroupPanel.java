@@ -215,7 +215,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		createLinks();
 
 		addCurrentFileTab();
-		
+
 		if (displayedGroup instanceof GroupsHolder) {
 			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 		}
@@ -636,13 +636,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
 	}
 
-	private static void customizeSelectedColor(MyTabInfo tab) {
+	private void customizeSelectedColor(MyTabInfo tab) {
 		ApplicationConfiguration config = ApplicationConfiguration.state();
-		if (config.isTabBgColorEnabled()) {
+		Color bgColor = displayedGroup.getBgColor();
+		if (bgColor != null) {
+			tab.setTabColor(bgColor);
+		} else if (config.isTabBgColorEnabled()) {
 			tab.setTabColor(config.getTabBgColorAsAWT());
 		}
-		if (config.isTabFgColorEnabled()) {
+
+		Color fgColor = displayedGroup.getFgColor();
+		if (fgColor != null) {
+			tab.setDefaultForeground(fgColor);
+		} else if (config.isTabFgColorEnabled()) {
 			tab.setDefaultForeground(config.getTabFgColorAsAWT());
 		}
+
 	}
 }
