@@ -42,7 +42,7 @@ import java.util.List;
  * @author pegov
  */
 public class JBEditorTabs extends JBTabsImpl {
-	public static final String TABS_ALPHABETICAL_KEY = "tabs.alphabetical";
+	//	public static final String TABS_ALPHABETICAL_KEY = "tabs.alphabetical";
 	protected JBEditorTabsPainter myDarkPainter = new krasa.editorGroups.tabs.impl.DarculaEditorTabsPainter(this);
 	protected JBEditorTabsPainter myDefaultPainter = new DefaultEditorTabsPainter(this);
 
@@ -176,9 +176,9 @@ public class JBEditorTabs extends JBTabsImpl {
 		return false;
 	}
 
-	public static void setAlphabeticalMode(boolean on) {
-		Registry.get(TABS_ALPHABETICAL_KEY).setValue(on);
-	}
+//	public static void setAlphabeticalMode(boolean on) {
+//		Registry.get(TABS_ALPHABETICAL_KEY).setValue(on);
+//	}
 
 	@Override
 	protected void doPaintBackground(Graphics2D g2d, Rectangle clip) {
