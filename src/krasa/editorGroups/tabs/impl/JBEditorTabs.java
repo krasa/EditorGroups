@@ -168,9 +168,12 @@ public class JBEditorTabs extends JBTabsImpl {
 		return UIUtil.isUnderDarcula() ? myDarkPainter : myDefaultPainter;
 	}
 
+	/**
+	 * EditorGroups false!
+	 */
 	@Override
 	public boolean isAlphabeticalMode() {
-		return Registry.is(TABS_ALPHABETICAL_KEY);
+		return false;
 	}
 
 	public static void setAlphabeticalMode(boolean on) {
