@@ -163,8 +163,8 @@ public class IndexCache {
 					result = AutoGroup.SAME_NAME_INSTANCE;
 				} else if (includeAutogroups && config.isAutoFolders() && AutoGroup.DIRECTORY.equals(last)) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
-				} else if (includeFavorites && last.startsWith(FavoritesGroup.OWNER_PREFIX)) {
-					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.OWNER_PREFIX.length()));
+				} else if (includeFavorites && last.startsWith(FavoritesGroup.ID_PREFIX)) {
+					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.ID_PREFIX.length()));
 					if (favoritesGroup.containsLink(project, currentFilePath)) {
 						result = favoritesGroup;
 					}

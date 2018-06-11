@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 public class FavoritesGroup extends EditorGroup {
-	public static final String OWNER_PREFIX = "Bookmark: ";
+	public static final String ID_PREFIX = "Favorites: ";
 	private final List<VirtualFile> files = new ArrayList<>();
 	private final String name;
 
@@ -79,7 +79,7 @@ public class FavoritesGroup extends EditorGroup {
 	@NotNull
 	@Override
 	public String getId() {
-		return OWNER_PREFIX + getTitle();
+		return ID_PREFIX + getTitle();
 	}
 
 	@Override
@@ -129,5 +129,13 @@ public class FavoritesGroup extends EditorGroup {
 	@Override
 	public boolean equalsVisually(Project project, EditorGroup group) {
 		return super.equalsVisually(project, group) && files.equals(((FavoritesGroup) group).files);
+	}
+
+	@Override
+	public String toString() {
+		return "FavoritesGroup{" +
+			"files=" + files +
+			", name='" + name + '\'' +
+			'}';
 	}
 }
