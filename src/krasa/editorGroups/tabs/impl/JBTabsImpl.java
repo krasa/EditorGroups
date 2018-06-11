@@ -1142,15 +1142,19 @@ public class JBTabsImpl extends JComponent
 		myInfo2Label.get(info).setTabActions(info.getTabLabelActions());
 	}
 
+
+	/**
+	 * EditorGroups: modified to not paint first tab as selected
+	 */
 	@Override
 	@Nullable
 	public TabInfo getSelectedInfo() {
 		if (myOldSelection != null) return myOldSelection;
 
-		if (!myVisibleInfos.contains(mySelectedInfo)) {
+		if (mySelectedInfo != null && !myVisibleInfos.contains(mySelectedInfo)) {
 			mySelectedInfo = null;
 		}
-		return mySelectedInfo != null ? mySelectedInfo : !myVisibleInfos.isEmpty() ? myVisibleInfos.get(0) : null;
+		return mySelectedInfo;
 	}
 
 	@Nullable
