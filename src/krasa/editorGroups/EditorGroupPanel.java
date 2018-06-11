@@ -222,7 +222,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 		}
 
-		tabs.setMySelectedInfo(null);
 		tabs.doLayout();
 		tabs.scroll(myScrollOffset);
 
