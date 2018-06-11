@@ -10,6 +10,7 @@ import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.EditorWithProviderComposite;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.model.EditorGroup;
@@ -23,6 +24,20 @@ public class AddToCurrentFavoritesAction extends EditorGroupsAction {
 		FavoritesGroup favoritesGroup = getFavoritesGroup(e);
 		if (favoritesGroup != null) {
 			new AddToFavoritesAction(favoritesGroup.getName()).actionPerformed(e);
+		}
+	}
+
+	@Override
+	public void update(AnActionEvent e) {
+		Presentation presentation = e.getPresentation();
+
+		FavoritesGroup favoritesGroup = getFavoritesGroup(e);
+		presentation.setVisible(favoritesGroup != null);
+		if (favoritesGroup != null) {
+			presentation.setText("Add to Favorites - " + favoritesGroup.getName());
+		}
+		if (favoritesGroup != null) {
+			presentation.setEnabled(isEnabled(e, favoritesGroup));
 		}
 	}
 
@@ -51,25 +66,23 @@ public class AddToCurrentFavoritesAction extends EditorGroupsAction {
 		return favoritesGroup;
 	}
 
-	@Override
-	public void update(AnActionEvent e) {
-		Presentation presentation = e.getPresentation();
-
-		FavoritesGroup favoritesGroup = getFavoritesGroup(e);
-		presentation.setVisible(favoritesGroup != null);
-		if (favoritesGroup != null) {
-			presentation.setText("Add to Favorites - " + favoritesGroup.getName());
-		}
-		if (favoritesGroup != null) {
-			DataContext dataContext = e.getDataContext();
-			VirtualFile[] data1 = CommonDataKeys.VIRTUAL_FILE_ARRAY.getData(dataContext);
-			if (data1 != null) {
-				boolean everyIsContained = true;
-				for (VirtualFile virtualFile : data1) {
-					everyIsContained = everyIsContained && favoritesGroup.containsLink(getEventProject(e), virtualFile.getCanonicalPath());
+	private boolean isEnabled(AnActionEvent e, FavoritesGroup favoritesGroup) {
+		Project project = e.getProject();
+		boolean enabled = true;
+		DataContext dataContext = e.getDataContext();
+		VirtualFile[] data1 = CommonDataKeys.VIRTUAL_FILE_ARRAY.getData(dataContext);
+		if (data1 != null) {
+			boolean everyFileIsContained = true;
+			for (VirtualFile virtualFile : data1) {
+				everyFileIsContained = favoritesGroup.containsLink(project, virtualFile.getCanonicalPath());
+				if (!everyFileIsContained) {
+					break;
 				}
-				presentation.setEnabled(!everyIsContained);
+			}
+			if (everyFileIsContained) {
+				enabled = false;
 			}
 		}
+		return enabled;
 	}
 }
