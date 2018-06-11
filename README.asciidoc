@@ -1,6 +1,6 @@
 ====  Implementation of https://github.com/SomewhatCloudy/phpstorm-related-proposal  ==== 
 
-image::example.jpg[]
+image::example.gif[]
 
 === Type of groups
 - from Favorites tool window
