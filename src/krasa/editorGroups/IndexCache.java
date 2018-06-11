@@ -41,9 +41,8 @@ public class IndexCache {
 
 		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
 		if (editorGroups != null) {
-			Map<String, EditorGroup> map = editorGroups.getMap();
-			Collection<EditorGroup> values = map.values();
-			if (map.size() == 1) {
+			Collection<EditorGroup> values = editorGroups.getAll();
+			if (values.size() == 1) {
 				result = (EditorGroup) values.toArray()[0];
 			} else {
 				for (EditorGroup value : values) {
@@ -184,23 +183,27 @@ public class IndexCache {
 		return result;
 	}
 
+	public List<EditorGroup> findGroups(String canonicalPath) {
+		List<EditorGroup> result = new ArrayList<>();
+		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
+		if (editorGroups != null) {
+			editorGroups.validate(this);
+			result.addAll(editorGroups.getAll());
+		}
+		result.addAll(externalGroupProvider.findGroups(canonicalPath));
+		return result;
+	}
+
 	public EditorGroup getSlaveGroup(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
-		EditorGroups groups = groupsByLinks.get(currentFilePath);
 
-		if (groups != null) {
-			groups.validate(this);
-
-			Collection<EditorGroup> all = groups.getAll();
-			for (EditorGroup editorGroup : all) {
-				if (result.isValid() && editorGroup.isValid()) {
-					result = groups;
-					break;
-				} else if (editorGroup.isValid()) {
-					result = editorGroup;
-				}
-			}
+		List<EditorGroup> favouriteGroups = findGroups(currentFilePath);
+		if (favouriteGroups.size() == 1) {
+			result = favouriteGroups.get(0);
+		} else if (favouriteGroups.size() > 1) {
+			result = new EditorGroups(favouriteGroups);
 		}
+
 		return result;
 	}
 
@@ -243,18 +246,6 @@ public class IndexCache {
 			groupsByLinks.put(currentFile, editorGroups);
 		}
 		editorGroups.setLast(result.getId());
-	}
-
-
-
-	public Collection<EditorGroup> getGroups(String canonicalPath) {
-		Collection<EditorGroup> result = Collections.emptyList();
-		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
-		if (editorGroups != null) {
-			editorGroups.validate(this);
-			result = editorGroups.getAll();
-		}
-		return result;
 	}
 
 
@@ -316,10 +307,6 @@ public class IndexCache {
 			state.lastGroup.add(new ProjectComponent.StringPair(entry.getKey(), last));
 		}
 		return state;
-	}
-
-	public EditorGroup updateGroups(AutoGroup result, String currentFilePath) {
-		return result.setGroups(getGroups(currentFilePath));
 	}
 
 

@@ -1,8 +1,10 @@
 package krasa.editorGroups.model;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.io.File;
 import java.util.List;
 
@@ -18,6 +20,11 @@ public class FolderGroup extends AutoGroup {
 	@Override
 	public boolean isValid() {
 		return valid && new File(folderPath).isDirectory();
+	}
+
+	@Override
+	public Icon icon() {
+		return AllIcons.Nodes.Folder;
 	}
 
 	@Override

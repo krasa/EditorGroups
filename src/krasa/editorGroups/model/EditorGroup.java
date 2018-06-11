@@ -6,6 +6,7 @@ import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,8 @@ public abstract class EditorGroup {
 	public abstract String getTitle();
 
 	public abstract boolean isValid();
+
+	public abstract Icon icon();
 
 	public abstract void invalidate();
 
@@ -142,4 +145,6 @@ public abstract class EditorGroup {
 	public String getTabGroupTooltipText(Project project) {
 		return getPresentableTitle(project, "Owner: " + getOwnerPath(), true);
 	}
+
+
 }

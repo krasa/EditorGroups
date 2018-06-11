@@ -1,11 +1,13 @@
 package krasa.editorGroups.model;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.text.StringUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,6 +84,11 @@ public class EditorGroupIndexValue extends EditorGroup {
 	@Override
 	public boolean isValid() {
 		return valid;
+	}
+
+	@Override
+	public Icon icon() {
+		return AllIcons.Actions.GroupByModule;
 	}
 
 	public void invalidate() {

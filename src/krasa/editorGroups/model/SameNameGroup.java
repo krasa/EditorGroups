@@ -1,8 +1,10 @@
 package krasa.editorGroups.model;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.List;
 
 public class SameNameGroup extends AutoGroup {
@@ -23,6 +25,11 @@ public class SameNameGroup extends AutoGroup {
 	@Override
 	public String getTitle() {
 		return SAME_FILE_NAME;
+	}
+
+	@Override
+	public Icon icon() {
+		return AllIcons.Actions.Copy;
 	}
 
 	@Override

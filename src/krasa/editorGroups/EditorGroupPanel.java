@@ -1,6 +1,5 @@
 package krasa.editorGroups;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.favoritesTreeView.FavoritesListener;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.openapi.Disposable;
@@ -223,7 +222,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 		}
 
-
+		tabs.setMySelectedInfo(null);
 		tabs.doLayout();
 		tabs.scroll(myScrollOffset);
 
@@ -298,7 +297,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
 			setText("[" + title + "]");
 			setToolTipText(editorGroup.getTabGroupTooltipText(EditorGroupPanel.this.project));
-			setIcon(AllIcons.Actions.GroupByModule);
+			setIcon(editorGroup.icon());
 		}
 	}
 

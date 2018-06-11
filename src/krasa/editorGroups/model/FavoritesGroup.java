@@ -1,5 +1,6 @@
 package krasa.editorGroups.model;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.projectView.impl.AbstractUrl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ContentIterator;
@@ -12,6 +13,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.TreeItem;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -92,6 +94,11 @@ public class FavoritesGroup extends EditorGroup {
 	@Override
 	public boolean isValid() {
 		return true;
+	}
+
+	@Override
+	public Icon icon() {
+		return AllIcons.Toolwindows.ToolWindowFavorites;
 	}
 
 	@Override

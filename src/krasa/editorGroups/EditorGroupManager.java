@@ -18,7 +18,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -179,8 +178,8 @@ public class EditorGroupManager {
 		return switching;
 	}
 
-	public Collection<EditorGroup> getGroups(VirtualFile file) {
-		return cache.getGroups(file.getCanonicalPath());
+	public List<EditorGroup> getGroups(VirtualFile file) {
+		return cache.findGroups(file.getCanonicalPath());
 	}
 
 	//TODO cache it?

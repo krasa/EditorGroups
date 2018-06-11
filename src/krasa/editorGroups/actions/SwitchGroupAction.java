@@ -28,8 +28,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.util.Collection;
-import java.util.Collections;
+import java.util.*;
 import java.util.List;
 
 import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
@@ -56,23 +55,27 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
 		FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
 		EditorGroupPanel panel = null;
+		EditorGroup displayedGroup = EditorGroup.EMPTY;
+		List<EditorGroup> editorGroups = Collections.emptyList();
 		if (data != null) {
 			panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
-				fillCurrentFileGroups(project, defaultActionGroup, panel);
+				displayedGroup = panel.getDisplayedGroup();
+				editorGroups = fillCurrentFileGroups(project, defaultActionGroup, panel);
 			}
 		}
-		fillOtherGroup(defaultActionGroup, panel, project);
+		fillOtherGroup(defaultActionGroup, editorGroups, displayedGroup, project);
+		fillFavorites(defaultActionGroup, project, editorGroups, displayedGroup);
 
 		defaultActionGroup.add(new Separator());
 		defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
 	}
 
-	private void fillCurrentFileGroups(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel) {
+	private List<EditorGroup> fillCurrentFileGroups(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel) {
 		EditorGroup displayedGroup = panel.getDisplayedGroup();
 		VirtualFile file = panel.getFile();
 		EditorGroupManager manager = EditorGroupManager.getInstance(project);
-		Collection<EditorGroup> groups = manager.getGroups(file);
+		List<EditorGroup> groups = manager.getGroups(file);
 
 		Handler refresh = refreshHandler(panel);
 
@@ -84,29 +87,18 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		for (EditorGroup g : groups) {
 			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
-		defaultActionGroup.add(new Separator("Other groups"));
+		return groups;
 	}
 
-	private void fillOtherGroup(DefaultActionGroup defaultActionGroup, @Nullable EditorGroupPanel panel, Project project) {
+	private void fillOtherGroup(DefaultActionGroup defaultActionGroup, List<EditorGroup> currentGroups, EditorGroup displayedGroup, Project project) {
 		EditorGroupManager manager = EditorGroupManager.getInstance(project);
-		EditorGroup displayedGroup = EditorGroup.EMPTY;
-		Collection<EditorGroup> groups = Collections.emptyList();
-		VirtualFile currentFile = null;
 
-		if (panel != null) {
-			displayedGroup = panel.getDisplayedGroup();
-			currentFile = panel.getFile();
-			groups = manager.getGroups(currentFile);
-		}
-
+		defaultActionGroup.add(new Separator("Other groups"));
 
 		try {
 			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
 			for (EditorGroupIndexValue g : allGroups) {
-//				if (currentFile != null && g.getId().equals(currentFile.getCanonicalPath())) {
-//					continue;
-//				}
-				if (!groups.contains(g)) {
+				if (!((Collection<EditorGroup>) currentGroups).contains(g)) {
 					defaultActionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(project), null));
 				}
 			}
@@ -123,18 +115,27 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		}
 
 
+	}
+
+	private void fillFavorites(DefaultActionGroup defaultActionGroup, Project project, List<EditorGroup> editorGroups, EditorGroup displayedGroup) {
 		Collection<FavoritesGroup> favoritesGroups = ExternalGroupProvider.getInstance(project).getFavoritesGroups();
+
+		Set<String> alreadyDisplayedFavourites = new HashSet<>();
+		for (EditorGroup group : editorGroups) {
+			if (group instanceof FavoritesGroup) {
+				alreadyDisplayedFavourites.add(((FavoritesGroup) group).getName());
+			}
+		}
+
 		if (!favoritesGroups.isEmpty()) {
 			Separator favourites = new Separator("Favourites");
 			defaultActionGroup.add(favourites);
 			for (FavoritesGroup favoritesGroup : favoritesGroups) {
-//				if (displayedGroup instanceof FavoritesGroup && displayedGroup.getTitle().equals(favoritesGroup.getTitle())) {
-//					continue;
-//				}
-				defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project), null));
+				if (!alreadyDisplayedFavourites.contains(favoritesGroup.getName())) {
+					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project), null));
+				}
 			}
 		}
-
 	}
 
 	@NotNull
@@ -216,19 +217,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 						displayedGroup = toBeRendered; //to remove flicker when switching
 					}
 				}
-				if (displayedGroup instanceof FolderGroup) {
-					presentation.setIcon(AllIcons.Nodes.Folder);
-				} else if (displayedGroup instanceof SameNameGroup) {
-					presentation.setIcon(AllIcons.Actions.Copy);
-				} else if (displayedGroup instanceof FavoritesGroup) {
-					presentation.setIcon(AllIcons.Toolwindows.ToolWindowFavorites);
-				} else if (displayedGroup instanceof EditorGroups) {
-					presentation.setIcon(AllIcons.Actions.GroupBy);
-				} else {
-					presentation.setIcon(AllIcons.Actions.GroupByModule);
-				}
+				presentation.setIcon(displayedGroup.icon());
 			}
 		}
-
 	}
 }

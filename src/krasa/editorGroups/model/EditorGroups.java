@@ -1,9 +1,11 @@
 package krasa.editorGroups.model;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import krasa.editorGroups.IndexCache;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,15 +17,47 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 	public EditorGroups() {
 	}
 
+	/**
+	 * no filtering by type
+	 */
+	public EditorGroups(List<EditorGroup> editorGroups) {
+		for (EditorGroup group : editorGroups) {
+			put(group);
+		}
+	}
+
+	/**
+	 * no filtering by type
+	 */
+	public EditorGroups(EditorGroup result, List<EditorGroup> editorGroups) {
+		put(result);
+		for (EditorGroup group : editorGroups) {
+			put(group);
+		}
+	}
+
+	private void put(EditorGroup group) {
+		if (group instanceof GroupsHolder) {
+			Collection<EditorGroup> groups = ((GroupsHolder) group).getGroups();
+			for (EditorGroup editorGroup : groups) {
+				this.map.put(editorGroup.getId(), editorGroup);
+			}
+		} else {
+			this.map.put(group.getId(), group);
+		}
+	}
 
 	public void add(EditorGroup editorGroup) {
 		if (editorGroup instanceof AutoGroup) {
 			return;
 		}
+		if (editorGroup instanceof EditorGroups) {
+			return;
+		}
 		if (editorGroup instanceof FavoritesGroup) {
 			return;
 		}
-		map.put(editorGroup.getId(), editorGroup);
+		put(editorGroup);
 	}
 
 	public Collection<EditorGroup> getAll() {
@@ -32,10 +66,6 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 
 	public void remove(EditorGroup editorGroup) {
 		map.remove(editorGroup.getId());
-	}
-
-	public Map<String, EditorGroup> getMap() {
-		return map;
 	}
 
 	@NotNull
@@ -53,6 +83,11 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 	@Override
 	public boolean isValid() {
 		return true;
+	}
+
+	@Override
+	public Icon icon() {
+		return AllIcons.Actions.GroupBy;
 	}
 
 	@Override

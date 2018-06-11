@@ -60,4 +60,24 @@ public class ExternalGroupProvider {
 
 		return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
 	}
+
+	public List<EditorGroup> findGroups(String currentFilePath) {
+		List<EditorGroup> favoritesGroups = new ArrayList<>();
+		long start = System.currentTimeMillis();
+
+		for (FavoritesGroup group : getFavoritesGroups()) {
+			if (group.containsLink(project, currentFilePath)) {
+				favoritesGroups.add(group);
+			}
+		}
+
+
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("findGroups " + (System.currentTimeMillis() - start) + "ms");
+		}
+
+
+		return favoritesGroups;
+
+	}
 }
