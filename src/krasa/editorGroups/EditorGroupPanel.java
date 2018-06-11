@@ -1,6 +1,8 @@
 package krasa.editorGroups;
 
 import com.intellij.icons.AllIcons;
+import com.intellij.ide.favoritesTreeView.FavoritesListener;
+import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
@@ -66,6 +68,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public EditorGroupManager groupManager;
 	private ActionToolbar toolbar;
 	private boolean disposed;
+	private FavoritesListener favoritesListener;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
@@ -496,7 +499,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
 				}
 			});
-			if (!refresh && (group == displayedGroup || group == toBeRendered || group.isSame(project, displayedGroup))) {
+			if (!refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
 				if (!(fileEditor instanceof TextEditorImpl)) {
 					groupManager.switching(false); //need for UI forms - when switching to open editors , focus listener does not do that
 				}
@@ -572,7 +575,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		reloadTabs();
 
 		updateVisibility(rendering);
-
+		addFavouritesListener();
 		fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 		fileEditorManager.updateFilePresentation(file);
@@ -584,6 +587,28 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		groupManager.switching(false);
 		if (LOG.isDebugEnabled())
 			LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
+	}
+
+	private void addFavouritesListener() {
+		if (displayedGroup instanceof FavoritesGroup && favoritesListener == null) {
+			favoritesListener = new FavoritesListener() {
+				@Override
+				public void rootsChanged() {
+					refresh(true, displayedGroup);
+				}
+
+				@Override
+				public void listAdded(String listName) {
+
+				}
+
+				@Override
+				public void listRemoved(String listName) {
+
+				}
+			};
+			FavoritesManager.getInstance(project).addFavoritesListener(favoritesListener, fileEditor);
+		}
 	}
 
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {

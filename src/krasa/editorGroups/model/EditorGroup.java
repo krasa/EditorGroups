@@ -81,7 +81,7 @@ public abstract class EditorGroup {
 		return getLinks(project).contains(currentFilePath);
 	}
 
-	public boolean isSame(Project project, EditorGroup group) {
+	public boolean equalsVisually(Project project, EditorGroup group) {
 		if (group == null) {
 			return false;
 		}

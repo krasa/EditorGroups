@@ -78,8 +78,8 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 	}
 
 	@Override
-	public boolean isSame(Project project, EditorGroup group) {
-		if (!super.isSame(project, group)) {
+	public boolean equalsVisually(Project project, EditorGroup group) {
+		if (!super.equalsVisually(project, group)) {
 			return false;
 		}
 

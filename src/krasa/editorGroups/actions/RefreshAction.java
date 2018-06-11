@@ -7,28 +7,23 @@ import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
-import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.project.DumbAwareAction;
 import com.intellij.ui.PopupHandler;
 import krasa.editorGroups.EditorGroupPanel;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class RefreshAction extends DumbAwareAction implements CustomComponentAction {
+public class RefreshAction extends EditorGroupsAction implements CustomComponentAction {
 	@Override
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		Document doc = getDocument(anActionEvent);
 		if (doc != null) {
 			FileDocumentManager.getInstance().saveDocument(doc);
 		}
-		
-		FileEditor data = anActionEvent.getData(PlatformDataKeys.FILE_EDITOR);
-		if (data != null) {
-			EditorGroupPanel panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
-			if (panel != null) {
-				panel.refresh(true, null);
-			}
+
+		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
+		if (panel != null) {
+			panel.refresh(true, null);
 		}
 	}
 

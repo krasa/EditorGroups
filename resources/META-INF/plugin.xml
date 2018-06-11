@@ -164,6 +164,25 @@
         </action>
 
 
+        <action id="AddToCurrentFavoritesAction" class="krasa.editorGroups.actions.AddToCurrentFavoritesAction"
+                text="Add to Currently Opened Favorites" icon="AllIcons.Toolwindows.ToolWindowFavorites">
+            <!--<add-to-group group-id="GuiDesigner.EditorPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>-->
+            <add-to-group group-id="TypeHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="MethodHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="CallHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="CommanderPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="Images.EditorPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="Images.ThumbnailsPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="FileMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="NavbarPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="FavoritesViewPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="StructureViewPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="EditorTabPopupMenuEx" anchor="before" relative-to-action="AddToFavorites"/>
+            <add-to-group group-id="UsageView.Popup" anchor="before" relative-to-action="AddToFavorites"/>
+            <!--<add-to-group group-id="PyTypeHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>-->
+            <!--<add-to-group group-id="PyCallHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>-->
+        </action>
     </actions>
 
 </idea-plugin>

@@ -41,7 +41,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			}
 		};
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.Before.FILE_EDITOR_MANAGER, before);	
-			
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 
 			//IJ 2018.2

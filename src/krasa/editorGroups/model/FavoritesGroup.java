@@ -85,6 +85,10 @@ public class FavoritesGroup extends EditorGroup {
 		return name;
 	}
 
+	public String getName() {
+		return name;
+	}
+
 	@Override
 	public boolean isValid() {
 		return true;
@@ -116,7 +120,7 @@ public class FavoritesGroup extends EditorGroup {
 	}
 
 	@Override
-	public boolean isSame(Project project, EditorGroup group) {
-		return super.isSame(project, group) && name.equals(((FavoritesGroup) group).name);
+	public boolean equalsVisually(Project project, EditorGroup group) {
+		return super.equalsVisually(project, group) && files.equals(((FavoritesGroup) group).files);
 	}
 }

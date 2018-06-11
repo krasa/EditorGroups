@@ -78,7 +78,7 @@ public class EditorGroupManager {
 
 
 		boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
-		if (force) {
+		if (force && !(requestedGroup instanceof FavoritesGroup)) {
 			if (result.isInvalid()) {
 				result = cache.getOwningOrSingleGroup(currentFilePath);
 			}
@@ -143,7 +143,7 @@ public class EditorGroupManager {
 
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "'");
+			LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
 		cache.setLast(currentFilePath, result);
 		return result;
 	}
