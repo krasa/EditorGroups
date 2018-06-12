@@ -53,22 +53,26 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 	@Override
 	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
-		FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
-		EditorGroupPanel panel = null;
-		EditorGroup displayedGroup = EditorGroup.EMPTY;
-		List<EditorGroup> editorGroups = Collections.emptyList();
-		if (data != null) {
-			panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
-			if (panel != null) {
-				displayedGroup = panel.getDisplayedGroup();
-				editorGroups = fillCurrentFileGroups(project, defaultActionGroup, panel);
+		try {
+			FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
+			EditorGroupPanel panel = null;
+			EditorGroup displayedGroup = EditorGroup.EMPTY;
+			List<EditorGroup> editorGroups = Collections.emptyList();
+			if (data != null) {
+				panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
+				if (panel != null) {
+					displayedGroup = panel.getDisplayedGroup();
+					editorGroups = fillCurrentFileGroups(project, defaultActionGroup, panel);
+				}
 			}
-		}
-		fillOtherGroup(defaultActionGroup, editorGroups, displayedGroup, project);
-		fillFavorites(defaultActionGroup, project, editorGroups, displayedGroup);
+			fillOtherGroup(defaultActionGroup, editorGroups, displayedGroup, project);
+			fillFavorites(defaultActionGroup, project, editorGroups, displayedGroup);
 
-		defaultActionGroup.add(new Separator());
-		defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
+			defaultActionGroup.add(new Separator());
+			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
+		} catch (IndexNotReadyException e) {
+			LOG.error("That should not happen", e);
+		}
 	}
 
 	private List<EditorGroup> fillCurrentFileGroups(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel) {

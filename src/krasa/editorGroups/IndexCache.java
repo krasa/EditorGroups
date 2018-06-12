@@ -3,6 +3,7 @@ package krasa.editorGroups;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
@@ -86,7 +87,7 @@ public class IndexCache {
 					group.invalidate();
 					return false;
 				}
-			} catch (ProcessCanceledException e) {
+			} catch (ProcessCanceledException | IndexNotReadyException e) {
 			}
 
 		}
