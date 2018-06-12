@@ -20,6 +20,7 @@ public class SettingsForm {
 	private JCheckBox indexOnlyEditorGroupsFileCheckBox;
 	private JCheckBox excludeEGroups;
 	private JPanel tabColors;
+	private JCheckBox rememberLastGroup;
 	private TabsColors tabsColors;
 
 
@@ -61,6 +62,7 @@ public class SettingsForm {
 		latencyOverFlicker.setSelected(data.isPreferLatencyOverFlicker());
 		indexOnlyEditorGroupsFileCheckBox.setSelected(data.isIndexOnlyEditorGroupsFiles());
 		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
+		rememberLastGroup.setSelected(data.isRememberLastGroup());
 	}
 
 	public void getData(ApplicationConfiguration data) {
@@ -73,6 +75,7 @@ public class SettingsForm {
 		data.setPreferLatencyOverFlicker(latencyOverFlicker.isSelected());
 		data.setIndexOnlyEditorGroupsFiles(indexOnlyEditorGroupsFileCheckBox.isSelected());
 		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
+		data.setRememberLastGroup(rememberLastGroup.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
@@ -85,7 +88,7 @@ public class SettingsForm {
 		if (latencyOverFlicker.isSelected() != data.isPreferLatencyOverFlicker()) return true;
 		if (indexOnlyEditorGroupsFileCheckBox.isSelected() != data.isIndexOnlyEditorGroupsFiles()) return true;
 		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
+		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
 		return false;
 	}
-
 }

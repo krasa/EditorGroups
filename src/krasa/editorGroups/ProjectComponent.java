@@ -46,7 +46,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			//IJ 2018.2
 			@Override
 			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
-				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "], editors = [" + editors + "]");
+				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "]");
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
@@ -124,19 +124,25 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	@Nullable
 	@Override
 	public State getState() {
-		long start = System.currentTimeMillis();
-		State state = IndexCache.getInstance(project).getState();
-		if (LOG.isDebugEnabled())
-			LOG.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
-		return state;
+		if (ApplicationConfiguration.state().isRememberLastGroup()) {
+			long start = System.currentTimeMillis();
+			State state = IndexCache.getInstance(project).getState();
+			if (LOG.isDebugEnabled())
+				LOG.debug("ProjectComponent.getState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+			return state;
+		} else {
+			return new State();
+		} 
 	}
 
 	@Override
 	public void loadState(@NotNull State state) {
-		long start = System.currentTimeMillis();
-		IndexCache.getInstance(project).loadState(state);
-		if (LOG.isDebugEnabled())
-			LOG.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		if (ApplicationConfiguration.state().isRememberLastGroup()) {
+			long start = System.currentTimeMillis();
+			IndexCache.getInstance(project).loadState(state);
+			if (LOG.isDebugEnabled())
+				LOG.debug("ProjectComponent.loadState size:" + state.lastGroup.size() + " " + (System.currentTimeMillis() - start) + "ms");
+		}
 	}
 
 	public static class State {

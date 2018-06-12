@@ -13,7 +13,7 @@ public class ApplicationConfiguration {
 	private boolean autoSameName = true;
 	private boolean forceSwitch = true;
 	private boolean hideEmpty = true;
-	private boolean showSize = false;
+	private boolean showSize;
 	private boolean continuousScrolling;
 	private boolean preferLatencyOverFlicker = true;
 	private boolean indexOnlyEditorGroupsFiles;
@@ -22,6 +22,7 @@ public class ApplicationConfiguration {
 	private boolean tabBgColorEnabled;
 	private Integer tabFgColor;
 	private boolean tabFgColorEnabled;
+	private boolean rememberLastGroup = true;
 
 	public static ApplicationConfiguration state() {
 		return ApplicationConfigurationComponent.getInstance().getState();
@@ -163,6 +164,14 @@ public class ApplicationConfiguration {
 		if (color != null) {
 			this.tabFgColor = color.getRGB();
 		}
+	}
+
+	public boolean isRememberLastGroup() {
+		return rememberLastGroup;
+	}
+
+	public void setRememberLastGroup(final boolean rememberLastGroup) {
+		this.rememberLastGroup = rememberLastGroup;
 	}
 
 

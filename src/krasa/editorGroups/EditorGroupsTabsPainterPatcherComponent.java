@@ -1,8 +1,8 @@
 package krasa.editorGroups;
 
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ex.ApplicationManagerEx;
 import com.intellij.openapi.components.ApplicationComponent;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManagerEvent;
@@ -34,7 +34,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 
 
 	public static EditorGroupsTabsPainterPatcherComponent getInstance() {
-		return ServiceManager.getService(EditorGroupsTabsPainterPatcherComponent.class);
+		return ApplicationManager.getApplication().getComponent(EditorGroupsTabsPainterPatcherComponent.class);
 	}
 
 	public static void onColorsChanged(ApplicationConfiguration applicationConfiguration) {
@@ -114,6 +114,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 				return true;
 			}
 			if (!painter.getClass().getPackage().getName().startsWith("com.intellij")) { //some other plugin
+				LOG.warn("Already patched by " + painter.getClass().getCanonicalName());
 				return true;
 			}
 		} else {
@@ -122,6 +123,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 				return true;
 			}
 			if (!painter.getClass().getPackage().getName().startsWith("com.intellij")) { //some other plugin
+				LOG.warn("Already patched by " + painter.getClass().getCanonicalName());
 				return true;
 			}
 		}

@@ -22,6 +22,7 @@ public class IndexCache {
 	public static final int LINKS_LIMIT = 100;
 	public static final int LIMIT_SAME_NAME = LINKS_LIMIT;
 
+
 	public static IndexCache getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, IndexCache.class);
 	}
@@ -29,12 +30,14 @@ public class IndexCache {
 	@NotNull
 	private Project project;
 	private Map<String, EditorGroups> groupsByLinks = new ConcurrentHashMap<>();
+	private ApplicationConfigurationComponent configuration;
 
 	private final ExternalGroupProvider externalGroupProvider;
 
-	public IndexCache(@NotNull Project project, ExternalGroupProvider externalGroupProvider) {
+	public IndexCache(@NotNull Project project, @NotNull ExternalGroupProvider externalGroupProvider, @NotNull ApplicationConfigurationComponent configuration) {
 		this.project = project;
 		this.externalGroupProvider = externalGroupProvider;
+		this.configuration = configuration;
 	}
 
 	public EditorGroup getOwningOrSingleGroup(@NotNull String canonicalPath) {
@@ -59,7 +62,9 @@ public class IndexCache {
 		}
 		//init
 		result.getLinks(project);
-
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<getOwningOrSingleGroup result =" + result);
+		}
 		return result;
 	}
 
@@ -91,7 +96,11 @@ public class IndexCache {
 			}
 
 		}
-		return group.isValid();
+		boolean valid = group.isValid();
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<validate " + valid);
+		}
+		return valid;
 	}
 
 	@NotNull
@@ -100,7 +109,11 @@ public class IndexCache {
 		if (values.size() > 1) {
 			Notifications.duplicateId(id, values);
 		}
-		return values.size() == 0 ? EditorGroup.EMPTY : values.get(0);
+		EditorGroup editorGroup = values.size() == 0 ? EditorGroup.EMPTY : values.get(0);
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<getGroupFromIndexById " + editorGroup);
+		}
+		return editorGroup;
 	}
 
 
@@ -153,13 +166,18 @@ public class IndexCache {
 
 	public EditorGroup getLastEditorGroup(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
+		if (!configuration.getState().isRememberLastGroup()) {
+			LOG.debug("<getLastEditorGroup " + result + " (isRememberLastGroup=false)");
+			return result;
+		}
+
 		EditorGroups groups = groupsByLinks.get(currentFilePath);
-		ApplicationConfiguration config = ApplicationConfiguration.state();
+		ApplicationConfiguration config = configuration.getState();
 
 		if (groups != null) {
 			String last = groups.getLast();
 			if (LOG.isDebugEnabled()) LOG.debug("last = " + last);
-			if (last != null) {
+			if (last != null && configuration.getState().isRememberLastGroup()) {
 				if (includeAutogroups && config.isAutoSameName() && AutoGroup.SAME_FILE_NAME.equals(last)) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
 				} else if (includeAutogroups && config.isAutoFolders() && AutoGroup.DIRECTORY.equals(last)) {
@@ -180,6 +198,9 @@ public class IndexCache {
 			if (result.isInvalid()) {
 				result = getSlaveGroup(currentFilePath);
 			}
+		}
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<getLastEditorGroup " + result);
 		}
 		return result;
 	}
@@ -208,7 +229,9 @@ public class IndexCache {
 		} else if (favouriteGroups.size() > 1) {
 			result = new EditorGroups(favouriteGroups);
 		}
-
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("<getSlaveGroup " + result);
+		}
 		return result;
 	}
 
@@ -221,7 +244,7 @@ public class IndexCache {
 
 		if (groups != null) {
 			String last = groups.getLast();
-			if (last != null) {
+			if (last != null && configuration.getState().isRememberLastGroup()) {
 				EditorGroups editorGroups = groupsByLinks.get(last);
 				if (editorGroups != null) {
 					EditorGroup lastGroup = editorGroups.getById(last);
@@ -294,8 +317,8 @@ public class IndexCache {
 	public ProjectComponent.State getState() {
 		ProjectComponent.State state = new ProjectComponent.State();
 		Set<Map.Entry<String, EditorGroups>> entries = groupsByLinks.entrySet();
-		boolean autoSameName = ApplicationConfiguration.state().isAutoSameName();
-		boolean autoFolders = ApplicationConfiguration.state().isAutoFolders();
+		boolean autoSameName = configuration.getState().isAutoSameName();
+		boolean autoFolders = configuration.getState().isAutoFolders();
 
 		for (Map.Entry<String, EditorGroups> entry : entries) {
 			String last = entry.getValue().getLast();

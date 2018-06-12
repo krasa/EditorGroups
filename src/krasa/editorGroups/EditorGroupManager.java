@@ -167,10 +167,13 @@ public class EditorGroupManager {
 		if (file.equals(switchingFile)) {
 			EditorGroup switchingGroup = this.switchingGroup;
 			this.switchingGroup = null;
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("<getSwitchingGroup " + switchingGroup);
+			}
 			return switchingGroup;
 		}
 		if (LOG.isDebugEnabled())
-			LOG.debug("getSwitchingGroup returning null for " + "file = [" + file + "], switchingFile=" + switchingFile);
+			LOG.debug("<getSwitchingGroup=null  " + "file = [" + file + "], switchingFile=" + switchingFile);
 		return null;
 	}
 
