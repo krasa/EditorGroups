@@ -115,7 +115,8 @@ public class SingleRowLayout extends TabLayout {
 		if (!myTabs.myForcedRelayout &&
 			myLastSingRowLayout != null &&
 			myLastSingRowLayout.contentCount == myTabs.getTabCount() &&
-			myLastSingRowLayout.layoutSize.equals(myTabs.getSize()) &&
+//			EditorGroups totally broken when changing opened tabs
+//			myLastSingRowLayout.layoutSize.equals(myTabs.getSize()) &&
 			myLastSingRowLayout.scrollOffset == getScrollOffset()) {
 			for (TabInfo each : data.myVisibleInfos) {
 				final TabLabel eachLabel = myTabs.myInfo2Label.get(each);
