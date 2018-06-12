@@ -22,8 +22,6 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.util.registry.Registry;
-import com.intellij.openapi.util.registry.RegistryValue;
-import com.intellij.openapi.util.registry.RegistryValueListener;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.tabs.JBTabsPosition;
@@ -49,16 +47,16 @@ public class JBEditorTabs extends JBTabsImpl {
 
 	public JBEditorTabs(@Nullable Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent) {
 		super(project, actionManager, focusManager, parent);
-		Registry.get(TABS_ALPHABETICAL_KEY).addListener(new RegistryValueListener.Adapter() {
-
-			@Override
-			public void afterValueChanged(RegistryValue value) {
-				ApplicationManager.getApplication().invokeLater(() -> {
-					resetTabsCache();
-					relayout(true, false);
-				});
-			}
-		}, parent);
+//		Registry.get(TABS_ALPHABETICAL_KEY).addListener(new RegistryValueListener.Adapter() {
+//
+//			@Override
+//			public void afterValueChanged(RegistryValue value) {
+//				ApplicationManager.getApplication().invokeLater(() -> {
+//					resetTabsCache();
+//					relayout(true, false);
+//				});
+//			}
+//		}, parent);
 	}
 
 	@Override
