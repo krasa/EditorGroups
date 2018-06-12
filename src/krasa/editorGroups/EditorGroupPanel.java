@@ -1,11 +1,12 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.DataManager;
+import com.intellij.ide.IdeEventQueue;
 import com.intellij.ide.favoritesTreeView.FavoritesListener;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
+import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.Disposable;
-import com.intellij.openapi.actionSystem.ActionManager;
-import com.intellij.openapi.actionSystem.ActionToolbar;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
@@ -27,7 +28,9 @@ import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
+import krasa.editorGroups.actions.RemoveFromCurrentFavoritesAction;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
@@ -39,12 +42,15 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
+	public static final DataKey<FavoritesGroup> FAVORITE_GROUP = DataKey.create("krasa.FavoritesGroup");
 	private static final Logger LOG = Logger.getInstance(EditorGroupPanel.class);
 
 
@@ -111,6 +117,54 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				return true;
 			}
 		};
+		Getter<ActionGroup> getter = new Getter<ActionGroup>() {
+			@Override
+			public ActionGroup get() {
+				return (ActionGroup) CustomActionsSchema.getInstance().getCorrectedAction("EditorGroupsTabPopupMenu");
+			}
+		};
+		tabs.setDataProvider(new DataProvider() {
+			@Nullable
+			@Override
+			public Object getData(String dataId) {
+				if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
+					TabInfo targetInfo = tabs.getTargetInfo();
+					if (targetInfo instanceof MyTabInfo) {
+						String path = ((MyTabInfo) targetInfo).path;
+						return Utils.getVirtualFileByAbsolutePath(path);
+					}
+				}
+				if (FAVORITE_GROUP.is(dataId)) {
+					TabInfo targetInfo = tabs.getTargetInfo();
+					if (targetInfo instanceof MyGroupTabInfo) {
+						EditorGroup group = ((MyGroupTabInfo) targetInfo).editorGroup;
+						if (group instanceof FavoritesGroup) {
+							return (FavoritesGroup) group;
+						}
+					}
+				}
+				return null;
+			}
+		});
+		tabs.addTabMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_RELEASED)) {
+					final TabInfo info = tabs.findInfo(e);
+					if (info != null) {
+						IdeEventQueue.getInstance().blockNextEvents(e);
+						tabs.setMyPopupInfo(info);
+						try {
+							ActionManager.getInstance().getAction(RemoveFromCurrentFavoritesAction.ID).actionPerformed(AnActionEvent.createFromInputEvent(e, ActionPlaces.UNKNOWN, null, DataManager.getInstance().getDataContext(tabs)));
+						} finally {
+							tabs.setMyPopupInfo(null);
+						}
+					}
+				}
+
+			}
+		});
+		tabs.setPopupGroup(getter, "EditorGroupsTabPopup", false);
 		tabs.setSelectionChangeHandler(new JBTabs.SelectionChangeHandler() {
 			@NotNull
 			@Override
@@ -371,7 +425,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("next: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
 			}
-			
+
 		}
 
 		openFile(fileByPath, newTab, newWindow);

@@ -3607,4 +3607,8 @@ public class JBTabsImpl extends JComponent
 		}
 		return 0;
 	}
+
+	public void setMyPopupInfo(TabInfo myPopupInfo) {
+		this.myPopupInfo = myPopupInfo;
+	}
 }

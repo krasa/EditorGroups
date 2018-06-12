@@ -20,13 +20,17 @@ import java.util.Objects;
 
 public class FavoritesGroup extends EditorGroup {
 	public static final String ID_PREFIX = "Favorites: ";
-	private final List<VirtualFile> files = new ArrayList<>();
+	private List<VirtualFile> files;
 	private final String name;
 
 	public FavoritesGroup(String name, List<TreeItem<Pair<AbstractUrl, String>>> validBookmark, Project project, ProjectFileIndex projectFileIndex) {
 		this.name = name;
 
+		files = add(validBookmark, project, projectFileIndex);
+	}
 
+	private static List<VirtualFile> add(List<TreeItem<Pair<AbstractUrl, String>>> validBookmark, Project project, ProjectFileIndex projectFileIndex) {
+		List<VirtualFile> files = new ArrayList<>();
 		for (TreeItem<Pair<AbstractUrl, String>> pairTreeItem : validBookmark) {
 			Pair<AbstractUrl, String> data = pairTreeItem.getData();
 			AbstractUrl first = data.first;
@@ -36,32 +40,31 @@ public class FavoritesGroup extends EditorGroup {
 			}
 			Object element = path[0];
 			if (element instanceof SmartPsiElementPointer) {
-				final VirtualFile virtualFile = PsiUtilCore.getVirtualFile(((SmartPsiElementPointer) element).getElement());
-				if (virtualFile == null) continue;
-				if (virtualFile.isDirectory()) {
-					iterateContentUnderDirectory(projectFileIndex, virtualFile);
-				} else {
-					files.add(virtualFile);
-				}
+				add(projectFileIndex, ((SmartPsiElementPointer) element).getElement(), files);
 			}
 
 			if (element instanceof PsiElement) {
-				final VirtualFile virtualFile = PsiUtilCore.getVirtualFile((PsiElement) element);
-				if (virtualFile == null) continue;
-				if (virtualFile.isDirectory()) {
-					iterateContentUnderDirectory(projectFileIndex, virtualFile);
-				} else {
-					files.add(virtualFile);
-				}
+				add(projectFileIndex, (PsiElement) element, files);
 			}
+			add(pairTreeItem.getChildren(), project, projectFileIndex);
 		}
-
+		return files;
 	}
 
-	private boolean iterateContentUnderDirectory(ProjectFileIndex projectFileIndex, VirtualFile virtualFile) {
+	private static void add(ProjectFileIndex projectFileIndex, PsiElement element1, List<VirtualFile> files) {
+		final VirtualFile virtualFile = PsiUtilCore.getVirtualFile(element1);
+		if (virtualFile == null) return;
+		if (virtualFile.isDirectory()) {
+			iterateContentUnderDirectory(projectFileIndex, virtualFile, files);
+		} else {
+			files.add(virtualFile);
+		}
+	}
+
+	private static boolean iterateContentUnderDirectory(ProjectFileIndex projectFileIndex, VirtualFile virtualFile, List<VirtualFile> files) {
 		final ContentIterator contentIterator = fileOrDir -> {
 			if (fileOrDir.isDirectory() && !fileOrDir.equals(virtualFile)) {
-				iterateContentUnderDirectory(projectFileIndex, fileOrDir);
+				iterateContentUnderDirectory(projectFileIndex, fileOrDir, files);
 			} else if (!fileOrDir.isDirectory()) {
 				files.add(fileOrDir);
 			}
