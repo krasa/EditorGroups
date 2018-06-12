@@ -57,6 +57,10 @@ public class PanelRefresher {
 		ApplicationManager.getApplication().invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				if (project.isDisposed()) {
+					return;
+				}
+				
 				long start = System.currentTimeMillis();
 				final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 				for (FileEditor selectedEditor : manager.getAllEditors()) {
@@ -116,6 +120,9 @@ public class PanelRefresher {
 			DumbService.getInstance(project).waitForSmartMode();
 			ApplicationManager.getApplication().runReadAction(
 				() -> {
+					if (project.isDisposed()) {
+						return;
+					}
 					long start = System.currentTimeMillis();
 					FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
 					IndexCache cache = IndexCache.getInstance(project);
