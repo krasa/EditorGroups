@@ -74,7 +74,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private ActionToolbar toolbar;
 	private boolean disposed;
 	private FavoritesListener favoritesListener;
-	private boolean brokenScroll;
+	private volatile boolean brokenScroll;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
