@@ -209,6 +209,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			long start = System.currentTimeMillis();
 			try {
 				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
+			} catch (IndexNotReadyException | ProcessCanceledException e) {
+				LOG.debug(e);
 			} catch (Exception e) {
 				LOG.error(e);
 			}
@@ -526,7 +528,25 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					return;
 				}
 				DumbService.getInstance(project).waitForSmartMode();
-				refresh3();
+				boolean selected = isSelected();
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("refresh2 selected =" + selected + " for " + file.getName());
+				}
+				if (selected) {
+					refresh3();
+				}
+
+			}
+
+			private boolean isSelected() {
+				boolean selected = false;
+				for (FileEditor selectedEditor : fileEditorManager.getSelectedEditors()) {
+					if (selectedEditor == fileEditor) {
+						selected = true;
+						break;
+					}
+				}
+				return selected;
 			}
 		});
 	}

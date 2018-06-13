@@ -277,7 +277,7 @@ public class IndexCache {
 	}
 
 
-	public List<EditorGroupIndexValue> getAllGroups() {
+	public List<EditorGroupIndexValue> getAllGroups() throws IndexNotReadyException {
 		FileBasedIndex instance = FileBasedIndex.getInstance();
 		Collection<String> allKeys = instance.getAllKeys(EditorGroupIndex.NAME, project);
 		GlobalSearchScope scope = GlobalSearchScope.projectScope(project);

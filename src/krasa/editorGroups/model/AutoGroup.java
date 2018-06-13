@@ -4,11 +4,10 @@ import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
+public abstract class AutoGroup extends EditorGroup {
 
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
@@ -18,17 +17,12 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 
 
 	protected final List<String> links;
-	protected Collection<EditorGroup> groups = Collections.emptyList();
 	protected volatile boolean valid = true;
 
 	public AutoGroup(List<String> links) {
 		this.links = links;
 	}
 
-	@Override
-	public Collection<EditorGroup> getGroups() {
-		return groups;
-	}
 
 	@NotNull
 	@Override
@@ -72,10 +66,6 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 		return obj.getClass().equals(this.getClass());
 	}
 
-	public EditorGroup setGroups(Collection<EditorGroup> groups) {
-		this.groups = groups;
-		return this;
-	}
 
 	@Override
 	public boolean equalsVisually(Project project, EditorGroup group) {
@@ -83,15 +73,11 @@ public abstract class AutoGroup extends EditorGroup implements GroupsHolder {
 			return false;
 		}
 
-		AutoGroup autoGroup = (AutoGroup) group;
-		if (!autoGroup.groups.equals(this.groups)) {
-			return false;
-		}
 		return true;
 	}
 
 	public boolean isEmpty() {
-		return links.size() == 0 && groups.size() == 0;
+		return links.size() == 0;
 	}
 
 	;

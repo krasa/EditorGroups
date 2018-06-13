@@ -60,16 +60,26 @@ public class PanelRefresher {
 				if (project.isDisposed()) {
 					return;
 				}
+				if (LOG.isDebugEnabled()) {
+					LOG.debug(">onSmartMode");
+				}
 				
 				long start = System.currentTimeMillis();
 				final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-				for (FileEditor selectedEditor : manager.getAllEditors()) {
+
+				for (FileEditor selectedEditor : manager.getSelectedEditors()) {   //refreshing not selected one fucks up tabs scrolling
+
 					EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {
 						EditorGroup displayedGroup = panel.getDisplayedGroup();
 						if (displayedGroup instanceof FolderGroup) {
 							continue;
 						}
+
+						if (LOG.isDebugEnabled()) {
+							LOG.debug("onSmartMode: refreshing panel for " + panel.getFile());
+						}
+						
 						panel.refresh(false, null);
 					}
 				}

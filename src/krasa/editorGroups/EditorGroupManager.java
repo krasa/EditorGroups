@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -113,6 +114,9 @@ public class EditorGroupManager {
 		}
 
 		if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("refreshing result");
+			}
 			//refresh
 			if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
 				cache.initGroup((EditorGroupIndexValue) result);
@@ -186,7 +190,7 @@ public class EditorGroupManager {
 	}
 
 	//TODO cache it?
-	public List<EditorGroupIndexValue> getAllGroups() {
+	public List<EditorGroupIndexValue> getAllGroups() throws IndexNotReadyException {
 		long start = System.currentTimeMillis();
 		List<EditorGroupIndexValue> allGroups = cache.getAllGroups();
 		Collections.sort(allGroups, new Comparator<EditorGroupIndexValue>() {

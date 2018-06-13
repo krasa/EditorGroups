@@ -40,7 +40,9 @@ public class SameNameGroup extends AutoGroup {
 	@Override
 	public String toString() {
 		return "SameNameGroup{" +
-			"'" + fileNameWithoutExtension + '\'' +
+			"fileNameWithoutExtension='" + fileNameWithoutExtension + '\'' +
+			", links=" + links +
+			", valid=" + valid +
 			'}';
 	}
 }
