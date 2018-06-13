@@ -74,6 +74,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private ActionToolbar toolbar;
 	private boolean disposed;
 	private FavoritesListener favoritesListener;
+	private boolean brokenScroll;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
 		super(new BorderLayout());
@@ -530,7 +531,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				DumbService.getInstance(project).waitForSmartMode();
 				boolean selected = isSelected();
 				if (LOG.isDebugEnabled()) {
-					LOG.debug("refresh2 selected =" + selected + " for " + file.getName());
+					LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
 				}
 				if (selected) {
 					refresh3();
@@ -538,16 +539,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 			}
 
-			private boolean isSelected() {
-				boolean selected = false;
-				for (FileEditor selectedEditor : fileEditorManager.getSelectedEditors()) {
-					if (selectedEditor == fileEditor) {
-						selected = true;
-						break;
-					}
-				}
-				return selected;
-			}
 		});
 	}
 
@@ -581,7 +572,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
 				}
 			});
-			if (!refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("refresh3 IF: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
+			}
+			if (!brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
 				if (!(fileEditor instanceof TextEditorImpl)) {
 					groupManager.switching(false); //need for UI forms - when switching to open editors , focus listener does not do that
 				}
@@ -616,8 +611,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled())
 				LOG.debug("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
 		} catch (ProcessCanceledException | IndexNotReadyException e) {
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("failed" + failed + " " + file.getName(), e);
+			}
 			if (++failed > 5) {
-				LOG.error(e);
+				LOG.error(file.getName(), e);
 				return;
 			}
 			if (LOG.isDebugEnabled())
@@ -626,8 +624,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				refresh2();
 			}
 		} catch (Exception e) {
-			LOG.error(e);
-			e.printStackTrace();
+			LOG.error(file.getName(), e);
 		}
 	}
 
@@ -635,7 +632,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		try {
 			render2();
 		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) LOG.debug(e);
+			if (LOG.isDebugEnabled()) LOG.debug(file.getName(), e);
 			ex.set(e);
 		}
 	}
@@ -646,9 +643,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		EditorGroup rendering = toBeRendered;
 		if (rendering == null) {
-			if (LOG.isDebugEnabled()) LOG.debug("skipping render toBeRendered =" + rendering);
+			if (LOG.isDebugEnabled()) LOG.debug("skipping render toBeRendered=" + rendering + " " + file.getName());
 			return;
 		}
+
+
+		brokenScroll = !isSelected();
+		if (brokenScroll && LOG.isDebugEnabled()) {
+			LOG.warn("rendering editor that is not selected, scrolling might break: " + file.getName());
+		}
+
 		displayedGroup = rendering;
 		toBeRendered = null;
 
@@ -760,4 +764,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 
 	}
+
+	private boolean isSelected() {
+		boolean selected = false;
+		for (FileEditor selectedEditor : fileEditorManager.getSelectedEditors()) {
+			if (selectedEditor == fileEditor) {
+				selected = true;
+				break;
+			}
+		}
+		return selected;
+	}
+
 }
