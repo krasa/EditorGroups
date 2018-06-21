@@ -19,6 +19,7 @@ import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.ExternalGroupProvider;
+import krasa.editorGroups.SwitchRequest;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -88,7 +89,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 
 		defaultActionGroup.add(new Separator("Groups for the current file"));
-		for (EditorGroup g : groups) {
+		for (EditorGroup g: groups) {
 			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
 		}
 		return groups;
@@ -101,7 +102,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 		try {
 			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
-			for (EditorGroupIndexValue g : allGroups) {
+			for (EditorGroupIndexValue g: allGroups) {
 				if (!((Collection<EditorGroup>) currentGroups).contains(g)) {
 					defaultActionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(project), null));
 				}
@@ -125,7 +126,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		Collection<FavoritesGroup> favoritesGroups = ExternalGroupProvider.getInstance(project).getFavoritesGroups();
 
 		Set<String> alreadyDisplayedFavourites = new HashSet<>();
-		for (EditorGroup group : editorGroups) {
+		for (EditorGroup group: editorGroups) {
 			if (group instanceof FavoritesGroup) {
 				alreadyDisplayedFavourites.add(((FavoritesGroup) group).getName());
 			}
@@ -134,7 +135,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		if (!favoritesGroups.isEmpty()) {
 			Separator favourites = new Separator("Favourites");
 			defaultActionGroup.add(favourites);
-			for (FavoritesGroup favoritesGroup : favoritesGroups) {
+			for (FavoritesGroup favoritesGroup: favoritesGroups) {
 				if (!alreadyDisplayedFavourites.contains(favoritesGroup.getName())) {
 					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project), null));
 				}
@@ -159,12 +160,12 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			void run(EditorGroup editorGroup) {
 				VirtualFile file = editorGroup.getFirstExistingFile(project);
 				if (file != null) {
-					EditorGroupManager.getInstance(project).open(file, editorGroup, false, true, null, 0);
+					EditorGroupManager.getInstance(project).open(file, editorGroup, false, true, null, new SwitchRequest(editorGroup, file));
 				} else {
 					String ownerPath = editorGroup.getOwnerPath();
 					VirtualFile virtualFileByAbsolutePath = Utils.getVirtualFileByAbsolutePath(ownerPath);
 					if (virtualFileByAbsolutePath != null) {
-						EditorGroupManager.getInstance(project).open(virtualFileByAbsolutePath, editorGroup, false, true, null, 0);
+						EditorGroupManager.getInstance(project).open(virtualFileByAbsolutePath, editorGroup, false, true, null, new SwitchRequest(editorGroup, virtualFileByAbsolutePath));
 					} else {
 						if (LOG.isDebugEnabled())
 							LOG.debug("opening failed, no file and not even owner exist " + editorGroup);

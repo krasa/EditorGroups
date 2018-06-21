@@ -4,7 +4,7 @@
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- *
+ *                                    b
  * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
@@ -115,10 +115,9 @@ public class SingleRowLayout extends TabLayout {
 		if (!myTabs.myForcedRelayout &&
 			myLastSingRowLayout != null &&
 			myLastSingRowLayout.contentCount == myTabs.getTabCount() &&
-//			EditorGroups totally broken when changing opened tabs
-//			myLastSingRowLayout.layoutSize.equals(myTabs.getSize()) &&
+			myLastSingRowLayout.layoutSize.equals(myTabs.getSize()) &&
 			myLastSingRowLayout.scrollOffset == getScrollOffset()) {
-			for (TabInfo each : data.myVisibleInfos) {
+			for (TabInfo each: data.myVisibleInfos) {
 				final TabLabel eachLabel = myTabs.myInfo2Label.get(each);
 				if (!eachLabel.isValid()) {
 					layoutLabels = true;
@@ -246,7 +245,7 @@ public class SingleRowLayout extends TabLayout {
 		int totalLength = 0;
 		int positionStart = data.position;
 		boolean layoutStopped = false;
-		for (TabInfo eachInfo : data.toLayout) {
+		for (TabInfo eachInfo: data.toLayout) {
 			final TabLabel label = myTabs.myInfo2Label.get(eachInfo);
 			if (layoutStopped) {
 				label.setActionPanelVisible(false);
@@ -277,7 +276,7 @@ public class SingleRowLayout extends TabLayout {
 			}
 		}
 
-		for (TabInfo eachInfo : data.toDrop) {
+		for (TabInfo eachInfo: data.toDrop) {
 			JBTabsImpl.resetLayout(myTabs.myInfo2Label.get(eachInfo));
 		}
 
@@ -342,7 +341,7 @@ public class SingleRowLayout extends TabLayout {
 	}
 
 	protected void calculateRequiredLength(SingleRowPassInfo data) {
-		for (TabInfo eachInfo : data.myVisibleInfos) {
+		for (TabInfo eachInfo: data.myVisibleInfos) {
 			data.requiredLength += getRequiredLength(eachInfo);
 			if (myTabs.getTabsPosition() == JBTabsPosition.left || myTabs.getTabsPosition() == JBTabsPosition.right) {
 				data.requiredLength -= 1;

@@ -33,18 +33,12 @@ public class EditorGroupManager {
 
 	private ApplicationConfigurationComponent config = ApplicationConfigurationComponent.getInstance();
 	private PanelRefresher panelRefresher;
-	/**
-	 * protection for too fast switching - without getting triggering focuslistener - resulting in switching with a wrong group
-	 */
-	private volatile boolean switching;
-	private volatile EditorGroup switchingGroup;
-	private volatile VirtualFile switchingFile;
-	public int myScrollOffset = 0;
 	private IdeFocusManager ideFocusManager;
 	private boolean warningShown;
 	private ExternalGroupProvider externalGroupProvider;
 	private AutoGroupProvider autogroupProvider;
 	private Key<?> initial_editor_index;
+	private volatile SwitchRequest switchRequest;
 
 	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, IndexCache cache) {
 		this.cache = cache;
@@ -151,38 +145,50 @@ public class EditorGroupManager {
 		return result;
 	}
 
-	public void switching(boolean switching, @NotNull EditorGroup group, @NotNull VirtualFile fileToOpen, int myScrollOffset) {
+	public void switching(SwitchRequest switchRequest) {
+		this.switchRequest = switchRequest;
 		if (LOG.isDebugEnabled())
-			LOG.debug("switching " + "switching = [" + switching + "], group = [" + group + "], fileToOpen = [" + fileToOpen + "], myScrollOffset = [" + myScrollOffset + "]");
-		this.myScrollOffset = myScrollOffset;
-		switchingFile = fileToOpen;
-		this.switching = switching;
-		switchingGroup = group;
+			LOG.debug("switching " + "switching = [" + switchRequest.isSwitching() + "], group = [" + switchRequest.getGroup() + "], fileToOpen = [" + switchRequest.getFileToOpen() + "], myScrollOffset = [" + switchRequest.getMyScrollOffset() + "]");
 	}
 
 	public void switching(boolean b) {
 		ideFocusManager.doWhenFocusSettlesDown(() -> {
 			if (LOG.isDebugEnabled()) LOG.debug("switching " + " [" + b + "]");
-			switching = false;
+			setSwitching(false);
 		});
 	}
 
-	public EditorGroup getSwitchingGroup(@NotNull VirtualFile file) {
+	@Nullable
+	public EditorGroup getSwitchingEditorGroup(@NotNull VirtualFile file) {
+		SwitchRequest switchRequest = getSwitchingRequest(file);
+		return switchRequest == null ? null : switchRequest.group;
+	}
+
+	@Nullable
+	public SwitchRequest getSwitchingRequest(@NotNull VirtualFile file) {
+		VirtualFile switchingFile;
+		if (switchRequest == null) {
+			switchingFile = null;
+		} else {
+			switchingFile = switchRequest.fileToOpen;
+		}
+
+
 		if (file.equals(switchingFile)) {
-			EditorGroup switchingGroup = this.switchingGroup;
-			this.switchingGroup = null;
+			SwitchRequest switchingGroup = this.getSwitchRequest();
+//						switchingGroup.switchingGroup = null;  todo is it needed?
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("<getSwitchingGroup " + switchingGroup);
+				LOG.debug("<getSwitchingRequest " + switchingGroup);
 			}
 			return switchingGroup;
 		}
 		if (LOG.isDebugEnabled())
-			LOG.debug("<getSwitchingGroup=null  " + "file = [" + file + "], switchingFile=" + switchingFile);
+			LOG.debug("<getSwitchingRequest=null  " + "file = [" + file + "], switchingFile=" + switchingFile);
 		return null;
 	}
 
 	public boolean switching() {
-		return switching;
+		return switchRequest != null && switchRequest.switching;
 	}
 
 	public List<EditorGroup> getGroups(VirtualFile file) {
@@ -225,11 +231,11 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, int myScrollOffset) {
+	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
-			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], myScrollOffset = [" + myScrollOffset + "]");
+			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], switchingRequest = [" + switchRequest + "]");
 
-		switching(true, group, fileToOpen, myScrollOffset);
+		switching(switchRequest);
 
 		if (!warningShown && UISettings.getInstance().getReuseNotModifiedTabs()) {
 			Notifications.notifyBugs();
@@ -247,7 +253,7 @@ public class EditorGroupManager {
 				initial_editor_index = Key.create("initial editor index not found");
 			}
 		}
-		
+
 
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
@@ -290,7 +296,7 @@ public class EditorGroupManager {
 						switching(false);
 						return;
 					}
-					for (FileEditor fileEditor : fileEditors) {
+					for (FileEditor fileEditor: fileEditors) {
 						if (LOG.isDebugEnabled()) LOG.debug("opened fileEditor = " + fileEditor);
 					}
 
@@ -314,5 +320,26 @@ public class EditorGroupManager {
 		}, null, null);
 	}
 
+
+	public void setSwitching(boolean switching) {
+		if (switchRequest != null) {
+			switchRequest.switching = switching;
+		}
+	}
+
+	public void clearSwitchingRequest() {
+		switchRequest = null;
+	}
+
+
+	public void setMyScrollOffset(int myScrollOffset) {
+		if (switchRequest != null) {
+			switchRequest.myScrollOffset = myScrollOffset;
+		}
+	}
+
+	public SwitchRequest getSwitchRequest() {
+		return switchRequest;
+	}
 
 }

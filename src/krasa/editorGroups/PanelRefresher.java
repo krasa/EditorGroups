@@ -1,5 +1,7 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.favoritesTreeView.FavoritesListener;
+import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
@@ -15,6 +17,7 @@ import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.FavoritesGroup;
 import krasa.editorGroups.model.FolderGroup;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,6 +32,7 @@ public class PanelRefresher {
 	private AtomicBoolean cacheReady = new AtomicBoolean();
 	private final ExecutorService ourThreadExecutorsService;
 	private IndexCache cache;
+	private FavoritesListener favoritesListener;
 
 	public PanelRefresher(Project project) {
 		this.project = project;
@@ -44,6 +48,44 @@ public class PanelRefresher {
 				onSmartMode();
 			}
 		});
+		addFavouritesListener();
+	}
+
+	private void addFavouritesListener() {
+		if (favoritesListener == null) {
+			favoritesListener = new FavoritesListener() {
+				@Override
+				public void rootsChanged() {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("FavoritesListener rootsChanged");
+					}
+					final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+					for (FileEditor selectedEditor: manager.getSelectedEditors()) {   //refreshing not selected one fucks up tabs scrolling
+						EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+						if (panel != null) {
+							EditorGroup displayedGroup = panel.getDisplayedGroup();
+							if (displayedGroup instanceof FavoritesGroup) {
+								LOG.debug("FavoritesListener refreshing " + selectedEditor.getName());
+								panel.refresh(true, displayedGroup);
+							}
+
+
+						}
+					}
+				}
+
+				@Override
+				public void listAdded(String listName) {
+
+				}
+
+				@Override
+				public void listRemoved(String listName) {
+
+				}
+			};
+			FavoritesManager.getInstance(project).addFavoritesListener(favoritesListener, project);
+		}
 	}
 
 	public static PanelRefresher getInstance(@NotNull Project project) {
@@ -63,11 +105,11 @@ public class PanelRefresher {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug(">onSmartMode");
 				}
-				
+
 				long start = System.currentTimeMillis();
 				final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
-				for (FileEditor selectedEditor : manager.getSelectedEditors()) {   //refreshing not selected one fucks up tabs scrolling
+				for (FileEditor selectedEditor: manager.getSelectedEditors()) {   //refreshing not selected one fucks up tabs scrolling
 
 					EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {
@@ -79,7 +121,7 @@ public class PanelRefresher {
 						if (LOG.isDebugEnabled()) {
 							LOG.debug("onSmartMode: refreshing panel for " + panel.getFile());
 						}
-						
+
 						panel.refresh(false, null);
 					}
 				}
@@ -92,7 +134,7 @@ public class PanelRefresher {
 
 	public void refresh(String owner) {
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		for (FileEditor selectedEditor : manager.getAllEditors()) {
+		for (FileEditor selectedEditor: manager.getAllEditors()) {
 			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
 				if (panel.getDisplayedGroup().isOwner(owner)) {
@@ -112,7 +154,7 @@ public class PanelRefresher {
 
 		long start = System.currentTimeMillis();
 		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-		for (FileEditor selectedEditor : manager.getAllEditors()) {
+		for (FileEditor selectedEditor: manager.getAllEditors()) {
 			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
 				panel.onIndexingDone(ownerPath, group);
@@ -140,7 +182,7 @@ public class PanelRefresher {
 						@Override
 						public boolean process(String s) {
 							List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-							for (EditorGroupIndexValue value : values) {
+							for (EditorGroupIndexValue value: values) {
 								cache.initGroup(value);
 							}
 							return true;

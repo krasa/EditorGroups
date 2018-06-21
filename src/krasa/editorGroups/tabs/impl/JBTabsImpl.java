@@ -6,6 +6,7 @@ import com.intellij.ide.ui.UISettingsListener;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.util.*;
@@ -53,7 +54,10 @@ public class JBTabsImpl extends JComponent
 	implements JBTabs, PropertyChangeListener, TimerListener, DataProvider, PopupMenuListener, Disposable, JBTabsPresentation, Queryable,
 	UISettingsListener, QuickActionProvider, Accessible {
 
-	public static final DataKey<krasa.editorGroups.tabs.impl.JBTabsImpl> NAVIGATION_ACTIONS_KEY = DataKey.create("JBTabs");
+	private static final Logger LOG = Logger.getInstance(JBTabsImpl.class);
+
+
+	public static final DataKey<JBTabsImpl> NAVIGATION_ACTIONS_KEY = DataKey.create("JBTabs");
 	@NonNls
 	public static final Key<Integer> SIDE_TABS_SIZE_LIMIT_KEY = Key.create("SIDE_TABS_SIZE_LIMIT_KEY");
 	static final int MIN_TAB_WIDTH = JBUI.scale(75);
@@ -173,6 +177,7 @@ public class JBTabsImpl extends JComponent
 	private Runnable myDeferredFocusRequest;
 	private boolean myAlwaysPaintSelectedTab;
 	private int myFirstTabOffset;
+	private int predictedWidth;
 
 	public JBTabsImpl(@NotNull Project project) {
 		this(project, project);
@@ -263,9 +268,9 @@ public class JBTabsImpl extends JComponent
 		add(mySingleRowLayout.myRightGhost);
 
 
-		new LazyUiDisposable<krasa.editorGroups.tabs.impl.JBTabsImpl>(parent, this, this) {
+		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
 			@Override
-			protected void initialize(@NotNull Disposable parent, @NotNull krasa.editorGroups.tabs.impl.JBTabsImpl child, @Nullable Project project) {
+			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
 				if (myProject == null && project != null) {
 					myProject = project;
 				}
@@ -311,7 +316,7 @@ public class JBTabsImpl extends JComponent
 	@Override
 	public void uiSettingsChanged(UISettings uiSettings) {
 		myImage = null;
-		for (Map.Entry<TabInfo, TabLabel> entry : myInfo2Label.entrySet()) {
+		for (Map.Entry<TabInfo, TabLabel> entry: myInfo2Label.entrySet()) {
 			entry.getKey().revalidate();
 			entry.getValue().setInactiveStateImage(null);
 		}
@@ -411,7 +416,7 @@ public class JBTabsImpl extends JComponent
 
 	private void repaintAttractions() {
 		boolean needsUpdate = false;
-		for (TabInfo each : myVisibleInfos) {
+		for (TabInfo each: myVisibleInfos) {
 			TabLabel eachLabel = myInfo2Label.get(each);
 			needsUpdate |= eachLabel.repaintAttraction();
 		}
@@ -498,6 +503,14 @@ public class JBTabsImpl extends JComponent
 		return 20;
 	}
 
+	public void setPredictedWidth(int predictedWidth) {
+		this.predictedWidth = predictedWidth;
+	}
+
+	public int getPredictedWidth() {
+		return predictedWidth;
+	}
+
 	class TabActionsAutoHideListener extends MouseMotionAdapter implements Weighted {
 
 		private TabLabel myCurrentOverLabel;
@@ -512,7 +525,7 @@ public class JBTabsImpl extends JComponent
 		public void mouseMoved(final MouseEvent e) {
 			if (!myTabLabelActionsAutoHide) return;
 
-			myLastOverPoint = SwingUtilities.convertPoint(e.getComponent(), e.getX(), e.getY(), krasa.editorGroups.tabs.impl.JBTabsImpl.this);
+			myLastOverPoint = SwingUtilities.convertPoint(e.getComponent(), e.getX(), e.getY(), JBTabsImpl.this);
 			processMouseOver();
 		}
 
@@ -553,7 +566,7 @@ public class JBTabsImpl extends JComponent
 
 	public void updateTabActions(final boolean validateNow) {
 		final Ref<Boolean> changed = new Ref<>(Boolean.FALSE);
-		for (final TabInfo eachInfo : myInfo2Label.keySet()) {
+		for (final TabInfo eachInfo: myInfo2Label.keySet()) {
 			updateTab(() -> {
 				final boolean changes = myInfo2Label.get(eachInfo).updateTabActions();
 				changed.set(changed.get().booleanValue() || changes);
@@ -580,7 +593,7 @@ public class JBTabsImpl extends JComponent
 			return;
 		}
 		mySingleRowLayout.myMorePopup = new JBPopupMenu();
-		for (final TabInfo each : getVisibleInfos()) {
+		for (final TabInfo each: getVisibleInfos()) {
 			if (!mySingleRowLayout.isTabHidden(each)) continue;
 			final JBMenuItem item = new JBMenuItem(each.getText(), each.getIcon());
 			item.setForeground(each.getDefaultForeground());
@@ -856,7 +869,7 @@ public class JBTabsImpl extends JComponent
 		if (oldInfo != newInfo) {
 			myOldSelection = oldInfo;
 			try {
-				for (TabsListener eachListener : myTabListeners) {
+				for (TabsListener eachListener: myTabListeners) {
 					eachListener.beforeSelectionChanged(oldInfo, newInfo);
 				}
 			} finally {
@@ -867,7 +880,7 @@ public class JBTabsImpl extends JComponent
 
 	private void fireSelectionChanged(@Nullable TabInfo oldInfo, TabInfo newInfo) {
 		if (oldInfo != newInfo) {
-			for (TabsListener eachListener : myTabListeners) {
+			for (TabsListener eachListener: myTabListeners) {
 				if (eachListener != null) {
 					eachListener.selectionChanged(oldInfo, newInfo);
 				}
@@ -876,7 +889,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 	void fireTabsMoved() {
-		for (TabsListener eachListener : myTabListeners) {
+		for (TabsListener eachListener: myTabListeners) {
 			if (eachListener != null) {
 				eachListener.tabsMoved();
 			}
@@ -885,7 +898,7 @@ public class JBTabsImpl extends JComponent
 
 
 	void fireTabRemoved(TabInfo info) {
-		for (TabsListener eachListener : myTabListeners) {
+		for (TabsListener eachListener: myTabListeners) {
 			if (eachListener != null) {
 				eachListener.tabRemoved(info);
 			}
@@ -946,7 +959,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void removeDeferredNow() {
-		for (Component each : myDeferredToRemove.keySet()) {
+		for (Component each: myDeferredToRemove.keySet()) {
 			if (each != null && each.getParent() == this) {
 				remove(each);
 			}
@@ -984,7 +997,7 @@ public class JBTabsImpl extends JComponent
 
 	private void updateEnabling() {
 		final List<TabInfo> all = getTabs();
-		for (TabInfo each : all) {
+		for (TabInfo each: all) {
 			final TabLabel eachLabel = myInfo2Label.get(each);
 			eachLabel.setTabEnabled(each.isEnabled());
 		}
@@ -1236,7 +1249,7 @@ public class JBTabsImpl extends JComponent
 
 		ArrayList<TabInfo> result = new ArrayList<>(myVisibleInfos);
 
-		for (TabInfo each : myHiddenInfos.keySet()) {
+		for (TabInfo each: myHiddenInfos.keySet()) {
 			result.add(getIndexInVisibleArray(each), each);
 		}
 		if (isAlphabeticalMode()) {
@@ -1327,9 +1340,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	public static class Toolbar extends JPanel {
-		private final krasa.editorGroups.tabs.impl.JBTabsImpl myTabs;
+		private final JBTabsImpl myTabs;
 
-		public Toolbar(krasa.editorGroups.tabs.impl.JBTabsImpl tabs, TabInfo info) {
+		public Toolbar(JBTabsImpl tabs, TabInfo info) {
 			myTabs = tabs;
 
 			setLayout(new BorderLayout());
@@ -1366,7 +1379,7 @@ public class JBTabsImpl extends JComponent
 		try {
 			myHeaderFitSize = computeHeaderFitSize();
 			final Collection<TabLabel> labels = myInfo2Label.values();
-			for (TabLabel each : labels) {
+			for (TabLabel each: labels) {
 				each.setTabActionsAutoHide(myTabLabelActionsAutoHide);
 			}
 
@@ -1482,7 +1495,7 @@ public class JBTabsImpl extends JComponent
 			mySingleRowLayout.myRightGhost.reset();
 		}
 
-		for (TabInfo each : myVisibleInfos) {
+		for (TabInfo each: myVisibleInfos) {
 			reset(each, resetLabels);
 		}
 
@@ -1490,11 +1503,11 @@ public class JBTabsImpl extends JComponent
 			reset(myDropInfo, resetLabels);
 		}
 
-		for (TabInfo each : myHiddenInfos.keySet()) {
+		for (TabInfo each: myHiddenInfos.keySet()) {
 			reset(each, resetLabels);
 		}
 
-		for (Component eachDeferred : myDeferredToRemove.keySet()) {
+		for (Component eachDeferred: myDeferredToRemove.keySet()) {
 			resetLayout((JComponent) eachDeferred);
 		}
 	}
@@ -1856,7 +1869,7 @@ public class JBTabsImpl extends JComponent
 		TabInfo selected = getSelectedInfo();
 		if (myLastPaintedSelection == null || !myLastPaintedSelection.equals(selected)) {
 			List<TabInfo> tabs = getTabs();
-			for (TabInfo each : tabs) {
+			for (TabInfo each: tabs) {
 				myInfo2Label.get(each).setInactiveStateImage(null);
 			}
 		}
@@ -2185,7 +2198,7 @@ public class JBTabsImpl extends JComponent
 
 	private Max computeMaxSize() {
 		Max max = new Max();
-		for (TabInfo eachInfo : myVisibleInfos) {
+		for (TabInfo eachInfo: myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
 			max.myLabel.height = Math.max(max.myLabel.height, label.getPreferredSize().height);
 			max.myLabel.width = Math.max(max.myLabel.width, label.getPreferredSize().width);
@@ -2362,8 +2375,8 @@ public class JBTabsImpl extends JComponent
 		if (myVisibleInfos.isEmpty()) {
 			removeDeferredNow();
 		}
-
-		revalidateAndRepaint(true);
+//EditorGroups optimization
+		revalidateAndRepaint(false);
 
 		fireTabRemoved(info);
 
@@ -2431,7 +2444,7 @@ public class JBTabsImpl extends JComponent
 
 	@Override
 	public void removeAllTabs() {
-		for (TabInfo each : getTabs()) {
+		for (TabInfo each: getTabs()) {
 			removeTab(each);
 		}
 	}
@@ -2492,9 +2505,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void addListeners() {
-		for (TabInfo eachInfo : myVisibleInfos) {
+		for (TabInfo eachInfo: myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
-			for (EventListener eachListener : myTabMouseListeners) {
+			for (EventListener eachListener: myTabMouseListeners) {
 				if (eachListener instanceof MouseListener) {
 					label.addMouseListener((MouseListener) eachListener);
 				} else if (eachListener instanceof MouseMotionListener) {
@@ -2507,9 +2520,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void removeListeners() {
-		for (TabInfo eachInfo : myVisibleInfos) {
+		for (TabInfo eachInfo: myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
-			for (EventListener eachListener : myTabMouseListeners) {
+			for (EventListener eachListener: myTabMouseListeners) {
 				if (eachListener instanceof MouseListener) {
 					label.removeMouseListener((MouseListener) eachListener);
 				} else if (eachListener instanceof MouseMotionListener) {
@@ -2637,9 +2650,9 @@ public class JBTabsImpl extends JComponent
 		private final ShadowAction myShadow;
 		@NotNull
 		private final ActionManager myActionManager;
-		private final krasa.editorGroups.tabs.impl.JBTabsImpl myTabs;
+		private final JBTabsImpl myTabs;
 
-		protected BaseNavigationAction(@NotNull String copyFromID, @NotNull krasa.editorGroups.tabs.impl.JBTabsImpl tabs, @NotNull ActionManager mgr) {
+		protected BaseNavigationAction(@NotNull String copyFromID, @NotNull JBTabsImpl tabs, @NotNull ActionManager mgr) {
 			myActionManager = mgr;
 			myTabs = tabs;
 			myShadow = new ShadowAction(this, myActionManager.getAction(copyFromID), tabs, tabs);
@@ -2648,7 +2661,7 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public final void update(final AnActionEvent e) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl tabs = e.getData(NAVIGATION_ACTIONS_KEY);
+			JBTabsImpl tabs = e.getData(NAVIGATION_ACTIONS_KEY);
 			e.getPresentation().setVisible(tabs != null);
 			if (tabs == null) return;
 
@@ -2660,7 +2673,7 @@ public class JBTabsImpl extends JComponent
 		}
 
 		@Nullable
-		protected krasa.editorGroups.tabs.impl.JBTabsImpl findNavigatableTabs(krasa.editorGroups.tabs.impl.JBTabsImpl tabs) {
+		protected JBTabsImpl findNavigatableTabs(JBTabsImpl tabs) {
 			// The debugger UI contains multiple nested JBTabsImpl, where the innermost JBTabsImpl has only one tab. In this case,
 			// the action should target the outer JBTabsImpl.
 			if (tabs == null || tabs != myTabs) {
@@ -2671,15 +2684,15 @@ public class JBTabsImpl extends JComponent
 			}
 			Component c = tabs.getParent();
 			while (c != null) {
-				if (c instanceof krasa.editorGroups.tabs.impl.JBTabsImpl && isNavigatable((krasa.editorGroups.tabs.impl.JBTabsImpl) c)) {
-					return (krasa.editorGroups.tabs.impl.JBTabsImpl) c;
+				if (c instanceof JBTabsImpl && isNavigatable((JBTabsImpl) c)) {
+					return (JBTabsImpl) c;
 				}
 				c = c.getParent();
 			}
 			return null;
 		}
 
-		private static boolean isNavigatable(krasa.editorGroups.tabs.impl.JBTabsImpl tabs) {
+		private static boolean isNavigatable(JBTabsImpl tabs) {
 			final int selectedIndex = tabs.getVisibleInfos().indexOf(tabs.getSelectedInfo());
 			return tabs.isNavigationVisible() && selectedIndex >= 0 && tabs.myNavigationActionsEnabled;
 		}
@@ -2688,11 +2701,11 @@ public class JBTabsImpl extends JComponent
 			myShadow.reconnect(myActionManager.getAction(actionId));
 		}
 
-		protected abstract void _update(AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, int selectedIndex);
+		protected abstract void _update(AnActionEvent e, final JBTabsImpl tabs, int selectedIndex);
 
 		@Override
 		public final void actionPerformed(final AnActionEvent e) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl tabs = e.getData(NAVIGATION_ACTIONS_KEY);
+			JBTabsImpl tabs = e.getData(NAVIGATION_ACTIONS_KEY);
 			tabs = findNavigatableTabs(tabs);
 			if (tabs == null) return;
 
@@ -2701,22 +2714,22 @@ public class JBTabsImpl extends JComponent
 			_actionPerformed(e, tabs, index);
 		}
 
-		protected abstract void _actionPerformed(final AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, final int selectedIndex);
+		protected abstract void _actionPerformed(final AnActionEvent e, final JBTabsImpl tabs, final int selectedIndex);
 	}
 
 	private static class SelectNextAction extends BaseNavigationAction {
 
-		private SelectNextAction(krasa.editorGroups.tabs.impl.JBTabsImpl tabs, @NotNull ActionManager mgr) {
+		private SelectNextAction(JBTabsImpl tabs, @NotNull ActionManager mgr) {
 			super(IdeActions.ACTION_NEXT_TAB, tabs, mgr);
 		}
 
 		@Override
-		protected void _update(final AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, int selectedIndex) {
+		protected void _update(final AnActionEvent e, final JBTabsImpl tabs, int selectedIndex) {
 			e.getPresentation().setEnabled(tabs.findEnabledForward(selectedIndex, true) != null);
 		}
 
 		@Override
-		protected void _actionPerformed(final AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, final int selectedIndex) {
+		protected void _actionPerformed(final AnActionEvent e, final JBTabsImpl tabs, final int selectedIndex) {
 			TabInfo tabInfo = tabs.findEnabledForward(selectedIndex, true);
 			if (tabInfo != null) {
 				tabs.select(tabInfo, true, e.getModifiers());
@@ -2725,17 +2738,17 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private static class SelectPreviousAction extends BaseNavigationAction {
-		private SelectPreviousAction(krasa.editorGroups.tabs.impl.JBTabsImpl tabs, @NotNull ActionManager mgr) {
+		private SelectPreviousAction(JBTabsImpl tabs, @NotNull ActionManager mgr) {
 			super(IdeActions.ACTION_PREVIOUS_TAB, tabs, mgr);
 		}
 
 		@Override
-		protected void _update(final AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, int selectedIndex) {
+		protected void _update(final AnActionEvent e, final JBTabsImpl tabs, int selectedIndex) {
 			e.getPresentation().setEnabled(tabs.findEnabledBackward(selectedIndex, true) != null);
 		}
 
 		@Override
-		protected void _actionPerformed(final AnActionEvent e, final krasa.editorGroups.tabs.impl.JBTabsImpl tabs, final int selectedIndex) {
+		protected void _actionPerformed(final AnActionEvent e, final JBTabsImpl tabs, final int selectedIndex) {
 			TabInfo tabInfo = tabs.findEnabledBackward(selectedIndex, true);
 			if (tabInfo != null) {
 				tabs.select(tabInfo, true, e.getModifiers());
@@ -2767,7 +2780,7 @@ public class JBTabsImpl extends JComponent
 	public JBTabsPresentation setSideComponentVertical(final boolean vertical) {
 		myHorizontalSide = !vertical;
 
-		for (TabInfo each : myVisibleInfos) {
+		for (TabInfo each: myVisibleInfos) {
 			each.getChangeSupport().firePropertyChange(TabInfo.ACTION_GROUP, "new1", "new2");
 		}
 
@@ -2885,7 +2898,7 @@ public class JBTabsImpl extends JComponent
 	private void applyDecoration() {
 		if (myUiDecorator != null) {
 			UiDecorator.UiDecoration uiDecoration = myUiDecorator.getDecoration();
-			for (TabLabel each : myInfo2Label.values()) {
+			for (TabLabel each: myInfo2Label.values()) {
 				each.apply(uiDecoration);
 			}
 		}
@@ -2949,7 +2962,7 @@ public class JBTabsImpl extends JComponent
 		return myDataProvider;
 	}
 
-	public krasa.editorGroups.tabs.impl.JBTabsImpl setDataProvider(@NotNull final DataProvider dataProvider) {
+	public JBTabsImpl setDataProvider(@NotNull final DataProvider dataProvider) {
 		myDataProvider = dataProvider;
 		return this;
 	}
@@ -3012,7 +3025,7 @@ public class JBTabsImpl extends JComponent
 	public JBTabsPresentation setTabLabelActionsMouseDeadzone(final TimedDeadzone.Length length) {
 		myTabActionsMouseDeadzone = length;
 		final List<TabInfo> all = getTabs();
-		for (TabInfo each : all) {
+		for (TabInfo each: all) {
 			final TabLabel eachLabel = myInfo2Label.get(each);
 			eachLabel.updateTabActions();
 		}
@@ -3167,7 +3180,7 @@ public class JBTabsImpl extends JComponent
 		public AccessibleJBTabsImpl() {
 			super();
 			getAccessibleComponent();
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.addListener(new TabsListener() {
+			JBTabsImpl.this.addListener(new TabsListener() {
 				@Override
 				public void selectionChanged(TabInfo oldSelection, TabInfo newSelection) {
 					firePropertyChange(AccessibleContext.ACCESSIBLE_SELECTION_PROPERTY, null, null);
@@ -3281,12 +3294,12 @@ public class JBTabsImpl extends JComponent
 		implements Accessible, AccessibleComponent, AccessibleAction {
 
 		private final @NotNull
-		krasa.editorGroups.tabs.impl.JBTabsImpl myParent;
+		JBTabsImpl myParent;
 		private final @NotNull
 		TabInfo myTabInfo;
 
 		AccessibleTabPage(@NotNull TabInfo tabInfo) {
-			myParent = krasa.editorGroups.tabs.impl.JBTabsImpl.this;
+			myParent = JBTabsImpl.this;
 			myTabInfo = tabInfo;
 			setAccessibleParent(myParent);
 		}
@@ -3297,11 +3310,11 @@ public class JBTabsImpl extends JComponent
 		}
 
 		private int getTabIndex() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getIndexOf(myTabInfo);
+			return JBTabsImpl.this.getIndexOf(myTabInfo);
 		}
 
 		private TabLabel getTabLabel() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.myInfo2Label.get(getTabInfo());
+			return JBTabsImpl.this.myInfo2Label.get(getTabInfo());
 		}
 
 
@@ -3390,7 +3403,7 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public Locale getLocale() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getLocale();
+			return JBTabsImpl.this.getLocale();
 		}
 
 		@Override
@@ -3407,47 +3420,47 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public Color getBackground() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getBackground();
+			return JBTabsImpl.this.getBackground();
 		}
 
 		@Override
 		public void setBackground(Color c) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.setBackground(c);
+			JBTabsImpl.this.setBackground(c);
 		}
 
 		@Override
 		public Color getForeground() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getForeground();
+			return JBTabsImpl.this.getForeground();
 		}
 
 		@Override
 		public void setForeground(Color c) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.setForeground(c);
+			JBTabsImpl.this.setForeground(c);
 		}
 
 		@Override
 		public Cursor getCursor() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getCursor();
+			return JBTabsImpl.this.getCursor();
 		}
 
 		@Override
 		public void setCursor(Cursor c) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.setCursor(c);
+			JBTabsImpl.this.setCursor(c);
 		}
 
 		@Override
 		public Font getFont() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getFont();
+			return JBTabsImpl.this.getFont();
 		}
 
 		@Override
 		public void setFont(Font f) {
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.setFont(f);
+			JBTabsImpl.this.setFont(f);
 		}
 
 		@Override
 		public FontMetrics getFontMetrics(Font f) {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.getFontMetrics(f);
+			return JBTabsImpl.this.getFontMetrics(f);
 		}
 
 		@Override
@@ -3472,7 +3485,7 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public boolean isShowing() {
-			return krasa.editorGroups.tabs.impl.JBTabsImpl.this.isShowing();
+			return JBTabsImpl.this.isShowing();
 		}
 
 		@Override
@@ -3483,7 +3496,7 @@ public class JBTabsImpl extends JComponent
 
 		@Override
 		public Point getLocationOnScreen() {
-			Point parentLocation = krasa.editorGroups.tabs.impl.JBTabsImpl.this.getLocationOnScreen();
+			Point parentLocation = JBTabsImpl.this.getLocationOnScreen();
 			Point componentLocation = getLocation();
 			componentLocation.translate(parentLocation.x, parentLocation.y);
 			return componentLocation;
@@ -3588,14 +3601,15 @@ public class JBTabsImpl extends JComponent
 			if (i != 0)
 				return false;
 
-			krasa.editorGroups.tabs.impl.JBTabsImpl.this.select(getTabInfo(), true, null);
+			JBTabsImpl.this.select(getTabInfo(), true, null);
 			return true;
 		}
 	}
 
 	public void scroll(int myScrollOffset) {
 		if (mySingleRowLayout.myLastSingRowLayout != null) {
-			mySingleRowLayout.scroll(myScrollOffset);
+			int relativeScroll = myScrollOffset - getMyScrollOffset();
+			mySingleRowLayout.scroll(relativeScroll);
 			revalidateAndRepaint(false);
 		}
 	}
@@ -3611,4 +3625,14 @@ public class JBTabsImpl extends JComponent
 	public void setMyPopupInfo(TabInfo myPopupInfo) {
 		this.myPopupInfo = myPopupInfo;
 	}
+
+	@Override
+	public int getWidth() {
+		int width = super.getWidth();
+		if (width < 0) {
+			return predictedWidth;
+		}
+		return width;
+	}
+
 }

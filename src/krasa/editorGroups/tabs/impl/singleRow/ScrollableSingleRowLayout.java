@@ -44,7 +44,7 @@ public class ScrollableSingleRowLayout extends SingleRowLayout {
 		myScrollOffset += units;
 		if (myLastSingRowLayout == null) return;
 		int offset = -myScrollOffset;
-		for (TabInfo info : myLastSingRowLayout.myVisibleInfos) {
+		for (TabInfo info: myLastSingRowLayout.myVisibleInfos) {
 			final int length = getRequiredLength(info);
 			if (info == myTabs.getSelectedInfo()) {
 				int maxLength = myLastSingRowLayout.toFitLength - getStrategy().getMoreRectAxisSize();
@@ -69,7 +69,9 @@ public class ScrollableSingleRowLayout extends SingleRowLayout {
 	}
 
 	private void clampScrollOffsetToBounds(SingleRowPassInfo data) {
-		if (data.requiredLength < data.toFitLength) {
+		if (data.toFitLength == 0) {
+			myScrollOffset = 0;
+		} else if (data.requiredLength < data.toFitLength) {
 			myScrollOffset = 0;
 		} else {
 			myScrollOffset = Math.max(0, Math.min(myScrollOffset, data.requiredLength - data.toFitLength + getStrategy().getMoreRectAxisSize()));
@@ -94,7 +96,7 @@ public class ScrollableSingleRowLayout extends SingleRowLayout {
 
 	private void doScrollSelectionInView(SingleRowPassInfo passInfo) {
 		int offset = -myScrollOffset;
-		for (TabInfo info : passInfo.myVisibleInfos) {
+		for (TabInfo info: passInfo.myVisibleInfos) {
 			final int length = getRequiredLength(info);
 			if (info == myTabs.getSelectedInfo()) {
 				if (offset < 0) {

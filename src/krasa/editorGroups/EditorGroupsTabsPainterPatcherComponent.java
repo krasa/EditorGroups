@@ -41,7 +41,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 		ApplicationConfiguration.Tabs tabs = applicationConfiguration.getTabs();
 
 		EditorGroupsTabsPainterPatcherComponent instance = getInstance();
-		for (EditorGroupsTabsPainter editorGroupsTabsPainter : instance.map.keySet()) {
+		for (EditorGroupsTabsPainter editorGroupsTabsPainter: instance.map.keySet()) {
 			setColors(tabs, editorGroupsTabsPainter);
 		}
 	}
@@ -192,7 +192,7 @@ public final class EditorGroupsTabsPainterPatcherComponent implements Applicatio
 			}
 			return new Color(0x515658);
 		}
-		
+
 
 	}
 }

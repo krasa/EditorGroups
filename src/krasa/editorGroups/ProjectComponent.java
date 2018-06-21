@@ -5,7 +5,6 @@ import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.*;
-import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -40,7 +39,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				if (LOG.isDebugEnabled()) LOG.debug("beforeFileClosed [" + file + "]");
 			}
 		};
-		project.getMessageBus().connect().subscribe(FileEditorManagerListener.Before.FILE_EDITOR_MANAGER, before);	
+		project.getMessageBus().connect().subscribe(FileEditorManagerListener.Before.FILE_EDITOR_MANAGER, before);
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 
 			//IJ 2018.2
@@ -49,18 +48,19 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "]");
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
-				int myScrollOffset = instance.myScrollOffset;
+				SwitchRequest switchRequest = instance.getSwitchingRequest(file);
 
-				for (FileEditor fileEditor : editors.getFirst()) {
+				for (FileEditor fileEditor: editors.getFirst()) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
 					long start = System.currentTimeMillis();
-					instance.myScrollOffset = 0;
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file, myScrollOffset);
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
+					panel.postConstruct();
+
+
 					if (LOG.isDebugEnabled()) {
 						if (LOG.isDebugEnabled())
 							LOG.debug("sync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
@@ -77,17 +77,16 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				EditorGroup switchingGroup = instance.getSwitchingGroup(file);
-				int myScrollOffset = instance.myScrollOffset;
+				SwitchRequest switchRequest = instance.getSwitchingRequest(file);
 
-				for (final FileEditor fileEditor : fileEditors) {
+				for (final FileEditor fileEditor: fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
 					long start = System.currentTimeMillis();
 
-					instance.myScrollOffset = 0;
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchingGroup, file, myScrollOffset);
+					instance.setMyScrollOffset(0);
+					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
 
 					manager.addTopComponent(fileEditor, panel.getRoot());
 					if (LOG.isDebugEnabled()) {
@@ -101,13 +100,14 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void selectionChanged(@NotNull FileEditorManagerEvent event) {
 				FileEditor fileEditor = event.getNewEditor();
-				if (fileEditor instanceof TextEditorImpl) {
-					return; //focus listener handles that
-				}
+//				if (fileEditor instanceof TextEditorImpl) {
+//					return; //focus listener handles that
+//				}
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
-						EditorGroup switchingGroup = EditorGroupManager.getInstance(project).getSwitchingGroup(panel.getFile());
+						EditorGroupManager instance = EditorGroupManager.getInstance(project);
+						EditorGroup switchingGroup = instance.getSwitchingEditorGroup(panel.getFile());
 						if (LOG.isDebugEnabled()) LOG.debug("selectionChanged, refresh");
 						panel.refresh(false, switchingGroup);
 					}
@@ -132,7 +132,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			return state;
 		} else {
 			return new State();
-		} 
+		}
 	}
 
 	@Override

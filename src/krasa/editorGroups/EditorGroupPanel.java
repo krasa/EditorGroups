@@ -2,8 +2,6 @@ package krasa.editorGroups;
 
 import com.intellij.ide.DataManager;
 import com.intellij.ide.IdeEventQueue;
-import com.intellij.ide.favoritesTreeView.FavoritesListener;
-import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
@@ -73,19 +71,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public EditorGroupManager groupManager;
 	private ActionToolbar toolbar;
 	private boolean disposed;
-	private FavoritesListener favoritesListener;
 	private volatile boolean brokenScroll;
 
-	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable EditorGroup editorGroup, VirtualFile file, int myScrollOffset) {
+	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
 		if (LOG.isDebugEnabled())
-			LOG.debug("EditorGroupPanel " + "fileEditor = [" + fileEditor + "], project = [" + project + "], editorGroup = [" + editorGroup + "], file = [" + file + "], myScrollOffset = [" + myScrollOffset + "]");
+			LOG.debug("EditorGroupPanel " + "fileEditor = [" + fileEditor + "], project = [" + project + "], switchingRequest = [" + switchRequest + "], file = [" + file + "]");
 		this.fileEditor = fileEditor;
 		Disposer.register(fileEditor, this);
 		this.project = project;
 		this.file = file;
-		this.myScrollOffset = myScrollOffset;
-		toBeRendered = editorGroup;
+
+
+		this.myScrollOffset = switchRequest == null ? 0 : switchRequest.myScrollOffset;
+		toBeRendered = switchRequest == null ? null : switchRequest.group;
+
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 		fileEditor.putUserData(EDITOR_PANEL, this);
@@ -106,7 +106,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				});
 			}
 		}
-
 		fileFromTextEditor = Utils.getFileFromTextEditor(project, fileEditor);
 		addButtons();
 
@@ -118,6 +117,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				return true;
 			}
 		};
+		tabs.setPredictedWidth(switchRequest != null ? switchRequest.getWidth() : 0);
 		Getter<ActionGroup> getter = new Getter<ActionGroup>() {
 			@Override
 			public ActionGroup get() {
@@ -205,8 +205,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		addMouseListener(getPopupHandler());
 		tabs.addMouseListener(getPopupHandler());
 
+
+	}
+
+	public void postConstruct() {
+		EditorGroup editorGroup = toBeRendered;
 		//minimize flicker for the price of latency
-		if (editorGroup == null && ApplicationConfiguration.state().isPreferLatencyOverFlicker() && !DumbService.isDumb(project)) {
+		boolean preferLatencyOverFlicker = ApplicationConfiguration.state().isPreferLatencyOverFlicker();
+		if (editorGroup == null && preferLatencyOverFlicker && !DumbService.isDumb(project)) {
 			long start = System.currentTimeMillis();
 			try {
 				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
@@ -226,23 +232,31 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			setVisible(false);
 			refresh(false, null);
 		} else {
-// TODO minimize flicker  - DOES NOT WORK - tabs do not like being updated while not visible first - it really messes up scrolling
-//			render();
 			updateVisibility(editorGroup);
-			SwingUtilities.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						render2();
-					} catch (Exception e) {
-						displayedGroup = EditorGroup.EMPTY;
-						LOG.error(e);
-					}
-				}
-			});
+			boolean b = true;
+//			b = false;
+			if (b) {
+				getLayout().layoutContainer(this.getParent());
+				render2(false);
+			} else {
+				renderLater();
+			}
 		}
 	}
 
+	private void renderLater() {
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					render2(true);
+				} catch (Exception e) {
+					displayedGroup = EditorGroup.EMPTY;
+					LOG.error(e);
+				}
+			}
+		});
+	}
 
 	@NotNull
 	private PopupHandler getPopupHandler() {
@@ -268,7 +282,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(component, BorderLayout.WEST);
 	}
 
-	private void reloadTabs() {
+	private void reloadTabs(boolean paintNow) {
 		tabs.removeAllTabs();
 
 		createLinks();
@@ -282,7 +296,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		tabs.doLayout();
 		tabs.scroll(myScrollOffset);
 
-		if (tabs.getTabCount() > 0) { //premature optimization
+		if (tabs.getTabCount() > 0 && paintNow) { //premature optimization
 			tabs.validate();
 			RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
 		}
@@ -324,7 +338,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	private void createGroupLinks(Collection<EditorGroup> groups) {
-		for (EditorGroup editorGroup : groups) {
+		for (EditorGroup editorGroup: groups) {
 			tabs.addTab(new MyGroupTabInfo(editorGroup));
 		}
 	}
@@ -459,7 +473,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - toBeRendered != null");
 			return;
 		}
-		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, tabs.getMyScrollOffset());
+		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
 
 	}
 
@@ -473,7 +487,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void focusGained() {
 		//important when switching to a file that has an exsting editor
 
-		EditorGroup switchingGroup = groupManager.getSwitchingGroup(file);
+		EditorGroup switchingGroup = groupManager.getSwitchingEditorGroup(this.file);
 		if (LOG.isDebugEnabled()) LOG.debug("focusGained " + file + " " + switchingGroup);
 		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
 			refresh(false, switchingGroup);
@@ -630,14 +644,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void render(AtomicReference<Exception> ex) {
 		try {
-			render2();
+			render2(true);
 		} catch (Exception e) {
 			if (LOG.isDebugEnabled()) LOG.debug(file.getName(), e);
 			ex.set(e);
 		}
 	}
 
-	private void render2() {
+	private void render2(boolean paintNow) {
 		if (disposed) {
 			return;
 		}
@@ -658,10 +672,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		long start = System.currentTimeMillis();
 
-		reloadTabs();
+		reloadTabs(paintNow);
 
 		updateVisibility(rendering);
-		addFavouritesListener();
 		fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 		fileEditorManager.updateFilePresentation(file);
@@ -675,27 +688,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
 	}
 
-	private void addFavouritesListener() {
-		if (displayedGroup instanceof FavoritesGroup && favoritesListener == null) {
-			favoritesListener = new FavoritesListener() {
-				@Override
-				public void rootsChanged() {
-					refresh(true, displayedGroup);
-				}
-
-				@Override
-				public void listAdded(String listName) {
-
-				}
-
-				@Override
-				public void listRemoved(String listName) {
-
-				}
-			};
-			FavoritesManager.getInstance(project).addFavoritesListener(favoritesListener, fileEditor);
-		}
-	}
 
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {
 		boolean visible;
@@ -767,7 +759,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private boolean isSelected() {
 		boolean selected = false;
-		for (FileEditor selectedEditor : fileEditorManager.getSelectedEditors()) {
+		for (FileEditor selectedEditor: fileEditorManager.getSelectedEditors()) {
 			if (selectedEditor == fileEditor) {
 				selected = true;
 				break;
