@@ -106,7 +106,11 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 			lastGroup.setRoot(ownerPath);
 		}
 
-		lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
+		try {
+			lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
+		} catch (Exception e) {
+			LOG.error(e);
+		}
 
 		if (map.containsKey(lastGroup.getId())) {
 			Notifications.duplicateId(lastGroup, inputData.getFile(), inputData.getProject());

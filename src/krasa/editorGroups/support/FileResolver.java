@@ -6,6 +6,8 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.SystemInfo;
@@ -126,6 +128,9 @@ public class FileResolver {
 					resolve(file);
 				}
 
+			} catch (ProcessCanceledException | IndexNotReadyException e) {
+				//TODO what to do?
+				LOG.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
 			} catch (Exception e) {
 				LOG.error("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", e);
 			}
