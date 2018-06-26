@@ -4,6 +4,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
+import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -13,6 +14,7 @@ import com.intellij.ui.ColorUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.util.HashMap;
@@ -460,5 +462,10 @@ public class Utils {
 			}
 		}
 		return myColor;
+	}
+
+	@Nullable
+	public static Icon getFileIcon(String path) {
+		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
 	}
 }

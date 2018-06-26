@@ -158,6 +158,10 @@
                 text="Switch Editor Group">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
+        <action id="krasa.editorGroups.SwitchFile" class="krasa.editorGroups.actions.SwitchFileAction"
+                text="Switch File Within Editor Group">
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt W"/>
+        </action>
 
         <action id="krasa.editorGroups.OpenConfiguration" class="krasa.editorGroups.actions.OpenConfigurationAction"
                 icon="AllIcons.General.Settings"

@@ -231,6 +231,10 @@ public class EditorGroupManager {
 		return null;
 	}
 
+	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, EditorGroup group, VirtualFile current) {
+		open(virtualFileByAbsolutePath, group, window, tab, current, new SwitchRequest(group, virtualFileByAbsolutePath));
+	}
+	
 	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], switchingRequest = [" + switchRequest + "]");
@@ -341,5 +345,6 @@ public class EditorGroupManager {
 	public SwitchRequest getSwitchRequest() {
 		return switchRequest;
 	}
+
 
 }

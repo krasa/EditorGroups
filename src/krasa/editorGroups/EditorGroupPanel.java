@@ -14,7 +14,6 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
@@ -351,7 +350,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			String name = Utils.toPresentableName(path);
 			setText(name);
 			setTooltipText(path);
-			setIcon(getFileIcon(path));
+			setIcon(Utils.getFileIcon(path));
 			if (!new File(path).exists()) {
 				setEnabled(false);
 			}
@@ -733,11 +732,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		return file;
 	}
 
-
-	@Nullable
-	private static Icon getFileIcon(String path) {
-		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
-	}
 
 	private void customizeSelectedColor(MyTabInfo tab) {
 		ApplicationConfiguration config = ApplicationConfiguration.state();
