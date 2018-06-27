@@ -9,17 +9,17 @@ image::example.gif[]
 - manually defined in any file
             
 == Shortcuts                    
-- Ctrl + Alt + Q - Refresh                                                           
-- Ctrl + Alt + W - Switch Group popup                                                         
-- Ctrl + Alt + Shift + W - Switch File popup
+- `Ctrl + Alt + Q` - Refresh                                                           
+- `Ctrl + Alt + W` - Switch Group popup                                                         
+- `Ctrl + Alt + Shift + W` - Switch File popup
 
-- [Ctrl + Mouse Wheel] or [Ctrl + ; or ' ]  - switch file (closing the previous one)           
-- [Ctrl + Alt + Mouse Wheel] or [Ctrl + Alt + ; or ' ] - switch file (leaving the previous one opened)
-- [Ctrl + Alt + Shift + Mouse Wheel] or [Ctrl + Alt + Shift + ; or ' ] - switch file into a new window                                              
+- `Ctrl + Mouse Wheel` or `Ctrl + ; or ' `  - switch file (closing the previous one)           
+- `Ctrl + Alt + Mouse Wheel` or `Ctrl + Alt + ; or ' ` - switch file (leaving the previous one opened)
+- `Ctrl + Alt + Shift + Mouse Wheel` or `Ctrl + Alt + Shift + ; or ' ` - switch file into a new window                                              
               
 === Tab click modifiers
-- [Ctrl/Alt + click] - open a file in a new tab
-- [Shift + click] - open a file in a new window
+- `Ctrl/Alt + click` - open a file in a new tab
+- `Shift + click` - open a file in a new window
 
 
 == Definitions
@@ -27,41 +27,41 @@ image::example.gif[]
 - anywhere else (can be disabled in settings)
                         
 === Title customization
-- @group.title yourTitle
-- @group.color yellow (a name from https://www.w3schools.com/colors/colors_names.asp)  
-- @group.color yellow+3 (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
-- @group.color #FF0096
-- @group.color 0xFF0096
+- `@group.title yourTitle`
+- `@group.color yellow` (a name from https://www.w3schools.com/colors/colors_names.asp)  
+- `@group.color yellow+3` (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
+- `@group.color #FF0096`
+- `@group.color 0xFF0096`
 
 === Relative paths to the current file
-- @group.related file.txt
-- @group.related ../file.txt
+- `@group.related file.txt`
+- `@group.related ../file.txt`
 
 === Absolute paths
-- @group.related C:/file.txt
-- @group.related /file.txt
+- `@group.related C:/file.txt`
+- `@group.related /file.txt`
 
 === Macros
-- @group.related MODULE/src/file.txt
-- @group.related PROJECT/myModule/src/file.txt
+- `@group.related MODULE/src/file.txt`
+- `@group.related PROJECT/myModule/src/file.txt`
 
 === Wildcards
-- @group.related ./*
-- @group.related *.txt
-- @group.related file.*
-- @group.related f??e.txt
-- @group.related fileName (with all extensions, unless the file exists)
+- `@group.related ./*`
+- `@group.related *.txt`
+- `@group.related file.*`
+- `@group.related f??e.txt`
+- `@group.related fileName` (with all extensions, unless the file exists)
 
 === Exact filename anywhere in the project
-- @group.related */foo/file.txt
+- `@group.related */foo/file.txt`
 
 === All files with the same name anywhere in the project
-- @group.related \*/foo/file.*
+- `@group.related \*/foo/file.*`
 
 === Other
-- @group.disable (disables indexing of the current file)
-- @group.id - must be unique across the project, creates a new group if there is more than one (otherwise path+index is used, which breaks references on refactoring)
-- @group.root - root directory, by default the current file's one
+- `@group.disable` (disables indexing of the current file)
+- `@group.id myUniqueId` - must be unique across the project, creates a new group if there is more than one (otherwise path+index is used, which breaks references on refactoring)
+- `@group.root` - root directory, by default the current file's one
                   
 === Advanced actions and settings
 - right click on the panel
