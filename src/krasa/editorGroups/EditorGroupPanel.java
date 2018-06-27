@@ -45,6 +45,7 @@ import java.awt.event.MouseEvent;
 import java.io.File;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
@@ -72,6 +73,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private ActionToolbar toolbar;
 	private boolean disposed;
 	private volatile boolean brokenScroll;
+	private UniqueTabNameBuilder uniqueNameBuilder;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
@@ -81,7 +83,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		Disposer.register(fileEditor, this);
 		this.project = project;
 		this.file = file;
-
+		uniqueNameBuilder = new UniqueTabNameBuilder(project);
 
 		this.myScrollOffset = switchRequest == null ? 0 : switchRequest.myScrollOffset;
 		toBeRendered = switchRequest == null ? null : switchRequest.group;
@@ -285,9 +287,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private void reloadTabs(boolean paintNow) {
 		tabs.removeAllTabs();
 
-		createLinks();
+		List<String> paths = displayedGroup.getLinks(project);
+		Map<String, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
 
-		addCurrentFileTab();
+		createLinks(paths, path_name);
+
+		addCurrentFileTab(path_name);
 
 		if (displayedGroup instanceof GroupsHolder) {
 			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
@@ -302,13 +307,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private void createLinks() {
-		List<String> paths = displayedGroup.getLinks(project);
+	private void createLinks(List<String> paths, Map<String, String> path_name) {
 
 		for (int i1 = 0; i1 < paths.size(); i1++) {
 			String path = paths.get(i1);
 
-			MyTabInfo tab = new MyTabInfo(path);
+			MyTabInfo tab = new MyTabInfo(path, path_name.get(path));
 
 			tabs.addTab(tab);
 //			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
@@ -324,9 +328,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	}
 
-	private void addCurrentFileTab() {
+	private void addCurrentFileTab(Map<String, String> path_name) {
 		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
-			MyTabInfo info = new MyTabInfo(file.getCanonicalPath());
+			String path = file.getCanonicalPath();
+			MyTabInfo info = new MyTabInfo(path, path_name.get(path));
 			customizeSelectedColor(info);
 			currentIndex = -1;
 			tabs.addTab(info, 0);
@@ -347,9 +352,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	class MyTabInfo extends TabInfo {
 		String path;
 
-		public MyTabInfo(String path) {
+		public MyTabInfo(String path, String name) {
 			this.path = path;
-			String name = Utils.toPresentableName(path);
 			setText(name);
 			setTooltipText(path);
 			setIcon(Utils.getFileIcon(path));

@@ -1,5 +1,6 @@
 package krasa.editorGroups.support;
 
+import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -116,7 +117,21 @@ public class Utils {
 		if (i > 0) {
 			name = path.substring(i + 1);
 		}
+
+		UISettings uiSettings = UISettings.getInstanceOrNull();
+		if (uiSettings != null && uiSettings.getHideKnownExtensionInTabs()) {
+			name = cutExtension(name, "/");
+		}
+
 		return name;
+	}
+
+	public static String cutExtension(String result, String separator) {
+		String withoutExtension = FileUtil.getNameWithoutExtension(result);
+		if (StringUtil.isNotEmpty(withoutExtension) && !withoutExtension.endsWith(separator)) {
+			return withoutExtension;
+		}
+		return result;
 	}
 
 	static {
