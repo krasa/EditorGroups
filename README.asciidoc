@@ -21,6 +21,8 @@ image::example.gif[]
 - `Ctrl/Alt + click` - open a file in a new tab
 - `Shift + click` - open a file in a new window
 
+== Syntax
+
 === Relative paths to the current file
 - `@group.related file.txt`
 - `@group.related ../file.txt`
