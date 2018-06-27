@@ -13,9 +13,9 @@ image::example.gif[]
 - `Ctrl + Alt + W` - Switch Group popup                                                         
 - `Ctrl + Alt + Shift + W` - Switch File popup
 
-- `Ctrl + Mouse Wheel` or `Ctrl + ; or ' `  - switch file (closing the previous one)           
-- `Ctrl + Alt + Mouse Wheel` or `Ctrl + Alt + ; or ' ` - switch file (leaving the previous one opened)
-- `Ctrl + Alt + Shift + Mouse Wheel` or `Ctrl + Alt + Shift + ; or ' ` - switch file into a new window                                              
+- `Ctrl + Mouse Wheel` or `Ctrl + ; or '`  - switch file (closing the previous one)           
+- `Ctrl + Alt + Mouse Wheel` or `Ctrl + Alt + ; or '` - switch file (leaving the previous one opened)
+- `Ctrl + Alt + Shift + Mouse Wheel` or `Ctrl + Alt + Shift + ; or '` - switch file into a new window                                              
               
 === Tab click modifiers
 - `Ctrl/Alt + click` - open a file in a new tab
