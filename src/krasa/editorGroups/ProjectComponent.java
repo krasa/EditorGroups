@@ -100,16 +100,16 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void selectionChanged(@NotNull FileEditorManagerEvent event) {
 				FileEditor fileEditor = event.getNewEditor();
-//				if (fileEditor instanceof TextEditorImpl) {
-//					return; //focus listener handles that
-//				}
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-					if (panel != null) {    //UI form editor is not disposed, so the panel might exist and it has no focus listener... 
+					if (panel != null) { 
 						EditorGroupManager instance = EditorGroupManager.getInstance(project);
-						EditorGroup switchingGroup = instance.getSwitchingEditorGroup(panel.getFile());
-						if (LOG.isDebugEnabled()) LOG.debug("selectionChanged, refresh");
-						panel.refresh(false, switchingGroup);
+						SwitchRequest switchRequest = instance.getSwitchingRequest(panel.getFile());
+						if (switchRequest != null) {
+							EditorGroup switchingGroup = switchRequest.group;
+							int scrollOffset = switchRequest.myScrollOffset;
+							panel.refreshOnSelectionChanged(false, switchingGroup, scrollOffset);
+						}
 					}
 				}
 			}

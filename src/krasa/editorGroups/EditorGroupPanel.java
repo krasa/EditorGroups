@@ -33,6 +33,7 @@ import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import krasa.editorGroups.tabs.JBTabs;
 import krasa.editorGroups.tabs.TabInfo;
+import krasa.editorGroups.tabs.impl.JBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -342,6 +343,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
+
 	class MyTabInfo extends TabInfo {
 		String path;
 
@@ -472,10 +474,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - toBeRendered != null");
 			return;
 		}
-		groupManager.open(fileToOpen, displayedGroup, newWindow, newTab, file, new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
+		groupManager.open(this, fileToOpen, newWindow, newTab);
 
 	}
 
+	public JBEditorTabs getTabs() {
+		return tabs;
+	}
 
 	@Override
 	public double getWeight() {
@@ -484,15 +489,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	private void focusGained() {
-		//important when switching to a file that has an exsting editor
-
-		EditorGroup switchingGroup = groupManager.getSwitchingEditorGroup(this.file);
-		if (LOG.isDebugEnabled()) LOG.debug("focusGained " + file + " " + switchingGroup);
-		if (switchingGroup != null && switchingGroup.isValid() && displayedGroup != switchingGroup) {
-			refresh(false, switchingGroup);
-		} else {
-			refresh(false, null);
-		}
+		refresh(false, null);
 		groupManager.switching(false);
 	}
 
@@ -534,6 +531,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		refresh2();
 	}
 
+	public void refreshOnSelectionChanged(boolean refresh, EditorGroup switchingGroup, int scrollOffset) {
+		if (LOG.isDebugEnabled()) LOG.debug("refreshOnSelectionChanged");
+		myScrollOffset = scrollOffset;
+		if (switchingGroup == displayedGroup) {
+			tabs.scroll(myScrollOffset);
+		}
+		refresh(refresh, switchingGroup);
+	}
+	    
 	private void refresh2() {
 		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
 			@Override
@@ -587,7 +593,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			});
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("refresh3 IF: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
+				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
 			if (!brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
 				if (!(fileEditor instanceof TextEditorImpl)) {

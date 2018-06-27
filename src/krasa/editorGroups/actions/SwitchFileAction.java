@@ -58,19 +58,24 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 					String currentFile = panel.getFile().getCanonicalPath();
 					EditorGroup group = panel.getDisplayedGroup();
 					for (String link: group.getLinks(project)) {
-						OpenFileAction action = new OpenFileAction(link, project, group, data);
-						if (link.equals(currentFile)) {
-							action.getTemplatePresentation().setEnabled(false);
-							action.getTemplatePresentation().setText(Utils.toPresentableName(link) + " - current", false);
-							action.getTemplatePresentation().setIcon(null);
-						}
-						defaultActionGroup.add(action);
+						defaultActionGroup.add(newAction(project, panel, currentFile, link));
 					}
 				}
 			}
 		} catch (IndexNotReadyException e) {
 			LOG.error("That should not happen", e);
 		}
+	}
+
+	@NotNull
+	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, String link) {
+		OpenFileAction action = new OpenFileAction(link, project, panel);
+		if (link.equals(currentFile)) {
+			action.getTemplatePresentation().setEnabled(false);
+			action.getTemplatePresentation().setText(Utils.toPresentableName(link) + " - current", false);
+			action.getTemplatePresentation().setIcon(null);
+		}
+		return action;
 	}
 
 	@Override
@@ -107,19 +112,17 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 
 	private static class OpenFileAction extends DumbAwareAction {
 		private final String link;
+		private final EditorGroupPanel panel;
 		private final VirtualFile virtualFileByAbsolutePath;
 		private final Project project;
-		private final EditorGroup group;
-		private final FileEditor data;
 
-		public OpenFileAction(String link, Project project, EditorGroup group, FileEditor data) {
+		public OpenFileAction(String link, Project project, EditorGroupPanel panel) {
 			super(Utils.toPresentableName(link), link, Utils.getFileIcon(link));
 			this.link = link;
+			this.panel = panel;
 			VirtualFile virtualFileByAbsolutePath = Utils.getVirtualFileByAbsolutePath(link);
 			this.virtualFileByAbsolutePath = virtualFileByAbsolutePath;
 			this.project = project;
-			this.group = group;
-			this.data = data;
 			getTemplatePresentation().setEnabled(virtualFileByAbsolutePath.exists());
 		}
 
@@ -129,7 +132,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 				boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
 				boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				instance.open(virtualFileByAbsolutePath, window, tab, group, data.getFile());
+				instance.open(panel, virtualFileByAbsolutePath, window, tab);
 			} else {
 				Notifications.warning("File not found " + link, null);
 			}

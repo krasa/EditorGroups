@@ -15,6 +15,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Notifications;
+import krasa.editorGroups.tabs.impl.JBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,6 +54,7 @@ public class EditorGroupManager {
 	public static EditorGroupManager getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, EditorGroupManager.class);
 	}
+
 
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
@@ -231,11 +233,17 @@ public class EditorGroupManager {
 		return null;
 	}
 
+	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab) {
+		EditorGroup displayedGroup = groupPanel.getDisplayedGroup();
+		JBEditorTabs tabs = groupPanel.getTabs();
+		open(fileToOpen, displayedGroup, newWindow, newTab, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
+	}
+	   
 	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, EditorGroup group, VirtualFile current) {
 		open(virtualFileByAbsolutePath, group, window, tab, current, new SwitchRequest(group, virtualFileByAbsolutePath));
 	}
-	
-	public void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
+
+	private void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], switchingRequest = [" + switchRequest + "]");
 

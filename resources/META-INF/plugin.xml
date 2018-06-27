@@ -159,7 +159,7 @@
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
         <action id="krasa.editorGroups.SwitchFile" class="krasa.editorGroups.actions.SwitchFileAction"
-                text="Switch File Within Editor Group">
+                text="Switch File in Editor Group">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt W"/>
         </action>
 
