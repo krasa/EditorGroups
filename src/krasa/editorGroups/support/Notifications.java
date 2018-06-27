@@ -41,8 +41,8 @@ public class Notifications {
 		show(notification);
 	}
 
-	public static void duplicateId(EditorGroupIndexValue lastGroup, VirtualFile file, Project project) {
-		String content = "Duplicate Group ID '" + lastGroup.getId() + "' in " + href(file);
+	public static void indexingWarn(Project project, VirtualFile file, String message) {
+		String content = message + " in " + href(file);
 		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {

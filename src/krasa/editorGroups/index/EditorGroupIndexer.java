@@ -113,7 +113,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 		}
 
 		if (map.containsKey(lastGroup.getId())) {
-			Notifications.duplicateId(lastGroup, inputData.getFile(), inputData.getProject());
+			Notifications.indexingWarn(inputData.getProject(), inputData.getFile(), "Duplicate Group ID '" + lastGroup.getId() + "'");
 		} else {
 			map.put(lastGroup.getId(), lastGroup);
 		}

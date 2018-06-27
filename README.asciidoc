@@ -61,7 +61,7 @@ image::example.gif[]
 === Other
 - `@group.disable` (disables indexing of the current file)
 - `@group.id myUniqueId` - must be unique across the project, creates a new group if there is more than one (otherwise path+index is used, which breaks references on refactoring)
-- `@group.root` - root directory, by default the current file's one
+- `@group.root ../../` - root directory, by default the current file's one; accepts macros, relative and absolute paths
                   
 === Advanced actions and settings
 - right click on the panel
