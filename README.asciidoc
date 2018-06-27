@@ -21,18 +21,6 @@ image::example.gif[]
 - `Ctrl/Alt + click` - open a file in a new tab
 - `Shift + click` - open a file in a new window
 
-
-== Definitions
-- in *.egroups - with language support
-- anywhere else (can be disabled in settings)
-                        
-=== Title customization
-- `@group.title yourTitle`
-- `@group.color yellow` (a name from https://www.w3schools.com/colors/colors_names.asp)  
-- `@group.color yellow+3` (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
-- `@group.color #FF0096`
-- `@group.color 0xFF0096`
-
 === Relative paths to the current file
 - `@group.related file.txt`
 - `@group.related ../file.txt`
@@ -57,6 +45,13 @@ image::example.gif[]
 
 === All files with the same name anywhere in the project
 - `@group.related \*/foo/file.*`
+                 
+=== Title customization
+- `@group.title yourTitle`
+- `@group.color yellow` (a name from https://www.w3schools.com/colors/colors_names.asp)  
+- `@group.color yellow+3` (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
+- `@group.color #FF0096`
+- `@group.color 0xFF0096`
 
 === Other
 - `@group.disable` (disables indexing of the current file)
