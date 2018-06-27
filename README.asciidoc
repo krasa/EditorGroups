@@ -6,7 +6,7 @@ image::example.gif[]
 - from Favorites tool window
 - by file name without extension anywhere in the project
 - by folder
-- manually defined in any file
+- manually defined in `*.egroups` file (with language support) or in any other file
             
 == Shortcuts                    
 - `Ctrl + Alt + Q` - Refresh                                                           
