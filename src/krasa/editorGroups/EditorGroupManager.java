@@ -160,14 +160,9 @@ public class EditorGroupManager {
 		});
 	}
 
-	@Nullable
-	public EditorGroup getSwitchingEditorGroup(@NotNull VirtualFile file) {
-		SwitchRequest switchRequest = getSwitchingRequest(file);
-		return switchRequest == null ? null : switchRequest.group;
-	}
 
 	@Nullable
-	public SwitchRequest getSwitchingRequest(@NotNull VirtualFile file) {
+	public SwitchRequest getAndClearSwitchingRequest(@NotNull VirtualFile file) {
 		VirtualFile switchingFile;
 		if (switchRequest == null) {
 			switchingFile = null;
@@ -177,8 +172,8 @@ public class EditorGroupManager {
 
 
 		if (file.equals(switchingFile)) {
-			SwitchRequest switchingGroup = this.getSwitchRequest();
-//						switchingGroup.switchingGroup = null;  todo is it needed?
+			SwitchRequest switchingGroup = switchRequest;
+			clearSwitchingRequest();
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("<getSwitchingRequest " + switchingGroup);
 			}
@@ -348,10 +343,6 @@ public class EditorGroupManager {
 		if (switchRequest != null) {
 			switchRequest.myScrollOffset = myScrollOffset;
 		}
-	}
-
-	public SwitchRequest getSwitchRequest() {
-		return switchRequest;
 	}
 
 

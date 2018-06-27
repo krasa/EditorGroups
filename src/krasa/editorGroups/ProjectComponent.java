@@ -48,7 +48,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "]");
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				SwitchRequest switchRequest = instance.getSwitchingRequest(file);
+				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
 
 				for (FileEditor fileEditor: editors.getFirst()) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
@@ -77,7 +77,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				final FileEditor[] fileEditors = manager.getAllEditors(file);
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				SwitchRequest switchRequest = instance.getSwitchingRequest(file);
+				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
 
 				for (final FileEditor fileEditor: fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
@@ -104,7 +104,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 					if (panel != null) { 
 						EditorGroupManager instance = EditorGroupManager.getInstance(project);
-						SwitchRequest switchRequest = instance.getSwitchingRequest(panel.getFile());
+						SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(panel.getFile());
 						if (switchRequest != null) {
 							EditorGroup switchingGroup = switchRequest.group;
 							int scrollOffset = switchRequest.myScrollOffset;
