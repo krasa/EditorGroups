@@ -128,7 +128,7 @@
 
         <action id="krasa.editorGroups.ToggleAutoSameNameGroups"
                 class="krasa.editorGroups.actions.ToggleAutoSameNameGroupsAction"
-                text="Automatic Groups by the Current File"
+                text="Automatic Groups by the Current File Name"
                 description="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"
         />
 
