@@ -19,6 +19,7 @@ import krasa.editorGroups.tabs.impl.JBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.swing.*;
 import java.awt.*;
 import java.util.Collections;
 import java.util.Comparator;
@@ -149,14 +150,17 @@ public class EditorGroupManager {
 
 	public void switching(SwitchRequest switchRequest) {
 		this.switchRequest = switchRequest;
+		switching = true;
 		if (LOG.isDebugEnabled())
-			LOG.debug("switching " + "switching = [" + switchRequest.isSwitching() + "], group = [" + switchRequest.getGroup() + "], fileToOpen = [" + switchRequest.getFileToOpen() + "], myScrollOffset = [" + switchRequest.getMyScrollOffset() + "]");
+			LOG.debug("switching " + "switching = [" + switching + "], group = [" + switchRequest.getGroup() + "], fileToOpen = [" + switchRequest.getFileToOpen() + "], myScrollOffset = [" + switchRequest.getMyScrollOffset() + "]");
 	}
 
 	public void switching(boolean b) {
-		ideFocusManager.doWhenFocusSettlesDown(() -> {
-			if (LOG.isDebugEnabled()) LOG.debug("switching " + " [" + b + "]");
-			setSwitching(false);
+		SwingUtilities.invokeLater(() -> {
+			ideFocusManager.doWhenFocusSettlesDown(() -> {
+				if (LOG.isDebugEnabled()) LOG.debug("switching " + " [" + b + "]");
+				setSwitching(false);
+			});
 		});
 	}
 
@@ -184,8 +188,10 @@ public class EditorGroupManager {
 		return null;
 	}
 
+	public volatile boolean switching = false;
+	       
 	public boolean switching() {
-		return switchRequest != null && switchRequest.switching;
+		return switchRequest != null || switching;
 	}
 
 	public List<EditorGroup> getGroups(VirtualFile file) {
@@ -329,9 +335,7 @@ public class EditorGroupManager {
 
 
 	public void setSwitching(boolean switching) {
-		if (switchRequest != null) {
-			switchRequest.switching = switching;
-		}
+		this.switching = switching;
 	}
 
 	public void clearSwitchingRequest() {

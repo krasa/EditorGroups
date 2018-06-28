@@ -5,7 +5,6 @@ import krasa.editorGroups.model.EditorGroup;
 import org.jetbrains.annotations.NotNull;
 
 public class SwitchRequest {
-	public volatile boolean switching = true;
 	@NotNull
 	public volatile EditorGroup group;
 	@NotNull
@@ -23,10 +22,6 @@ public class SwitchRequest {
 		this.fileToOpen = fileToOpen;
 		this.myScrollOffset = myScrollOffset;
 		this.width = width;
-	}
-
-	public boolean isSwitching() {
-		return switching;
 	}
 
 	public EditorGroup getGroup() {
@@ -48,7 +43,6 @@ public class SwitchRequest {
 	@Override
 	public String toString() {
 		return "SwitchRequest{" +
-			"switching=" + switching +
 			", group=" + group +
 			", fileToOpen=" + fileToOpen +
 			", myScrollOffset=" + myScrollOffset +
