@@ -14,9 +14,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
-import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
-import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -218,9 +216,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			long start = System.currentTimeMillis();
 			try {
 				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
-			} catch (IndexNotReadyException | ProcessCanceledException e) {
+			} catch (IndexNotReady e) {
 				LOG.debug(e);
-			} catch (Exception e) {
+			} catch (Throwable e) {
 				LOG.error(e);
 			}
 			long delta = System.currentTimeMillis() - start;
@@ -556,6 +554,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
 				}
 				if (selected) {
+					RefreshRequest refreshRequest = atomicReference.get();
+					if (refreshRequest != null && (refreshRequest.requestedGroup == null || refreshRequest.requestedGroup instanceof EditorGroupIndexValue)) {
+						LOG.debug("waiting on smart mode");
+						DumbService.getInstance(project).waitForSmartMode();
+						if (disposed) {
+							return;
+						}
+					}
+					     
 					refresh3();
 				}
 
@@ -585,34 +592,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup requestedGroup = request.requestedGroup;
 		boolean refresh = request.refresh;
 
-		if (requestedGroup instanceof EditorGroupIndexValue) {
-			LOG.debug("waiting on smart mode");
-			DumbService.getInstance(project).waitForSmartMode();
-			if (disposed) {
-				return;
-			}
-		}
-		           
 		           
 		try {
-			AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
-			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
+			EditorGroup group = ApplicationManager.getApplication().runReadAction(new ThrowableComputable<EditorGroup, Throwable>() {
 				@Override
-				public EditorGroup compute() {
+				public EditorGroup compute() throws Throwable {
 					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
 					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
-					try {
-						return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
-					} catch (Exception e) {
-						exceptionAtomicReference.set(e);
-					}
-					return EditorGroup.EMPTY;
+					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
 				}
 			});
-			Exception exception = exceptionAtomicReference.get();
-			if (exception != null) {
-				throw exception;
-			}
 
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
@@ -651,12 +640,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			atomicReference.compareAndSet(request, null);
 			if (LOG.isDebugEnabled())
 				LOG.debug("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
-		} catch (ProcessCanceledException | IndexNotReadyException e) {
+		} catch (IndexNotReady e) {
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("failed" + failed + " " + file.getName(), e);
+				LOG.debug("failed " + failed + " " + file.getName() + " isDumb=" + DumbService.getInstance(project).isDumb(), e);
 			}
 			if (++failed > 5) {
-				LOG.error(file.getName(), e);
+				LOG.error("Failed too many times " + file.getName() + " isDumb=" + DumbService.getInstance(project).isDumb(), e);
 				return;
 			}
 			if (LOG.isDebugEnabled())
@@ -664,7 +653,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (atomicReference.compareAndSet(null, request)) {
 				refresh2();
 			}
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			LOG.error(file.getName(), e);
 		}
 	}

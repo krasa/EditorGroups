@@ -8,6 +8,7 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -61,92 +62,96 @@ public class EditorGroupManager {
 	 * Index throws exceptions, nothing we can do about it here, let the caller try it again later
 	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) throws IndexNotReady {
 		if (LOG.isDebugEnabled())
 			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
 		long start = System.currentTimeMillis();
 
 		EditorGroup result = EditorGroup.EMPTY;
-		if (requestedGroup == null) {
-			requestedGroup = displayedGroup;
-		}
-
-
-		String currentFilePath = currentFile.getCanonicalPath();
-
-
-		boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
-		if (force && !(requestedGroup instanceof FavoritesGroup)) {
-			if (result.isInvalid()) {
-				result = cache.getOwningOrSingleGroup(currentFilePath);
-			}
-			if (result.isInvalid()) {
-				result = cache.getLastEditorGroup(currentFilePath, false, true);
-			}
-		}
-
-		if (result.isInvalid()) {
-			cache.validate(requestedGroup);
-			if (requestedGroup.isValid()
-				&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath) || requestedGroup.isOwner(currentFilePath))) {
-				result = requestedGroup;
-			}
-		}
-
-		if (!force) {
-			if (result.isInvalid()) {
-				result = cache.getOwningOrSingleGroup(currentFilePath);
-			}
-
-			if (result.isInvalid()) {
-				result = cache.getLastEditorGroup(currentFilePath, true, true);
-			}
-		}
-
-		if (result.isInvalid()) {
-			if (config.getState().isAutoSameName()) {
-				result = AutoGroup.SAME_NAME_INSTANCE;
-			} else if (config.getState().isAutoFolders()) {
-				result = AutoGroup.DIRECTORY_INSTANCE;
-			}
-		}
-
-		if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("refreshing result");
-			}
-			//refresh
-			if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
-				cache.initGroup((EditorGroupIndexValue) result);
-			} else if (result instanceof SameNameGroup) {
-				result = autogroupProvider.getSameNameGroup(currentFile);
-			} else if (result instanceof FolderGroup) {
-				result = autogroupProvider.getFolderGroup(currentFile);
-			} else if (result instanceof FavoritesGroup) {
-				result = externalGroupProvider.getFavoritesGroup(result.getTitle());
+		try {
+			if (requestedGroup == null) {
+				requestedGroup = displayedGroup;
 			}
 
 
-			if (result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup)) {
-				EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
-				if (slaveGroup.isValid()) {
-					result = slaveGroup;
-				} else if (config.getState().isAutoFolders()
-					&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
-					result = autogroupProvider.getFolderGroup(currentFile);
+			String currentFilePath = currentFile.getCanonicalPath();
+
+
+			boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
+			if (force && !(requestedGroup instanceof FavoritesGroup)) {
+				if (result.isInvalid()) {
+					result = cache.getOwningOrSingleGroup(currentFilePath);
+				}
+				if (result.isInvalid()) {
+					result = cache.getLastEditorGroup(currentFilePath, false, true);
 				}
 			}
-		}
+
+			if (result.isInvalid()) {
+				cache.validate(requestedGroup);
+				if (requestedGroup.isValid()
+					&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath) || requestedGroup.isOwner(currentFilePath))) {
+					result = requestedGroup;
+				}
+			}
+
+			if (!force) {
+				if (result.isInvalid()) {
+					result = cache.getOwningOrSingleGroup(currentFilePath);
+				}
+
+				if (result.isInvalid()) {
+					result = cache.getLastEditorGroup(currentFilePath, true, true);
+				}
+			}
+
+			if (result.isInvalid()) {
+				if (config.getState().isAutoSameName()) {
+					result = AutoGroup.SAME_NAME_INSTANCE;
+				} else if (config.getState().isAutoFolders()) {
+					result = AutoGroup.DIRECTORY_INSTANCE;
+				}
+			}
+
+			if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("refreshing result");
+				}
+				//refresh
+				if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
+					cache.initGroup((EditorGroupIndexValue) result);
+				} else if (result instanceof SameNameGroup) {
+					result = autogroupProvider.getSameNameGroup(currentFile);
+				} else if (result instanceof FolderGroup) {
+					result = autogroupProvider.getFolderGroup(currentFile);
+				} else if (result instanceof FavoritesGroup) {
+					result = externalGroupProvider.getFavoritesGroup(result.getTitle());
+				}
+
+
+				if (result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup)) {
+					EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
+					if (slaveGroup.isValid()) {
+						result = slaveGroup;
+					} else if (config.getState().isAutoFolders()
+						&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
+						result = autogroupProvider.getFolderGroup(currentFile);
+					}
+				}
+			}
 
 //		if (result instanceof AutoGroup) {
 //			result = cache.updateGroups((AutoGroup) result, currentFilePath);
 //		}
 
 
-		if (LOG.isDebugEnabled())
-			LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
-		cache.setLast(currentFilePath, result);
+			if (LOG.isDebugEnabled())
+				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
+			cache.setLast(currentFilePath, result);
+		} catch (IndexNotReadyException | ProcessCanceledException e) {
+			throw new IndexNotReady(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
+		}
 		return result;
 	}
 
