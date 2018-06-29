@@ -3154,7 +3154,7 @@ public class JBTabsImpl extends JComponent
 
 	@Override
 	public String toString() {
-		return "JBTabs visible=" + myVisibleInfos + " selected=" + mySelectedInfo;
+		return "EditorGroups plugin JBTabs visible=" + myVisibleInfos + " selected=" + mySelectedInfo;
 	}
 
 	public void setMySelectedInfo(TabInfo mySelectedInfo) {
