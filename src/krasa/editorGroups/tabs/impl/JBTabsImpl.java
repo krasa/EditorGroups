@@ -265,7 +265,7 @@ public class JBTabsImpl extends JComponent
 		add(mySingleRowLayout.myRightGhost);
 
 
-		//EditorGroups: fixes IDEA-194820 LazyUiDisposable: closing Editor (with added panel) too soon produces Disposer exception
+		//EditorGroups: workaround for  IDEA-194820 LazyUiDisposable: closing Editor too soon produces Disposer exception
 		Disposer.register(this, myAnimator);
 		Disposer.register(this, new Disposable() {
 			@Override
