@@ -14,15 +14,12 @@ import com.intellij.openapi.util.registry.Registry;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.IdeGlassPane;
-import com.intellij.openapi.wm.IdeGlassPaneUtil;
 import com.intellij.ui.*;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.switcher.QuickActionProvider;
 import com.intellij.util.Function;
-import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.*;
-import com.intellij.util.ui.update.LazyUiDisposable;
 import krasa.editorGroups.tabs.*;
 import krasa.editorGroups.tabs.ShadowAction;
 import krasa.editorGroups.tabs.impl.singleRow.ScrollableSingleRowLayout;
@@ -268,49 +265,59 @@ public class JBTabsImpl extends JComponent
 		add(mySingleRowLayout.myRightGhost);
 
 
-		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
+		//EditorGroups: fixes IDEA-194820 LazyUiDisposable: closing Editor (with added panel) too soon produces Disposer exception
+		Disposer.register(this, myAnimator);
+		Disposer.register(this, new Disposable() {
 			@Override
-			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
-				if (myProject == null && project != null) {
-					myProject = project;
-				}
-
-				try {
-					Disposer.register(child, myAnimator);
-					Disposer.register(child, new Disposable() {
-						@Override
-						public void dispose() {
-							removeTimerUpdate();
-						}
-					});
-
-					if (!myTestMode) {
-						final IdeGlassPane gp = IdeGlassPaneUtil.find(child);
-						if (gp != null) {
-							gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, child);
-							myGlassPane = gp;
-						}
-
-						UIUtil.addAwtListener(new AWTEventListener() {
-							@Override
-							public void eventDispatched(final AWTEvent event) {
-								if (mySingleRowLayout.myMorePopup != null) return;
-								processFocusChange();
-							}
-						}, AWTEvent.FOCUS_EVENT_MASK, child);
-
-					}
-
-					if (myProject != null && myFocusManager == IdeFocusManager.getGlobalInstance()) {
-						myFocusManager = IdeFocusManager.getInstance(myProject);
-					}
-				} catch (IncorrectOperationException e) {
-					myAnimator.dispose();
-					removeTimerUpdate();
-				}
-
+			public void dispose() {
+				removeTimerUpdate();
 			}
-		};
+		});
+
+
+//		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
+//			@Override
+//			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
+//				if (myProject == null && project != null) {
+//					myProject = project;
+//				}
+//
+//				try {
+//					Disposer.register(child, myAnimator);
+//					Disposer.register(child, new Disposable() {
+//						@Override
+//						public void dispose() {
+//							removeTimerUpdate();
+//						}
+//					});
+//
+//					if (!myTestMode) {
+//						final IdeGlassPane gp = IdeGlassPaneUtil.find(child);
+//						if (gp != null) {
+//							gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, child);
+//							myGlassPane = gp;
+//						}
+//
+//						UIUtil.addAwtListener(new AWTEventListener() {
+//							@Override
+//							public void eventDispatched(final AWTEvent event) {
+//								if (mySingleRowLayout.myMorePopup != null) return;
+//								processFocusChange();
+//							}
+//						}, AWTEvent.FOCUS_EVENT_MASK, child);
+//
+//					}
+//
+//					if (myProject != null && myFocusManager == IdeFocusManager.getGlobalInstance()) {
+//						myFocusManager = IdeFocusManager.getInstance(myProject);
+//					}
+//				} catch (IncorrectOperationException e) {
+//					myAnimator.dispose();
+//					removeTimerUpdate();
+//				}
+//
+//			}
+//		};
 	}
 
 	@Override
