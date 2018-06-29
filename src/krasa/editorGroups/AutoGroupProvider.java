@@ -13,6 +13,7 @@ import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.FolderGroup;
 import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.FileResolver;
+import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -67,8 +68,11 @@ public class AutoGroupProvider {
 			paths = new ArrayList<>(Math.max(size + 1, IndexCache.LIMIT_SAME_NAME));
 
 
-			for (VirtualFile file : virtualFilesByName) {
+			for (VirtualFile file: virtualFilesByName) {
 				if (ProjectCoreUtil.isProjectOrWorkspaceFile(file)) {
+					continue;
+				}
+				if (Utils.isJarOrZip(file)) {
 					continue;
 				}
 				if (file.isDirectory()) {

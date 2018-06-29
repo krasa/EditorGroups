@@ -232,6 +232,9 @@ public class FileResolver {
 		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(file.getCanonicalPath())) {
 			return true;
 		}
+		if (FileUtil.isJarOrZip(file)) {
+			return true;
+		}
 		return false;
 	}
 

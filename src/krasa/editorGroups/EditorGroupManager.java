@@ -308,6 +308,9 @@ public class EditorGroupManager {
 					if (LOG.isDebugEnabled()) LOG.debug("openFile " + fileToOpen);
 					FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 					if (fileEditors.length == 0) {  //directory or some fail
+						Notifications.warning("Unable to open editor for file " + fileToOpen.getName(), null);
+						LOG.debug("no editors opened");
+						this.switchRequest = null;
 						enableSwitching();
 						return;
 					}

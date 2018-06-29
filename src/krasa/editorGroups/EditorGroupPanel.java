@@ -588,17 +588,31 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (requestedGroup instanceof EditorGroupIndexValue) {
 			LOG.debug("waiting on smart mode");
 			DumbService.getInstance(project).waitForSmartMode();
+			if (disposed) {
+				return;
+			}
 		}
-		
+		           
+		           
 		try {
+			AtomicReference<Exception> exceptionAtomicReference = new AtomicReference<>();
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
 				public EditorGroup compute() {
 					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
 					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
-					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
+					try {
+						return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
+					} catch (Exception e) {
+						exceptionAtomicReference.set(e);
+					}
+					return EditorGroup.EMPTY;
 				}
 			});
+			Exception exception = exceptionAtomicReference.get();
+			if (exception != null) {
+				throw exception;
+			}
 
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
@@ -718,6 +732,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@Override
 	public void dispose() {
 		disposed = true;
+		tabs.dispose();
 	}
 
 	public void onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {

@@ -483,4 +483,12 @@ public class Utils {
 	public static Icon getFileIcon(String path) {
 		return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
 	}
+
+	public static boolean isJarOrZip(@NotNull VirtualFile file) {
+		if (file.isDirectory()) {
+			return false;
+		}
+		final String name = file.getName();
+		return StringUtil.endsWithIgnoreCase(name, ".jar") || StringUtil.endsWithIgnoreCase(name, ".zip");
+	}
 }
