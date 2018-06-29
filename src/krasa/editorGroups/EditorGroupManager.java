@@ -57,9 +57,11 @@ public class EditorGroupManager {
 	}
 
 
+	/**
+	 * Index throws exceptions, nothing we can do about it here, let the caller try it again later
+	 */
 	@NotNull
 	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) {
-
 		if (LOG.isDebugEnabled())
 			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
 
@@ -155,11 +157,11 @@ public class EditorGroupManager {
 			LOG.debug("switching " + "switching = [" + switching + "], group = [" + switchRequest.getGroup() + "], fileToOpen = [" + switchRequest.getFileToOpen() + "], myScrollOffset = [" + switchRequest.getMyScrollOffset() + "]");
 	}
 
-	public void switching(boolean b) {
+	public void enableSwitching() {
 		SwingUtilities.invokeLater(() -> {
 			ideFocusManager.doWhenFocusSettlesDown(() -> {
-				if (LOG.isDebugEnabled()) LOG.debug("switching " + " [" + b + "]");
-				setSwitching(false);
+				if (LOG.isDebugEnabled()) LOG.debug("enabling switching");
+				this.switching = false;
 			});
 		});
 	}
@@ -189,7 +191,7 @@ public class EditorGroupManager {
 	}
 
 	public volatile boolean switching = false;
-	       
+
 	public boolean switching() {
 		return switchRequest != null || switching;
 	}
@@ -239,7 +241,7 @@ public class EditorGroupManager {
 		JBEditorTabs tabs = groupPanel.getTabs();
 		open(fileToOpen, displayedGroup, newWindow, newTab, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
 	}
-	   
+
 	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, EditorGroup group, VirtualFile current) {
 		open(virtualFileByAbsolutePath, group, window, tab, current, new SwitchRequest(group, virtualFileByAbsolutePath));
 	}
@@ -282,7 +284,7 @@ public class EditorGroupManager {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
 				}
-				switching(false);
+				enableSwitching();
 				return;
 			}
 			fileToOpen.putUserData(EditorGroupPanel.EDITOR_GROUP, group); // for project view colors
@@ -306,7 +308,7 @@ public class EditorGroupManager {
 					if (LOG.isDebugEnabled()) LOG.debug("openFile " + fileToOpen);
 					FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
 					if (fileEditors.length == 0) {  //directory or some fail
-						switching(false);
+						enableSwitching();
 						return;
 					}
 					for (FileEditor fileEditor: fileEditors) {
@@ -333,10 +335,6 @@ public class EditorGroupManager {
 		}, null, null);
 	}
 
-
-	public void setSwitching(boolean switching) {
-		this.switching = switching;
-	}
 
 	public void clearSwitchingRequest() {
 		switchRequest = null;

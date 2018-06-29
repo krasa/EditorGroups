@@ -494,7 +494,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void focusGained() {
 		refresh(false, null);
-		groupManager.switching(false);
+		groupManager.enableSwitching();
 	}
 
 
@@ -543,7 +543,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		refresh(refresh, switchingGroup);
 	}
-	    
+
 	private void refresh2() {
 		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
 			@Override
@@ -551,7 +551,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				if (disposed) {
 					return;
 				}
-				DumbService.getInstance(project).waitForSmartMode();
 				boolean selected = isSelected();
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
@@ -586,6 +585,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup requestedGroup = request.requestedGroup;
 		boolean refresh = request.refresh;
 
+		if (requestedGroup instanceof EditorGroupIndexValue) {
+			LOG.debug("waiting on smart mode");
+			DumbService.getInstance(project).waitForSmartMode();
+		}
+		
 		try {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new Computable<EditorGroup>() {
 				@Override
@@ -601,7 +605,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 			if (!brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
 				if (!(fileEditor instanceof TextEditorImpl)) {
-					groupManager.switching(false); //need for UI forms - when switching to open editors , focus listener does not do that
+					groupManager.enableSwitching(); //need for UI forms - when switching to open editors , focus listener does not do that
 				}
 				if (LOG.isDebugEnabled()) LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered);
 				return;
@@ -692,7 +696,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		failed = 0;
 
-		groupManager.switching(false);
+		groupManager.enableSwitching();
 		if (LOG.isDebugEnabled())
 			LOG.debug("<refreshOnEDT " + (System.currentTimeMillis() - start) + "ms " + fileEditor.getName() + ", displayedGroup=" + displayedGroup);
 	}
