@@ -19,7 +19,10 @@ import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.switcher.QuickActionProvider;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
-import com.intellij.util.ui.*;
+import com.intellij.util.ui.JBSwingUtilities;
+import com.intellij.util.ui.JBUI;
+import com.intellij.util.ui.TimedDeadzone;
+import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.tabs.*;
 import krasa.editorGroups.tabs.ShadowAction;
 import krasa.editorGroups.tabs.impl.singleRow.ScrollableSingleRowLayout;
@@ -126,7 +129,7 @@ public class JBTabsImpl extends JComponent
 	private boolean myRequestFocusOnLastFocusedComponent = false;
 	private boolean myListenerAdded;
 	final Set<TabInfo> myAttractions = new HashSet<>();
-	private final Animator myAnimator;
+	//	private final Animator myAnimator;
 	private List<TabInfo> myAllTabs;
 	private boolean myPaintBlocked;
 	private BufferedImage myImage;
@@ -246,12 +249,12 @@ public class JBTabsImpl extends JComponent
 			}
 		});
 
-		myAnimator = new Animator("JBTabs Attractions", 2, 500, true) {
-			@Override
-			public void paintNow(final int frame, final int totalFrames, final int cycle) {
-				repaintAttractions();
-			}
-		};
+//		myAnimator = new Animator("JBTabs Attractions", 2, 500, true) {
+//			@Override
+//			public void paintNow(final int frame, final int totalFrames, final int cycle) {
+//				repaintAttractions();
+//			}
+//		};
 
 		setFocusTraversalPolicyProvider(true);
 		setFocusTraversalPolicy(new LayoutFocusTraversalPolicy() {
@@ -266,7 +269,7 @@ public class JBTabsImpl extends JComponent
 
 
 		//EditorGroups: workaround for  IDEA-194820 LazyUiDisposable: closing Editor too soon produces Disposer exception
-		Disposer.register(this, myAnimator);
+//		Disposer.register(this, myAnimator);
 		Disposer.register(this, new Disposable() {
 			@Override
 			public void dispose() {
@@ -470,6 +473,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void addTimerUpdate() {
+		if (Disposer.isDisposed(this)) {
+			return;
+		}
 		if (!myListenerAdded) {
 			myActionManager.addTimerListener(500, this);
 			myListenerAdded = true;
@@ -1130,12 +1136,12 @@ public class JBTabsImpl extends JComponent
 			tabInfo.setBlinkCount(0);
 		}
 
-		if (start && !myAnimator.isRunning()) {
-			myAnimator.resume();
-		} else if (!start && myAttractions.isEmpty()) {
-			myAnimator.suspend();
-			repaintAttractions();
-		}
+//		if (start && !myAnimator.isRunning()) {
+//			myAnimator.resume();
+//		} else if (!start && myAttractions.isEmpty()) {
+//			myAnimator.suspend();
+//			repaintAttractions();
+//		}
 	}
 
 	private void updateText(final TabInfo tabInfo) {
