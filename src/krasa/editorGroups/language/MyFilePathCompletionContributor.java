@@ -1,5 +1,6 @@
 package krasa.editorGroups.language;
 
+import com.google.common.collect.ObjectArrays;
 import com.intellij.codeInsight.completion.*;
 import com.intellij.codeInsight.lookup.LookupElement;
 import com.intellij.codeInsight.lookup.LookupElementPresentation;
@@ -124,12 +125,14 @@ public class MyFilePathCompletionContributor extends CompletionContributor {
 						for (final String name : resultNames) {
 							ProgressManager.checkCanceled();
 
-							final PsiFile[] files = FilenameIndex.getFilesByName(project, name, scope);
+							PsiFileSystemItem[] folders = FilenameIndex.getFilesByName(project, name, scope, true);
+							PsiFileSystemItem[] files = FilenameIndex.getFilesByName(project, name, scope, false);
+							PsiFileSystemItem[] concat = ObjectArrays.concat(folders, files, PsiFileSystemItem.class);
 
-							if (files.length <= 0) {
+							if (concat.length <= 0) {
 								continue;
 							}
-							for (final PsiFile file : files) {
+							for (final PsiFileSystemItem file: concat) {
 								ProgressManager.checkCanceled();
 
 								final VirtualFile virtualFile = file.getVirtualFile();
@@ -226,12 +229,12 @@ public class MyFilePathCompletionContributor extends CompletionContributor {
 		private final String myPath;
 		private final String myInfo;
 		private final Icon myIcon;
-		private final PsiFile myFile;
+		private final PsiFileSystemItem myFile;
 		private final String macro;
 		private final Module moduleForFile;
 		private final List<FileReferenceHelper> myHelpers;
 
-		public FilePathLookupItem(PsiFile originalFile, @NotNull final PsiFile file, String macro, Module moduleForFile, @NotNull final List<FileReferenceHelper> helpers) {
+		public FilePathLookupItem(PsiFile originalFile, @NotNull final PsiFileSystemItem file, String macro, Module moduleForFile, @NotNull final List<FileReferenceHelper> helpers) {
 			this.originalFile = originalFile;
 			myName = file.getName();
 			myPath = file.getVirtualFile().getPath();
@@ -358,6 +361,9 @@ public class MyFilePathCompletionContributor extends CompletionContributor {
 					}
 				} else {
 					path = PsiFileSystemItemUtil.findRelativePath(originalFile, psiFileSystemItem);
+					if (path == null || path.isEmpty()) {
+						path = "PROJECT/" + VfsUtilCore.findRelativePath(projectBaseDir, virtualFile, VfsUtilCore.VFS_SEPARATOR_CHAR);
+					}
 				}
 				if (path != null) return path;
 			}
