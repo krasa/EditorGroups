@@ -216,6 +216,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			long start = System.currentTimeMillis();
 			try {
 				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
+				toBeRendered = editorGroup;
 			} catch (IndexNotReady e) {
 				LOG.debug(e);
 			} catch (Throwable e) {
@@ -673,7 +674,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 		EditorGroup rendering = toBeRendered;
 		if (rendering == null) {
-			if (LOG.isDebugEnabled()) LOG.debug("skipping render toBeRendered=" + rendering + " " + file.getName());
+			if (LOG.isDebugEnabled())
+				LOG.debug("skipping render toBeRendered=" + rendering + " file=" + file.getName());
 			return;
 		}
 
