@@ -1,7 +1,7 @@
 package krasa.editorGroups.model;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -24,7 +24,7 @@ public class FolderGroup extends AutoGroup {
 
 	@Override
 	public Icon icon() {
-		return AllIcons.Nodes.Folder;
+		return MyIcons.folder;
 	}
 
 	@Override

@@ -1,6 +1,5 @@
 package krasa.editorGroups.actions;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.AnActionEvent;
@@ -10,6 +9,7 @@ import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.DumbAwareAction;
 import krasa.editorGroups.MyConfigurable;
+import krasa.editorGroups.icons.MyIcons;
 
 import javax.swing.*;
 
@@ -23,7 +23,7 @@ public class OpenConfigurationAction extends DumbAwareAction implements CustomCo
 	@Override
 	public JComponent createCustomComponent(Presentation presentation) {
 		ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		presentation.setIcon(AllIcons.General.Settings);
+		presentation.setIcon(MyIcons.settings);
 		return refresh;
 	}
 

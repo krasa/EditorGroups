@@ -1,6 +1,5 @@
 package krasa.editorGroups.actions;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
@@ -9,6 +8,7 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.ui.PopupHandler;
 import krasa.editorGroups.EditorGroupPanel;
+import krasa.editorGroups.icons.MyIcons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -35,7 +35,7 @@ public class RefreshAction extends EditorGroupsAction implements CustomComponent
 				PopupMenu.popupInvoked(comp, x, y);
 			}
 		});
-		presentation.setIcon(AllIcons.Actions.Refresh);
+		presentation.setIcon(MyIcons.refresh);
 
 		return refresh;
 	}

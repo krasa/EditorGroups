@@ -15,7 +15,6 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.ui.PopupHandler;
-import com.intellij.util.PlatformIcons;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.ExternalGroupProvider;
@@ -83,13 +82,13 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 		Handler refresh = refreshHandler(panel);
 
-		defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refresh, null));
-		defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refresh, null));
+		defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refresh));
+		defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refresh));
 
 
 		defaultActionGroup.add(new Separator("Groups for the current file"));
 		for (EditorGroup g: groups) {
-			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh, null));
+			defaultActionGroup.add(createAction(displayedGroup, g, project, refresh));
 		}
 		return groups;
 	}
@@ -103,7 +102,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
 			for (EditorGroupIndexValue g: allGroups) {
 				if (!((Collection<EditorGroup>) currentGroups).contains(g)) {
-					defaultActionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(project), null));
+					defaultActionGroup.add(createAction(displayedGroup, g, project, otherGroupHandler(project)));
 				}
 			}
 
@@ -136,7 +135,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			defaultActionGroup.add(favourites);
 			for (FavoritesGroup favoritesGroup: favoritesGroups) {
 				if (!alreadyDisplayedFavourites.contains(favoritesGroup.getName())) {
-					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project), null));
+					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project)));
 				}
 			}
 		}
@@ -178,17 +177,21 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	}
 
 	@NotNull
-	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler, final Icon icon) {
+	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler) {
 		boolean isSelected = displayedGroup.equals(groupLink);
 		String title = groupLink.switchTitle(project);
 		String description = groupLink.getSwitchDescription();
-
-		return new DumbAwareAction(title, description, isSelected ? PlatformIcons.CHECK_ICON_SELECTED : icon) {
+		if (isSelected) {
+			title += " - current";
+		}
+		DumbAwareAction dumbAwareAction = new DumbAwareAction(title, description, groupLink.icon()) {
 			@Override
 			public void actionPerformed(AnActionEvent e1) {
 				actionHandler.run(groupLink);
 			}
 		};
+		dumbAwareAction.getTemplatePresentation().setEnabled(!isSelected);
+		return dumbAwareAction;
 	}
 
 	abstract class Handler {
