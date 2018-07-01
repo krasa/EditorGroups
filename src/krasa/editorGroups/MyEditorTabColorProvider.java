@@ -66,24 +66,24 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 	/**
 	 * https://youtrack.jetbrains.com/issue/IDEA-193430
 	 */
-	@Nullable
-	@Override
-	public Color getEditorTabForegroundColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
-		if (editorWindow != null) {
-			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
-				if (editor.getFile().equals(file)) {
-					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
-					FileEditor first = pair.first;
-					return getFgColor(project, first, file);
-				}
-			}
-		}
-		EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
-		if (userData != null) {
-			return userData.getFgColor();
-		}
-		return null;
-	}
+//	@Nullable
+//	@Override
+//	public Color getEditorTabForegroundColor(@NotNull Project project, @NotNull VirtualFile file, @Nullable EditorWindow editorWindow) {
+//		if (editorWindow != null) {
+//			for (EditorWithProviderComposite editor : editorWindow.getEditors()) {
+//				if (editor.getFile().equals(file)) {
+//					Pair<FileEditor, FileEditorProvider> pair = editor.getSelectedEditorWithProvider();
+//					FileEditor first = pair.first;
+//					return getFgColor(project, first, file);
+//				}
+//			}
+//		}
+//		EditorGroup userData = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
+//		if (userData != null) {
+//			return userData.getFgColor();
+//		}
+//		return null;
+//	}
 	private Color getFgColor(Project project, FileEditor textEditor, VirtualFile file) {
 		Color fgColor = null;
 

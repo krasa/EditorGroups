@@ -6,9 +6,10 @@
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
-        Implementation of <a href="https://github.com/SomewhatCloudy/phpstorm-related-proposal"/>
+         Usage: of <a href="https://github.com/krasa/EditorGroups"/>
         <br/>
-        Usage: of <a href="https://github.com/krasa/EditorGroups"/>
+        In development. Please report your issues and requests.
+      
     
          
     ]]></description>
@@ -63,9 +64,9 @@
     </extensions>
 
     <application-components>
-        <component>
-            <implementation-class>krasa.editorGroups.EditorGroupsTabsPainterPatcherComponent</implementation-class>
-        </component>
+        <!--<component>-->
+        <!--<implementation-class>krasa.editorGroups.EditorGroupsTabsPainterPatcherComponent</implementation-class>-->
+        <!--</component>-->
     </application-components>
     <project-components>
         <component>
@@ -158,11 +159,11 @@
 
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"
-                text="Switch Editor Group">
+                text="Switch Editor Group" icon="AllIcons.Actions.GroupBy">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
         <action id="krasa.editorGroups.SwitchFile" class="krasa.editorGroups.actions.SwitchFileAction"
-                text="Switch File in Editor Group">
+                text="Switch File" description="Switch File in Editor Group" icon="AllIcons.Actions.ListFiles">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt W"/>
         </action>
 

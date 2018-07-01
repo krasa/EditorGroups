@@ -31,6 +31,7 @@ public class TabsColors {
 	private CheckBoxWithColorChooser tabFgColor;
 	private JPanel classic;
 	private JPanel darcula;
+	private JPanel ideTabs;
 
 	public JPanel getRoot() {
 		return root;
@@ -52,6 +53,7 @@ public class TabsColors {
 				opacity.setText(String.valueOf(ApplicationConfiguration.Tabs.DEFAULT_DARCULA_OPACITY));
 			}
 		});
+		ideTabs.setVisible(false);
 	}
 
 	private void createUIComponents() {

@@ -15,6 +15,9 @@ public class PopupMenu {
 	@NotNull
 	public static DefaultActionGroup getDefaultActionGroup() {
 		DefaultActionGroup group = new DefaultActionGroup();
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.SwitchGroup"));
+		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.SwitchFile"));
+		group.add(new Separator());
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Refresh"));
 		group.add(new Separator());
 		group.add(ActionManager.getInstance().getAction("krasa.editorGroups.Next"));

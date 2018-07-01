@@ -41,7 +41,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		if (project != null) {
 			InputEvent inputEvent = e.getInputEvent();
 			if (inputEvent instanceof MouseEvent) {
-				popup.showUnderneathOf(inputEvent.getComponent());
+				popup.showInBestPositionFor(e.getDataContext());
 			} else {
 				popup.showCenteredInCurrentWindow(project);
 			}
@@ -49,6 +49,19 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			popup.showInBestPositionFor(e.getDataContext());
 		}
 	}
+
+	@Override
+	public JComponent createCustomComponent(Presentation presentation) {
+		ActionButton button = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
+		presentation.setIcon(AllIcons.Actions.GroupBy);
+		button.addMouseListener(new PopupHandler() {
+			public void invokePopup(Component comp, int x, int y) {
+				popupInvoked(comp, x, y);
+			}
+		});
+		return button;
+	}
+	
 
 	@Override
 	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
@@ -196,18 +209,6 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 	abstract class Handler {
 		abstract void run(EditorGroup groupLink);
-	}
-
-	@Override
-	public JComponent createCustomComponent(Presentation presentation) {
-		ActionButton button = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		presentation.setIcon(AllIcons.Actions.GroupByModule);
-		button.addMouseListener(new PopupHandler() {
-			public void invokePopup(Component comp, int x, int y) {
-				popupInvoked(comp, x, y);
-			}
-		});
-		return button;
 	}
 
 	@Override

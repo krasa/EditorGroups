@@ -6,9 +6,10 @@ image::example.gif[]
 - from Favorites tool window
 - by file name without extension anywhere in the project
 - by folder
-- manually defined in `*.egroups` file (with language support) or in any other file
+- manually defined in `*.egroups` file (with language support) or in any other file 
+** does not support refactoring yet
             
-== Shortcuts                    
+=== Shortcuts                    
 - `Ctrl + Alt + Q` - Refresh                                                           
 - `Ctrl + Alt + W` - Switch Group popup                                                         
 - `Ctrl + Alt + Shift + W` - Switch File popup
@@ -16,10 +17,15 @@ image::example.gif[]
 - `Ctrl + Mouse Wheel` or `Ctrl + ; or '`  - switch file (closing the previous one)           
 - `Ctrl + Alt + Mouse Wheel` or `Ctrl + Alt + ; or '` - switch file (leaving the previous one opened)
 - `Ctrl + Alt + Shift + Mouse Wheel` or `Ctrl + Alt + Shift + ; or '` - switch file into a new window                                              
-              
+           
 === Tab click modifiers
 - `Ctrl/Alt + click` - open a file in a new tab
-- `Shift + click` - open a file in a new window
+- `Shift + click` - open a file in a new window   
+ 
+=== Advanced actions and settings
+- right click on the panel
+- `File | Settings | Other Settings | Editor Groups`
+   
 
 == Syntax
 
@@ -60,9 +66,6 @@ image::example.gif[]
 - `@group.id myUniqueId` - must be unique across the project, creates a new group if there is more than one (otherwise path+index is used, which breaks references on refactoring)
 - `@group.root ../../` - root directory, by default the current file's one; accepts macros, relative and absolute paths
                   
-=== Advanced actions and settings
-- right click on the panel
-
 
 ---
 
