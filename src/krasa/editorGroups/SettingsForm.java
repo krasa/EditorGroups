@@ -28,6 +28,10 @@ public class SettingsForm {
 		return root;
 	}
 
+	public SettingsForm() {
+		latencyOverFlicker.setVisible(false);
+	}
+
 	public boolean isSettingsModified(ApplicationConfiguration data) {
 		if (tabsColors.isModified(data, data.getTabs())) return true;
 		return isModified(data);

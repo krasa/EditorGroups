@@ -13,7 +13,8 @@
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Automatic Editor Groups by a Current File Name (without extension)"/>
+          <text value="Autogroups by a Current File Name (without extension)"/>
+          <toolTipText value="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"/>
         </properties>
       </component>
       <component id="b88ba" class="javax.swing.JCheckBox" binding="showSize">
@@ -29,7 +30,7 @@
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Hide the panel when the group is empty"/>
+          <text value="Hide the panel when no group exists or is empty"/>
         </properties>
       </component>
       <component id="a3b86" class="javax.swing.JCheckBox" binding="autoSwitch">
@@ -37,7 +38,8 @@
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Automatic Switching of Groups on Manual Refresh"/>
+          <text value="Switch from Autogroups on Manual Refresh"/>
+          <toolTipText value="Switches from AutoGroups to manually defined one - if exists for the current file"/>
         </properties>
       </component>
       <component id="ec726" class="javax.swing.JCheckBox" binding="byFolder">
@@ -45,7 +47,8 @@
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="Automatic Editor Groups by a Current Folder"/>
+          <text value="Autogroups by a Current Folder"/>
+          <toolTipText value="Automatic Editor Groups by the Current Folder, if no manually defined exists"/>
         </properties>
       </component>
       <vspacer id="c8b9a">

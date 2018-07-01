@@ -1,14 +1,14 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.12</version>
+    <version>0.13</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
-         Usage: of <a href="https://github.com/krasa/EditorGroups"/>
-        <br/>
-        In development. Please report your issues and requests.
+         Usage: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</>
+        <br/>   <br/>
+        In active development. Please report your ideas and issues.
       
     
          
@@ -77,36 +77,36 @@
         <group id="EditorGroupsTabPopupMenu"/>
 
         <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
-                text="Open Previous File in Group" icon="/krasa/editorGroups/icons/back.png">
+                text="Open Previous File in Editor Group" icon="/krasa/editorGroups/icons/back.png">
             <keyboard-shortcut first-keystroke="ctrl  SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.PreviousInNewTabAction" id="krasa.editorGroups.PreviousInNewTab"
-                text="Open Previous File in Group in a New Tab">
+                text="Open Previous File in Editor Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button143" keymap="$default"/>
         </action>
 
         <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
                 id="krasa.editorGroups.PreviousInNewWindow"
-                text="Open Previous File in Group in a New Tab">
+                text="Open Previous File in Editor Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt shift SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>
         </action>
 
 
         <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
-                text="Open Next File in Group" icon="/krasa/editorGroups/icons/forward.png">
+                text="Open Next File in Editor Group" icon="/krasa/editorGroups/icons/forward.png">
             <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
-                text="Open Next File in Group in a New Tab">
+                text="Open Next File in Editor Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>
         </action>
         <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
-                text="Open Next File in Group in a New Tab">
+                text="Open Next File in Editor Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
         </action>
@@ -132,20 +132,20 @@
 
         <action id="krasa.editorGroups.ToggleAutoSameNameGroups"
                 class="krasa.editorGroups.actions.ToggleAutoSameNameGroupsAction"
-                text="Automatic Groups by the Current File Name"
+                text="Autogroups by the Current File Name"
                 description="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"
         />
 
         <action id="krasa.editorGroups.ToggleFolderEditorGroups"
                 class="krasa.editorGroups.actions.ToggleAutoFolderGroupsAction"
-                text="Automatic Groups by the Current Folder"
+                text="Autogroups by the Current Folder"
                 description="Automatic Editor Groups by the Current Folder, if no manually defined exists"
         />
 
         <action id="krasa.editorGroups.ToggleForce"
                 class="krasa.editorGroups.actions.ToggleForceAction"
-                text="Switch Groups on Manual Refresh"
-                description="Switches from AutoGroups to manually defined one (if exists in this file)"
+                text="Switch from Autogroups on Manual Refresh"
+                description="Switches from AutoGroups to manually defined one - if exists for the current file"
         />
 
         <action id="krasa.editorGroups.ToggleHideEmpty"
