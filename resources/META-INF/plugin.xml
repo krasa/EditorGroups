@@ -1,16 +1,15 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.13</version>
+    <version>0.14</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
-         Usage: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</>
+         Usage: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</a>
         <br/>   <br/>
-        In active development. Please report your ideas and issues.
-      
-    
+        
+       <a href="https://github.com/krasa/EditorGroups/issues">In active development. Please report your ideas and issues.</a>
          
     ]]></description>
 
