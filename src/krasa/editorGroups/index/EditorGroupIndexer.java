@@ -53,7 +53,6 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 
 		String ownerPath = file.getCanonicalPath();
 		try {
-			String chars = inputData.getContentAsText().toString(); // matching strings is faster than HeapCharBuffer
 			File folder = null;
 			try {
 				folder = new File(inputData.getFile().getParent().getCanonicalPath());
@@ -61,11 +60,16 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 				return Collections.emptyMap();
 			}
 
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("Indexing " + inputData.getFile());
+			}
+			
 			EditorGroupIndexValue currentGroup = null;
 			EditorGroupIndexValue lastGroup = null;
 			int index = 0;
 			HashMap<String, EditorGroupIndexValue> map = new HashMap<>();
 
+			String chars = inputData.getContentAsText().toString(); // matching strings is faster than HeapCharBuffer
 			CharSequence input = StringPattern.newBombedCharSequence(chars);
 			Pattern optimizedIndexingPattern = MAIN_PATTERN.getOptimizedIndexingPattern();
 			Matcher matcher = optimizedIndexingPattern.matcher(input);

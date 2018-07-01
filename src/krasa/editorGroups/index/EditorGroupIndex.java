@@ -14,7 +14,7 @@ import java.io.IOException;
 import java.util.List;
 
 //@group.title Index
-//@group.related PlainTextIndexer.java
+//@group.related EditorGroupIndexer.java
 public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGroupIndexValue> {
 	@NonNls
 	public static final ID<String, EditorGroupIndexValue> NAME = ID.create("krasa.EditorGroupIndex");

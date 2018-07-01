@@ -162,7 +162,7 @@ public class PanelRefresher {
 		}
 
 		if (LOG.isDebugEnabled())
-			LOG.debug("onIndexingDone " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
+			LOG.debug("onIndexingDone " + ownerPath + " - " + (System.currentTimeMillis() - start) + "ms " + Thread.currentThread().getName());
 		return group;
 	}
 
