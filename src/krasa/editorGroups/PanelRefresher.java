@@ -60,7 +60,7 @@ public class PanelRefresher {
 						LOG.debug("FavoritesListener rootsChanged");
 					}
 					final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-					for (FileEditor selectedEditor: manager.getSelectedEditors()) {   //refreshing not selected one fucks up tabs scrolling
+					for (FileEditor selectedEditor: manager.getAllEditors()) { 
 						EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 						if (panel != null) {
 							EditorGroup displayedGroup = panel.getDisplayedGroup();
@@ -68,8 +68,6 @@ public class PanelRefresher {
 								LOG.debug("FavoritesListener refreshing " + selectedEditor.getName());
 								panel.refresh(true, displayedGroup);
 							}
-
-
 						}
 					}
 				}
