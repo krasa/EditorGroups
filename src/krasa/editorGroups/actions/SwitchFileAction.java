@@ -103,8 +103,9 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 			if (virtualFileByAbsolutePath != null) {
 				boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
 				boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
+				boolean split = BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK);
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				instance.open(panel, virtualFileByAbsolutePath, window, tab);
+				instance.open(panel, virtualFileByAbsolutePath, window, tab, split);
 			} else {
 				Notifications.warning("File not found " + link, null);
 			}

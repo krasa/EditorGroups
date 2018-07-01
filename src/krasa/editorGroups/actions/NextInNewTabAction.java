@@ -9,7 +9,7 @@ public class NextInNewTabAction extends EditorGroupsAction {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
 
 		if (panel != null) {
-			panel.next(true, false);
+			panel.next(true, false, false);
 		}
 	}
 

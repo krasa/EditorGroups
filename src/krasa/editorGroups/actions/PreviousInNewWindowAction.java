@@ -8,7 +8,7 @@ public class PreviousInNewWindowAction extends EditorGroupsAction {
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
 			if (panel != null) {
-				panel.previous(true, true);
+				panel.previous(true, true, false);
 		}
 	}
 }

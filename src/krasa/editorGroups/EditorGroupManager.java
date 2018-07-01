@@ -5,15 +5,19 @@ import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
+import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
+import com.intellij.openapi.fileEditor.impl.EditorWindowHolder;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
+import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
+import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.tabs.impl.JBEditorTabs;
@@ -47,6 +51,7 @@ public class EditorGroupManager {
 	private AutoGroupProvider autogroupProvider;
 	private Key<?> initial_editor_index;
 	private volatile SwitchRequest switchRequest;
+	public volatile boolean switching = false;
 
 	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, IndexCache cache) {
 		this.cache = cache;
@@ -200,9 +205,11 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public volatile boolean switching = false;
 
-	public boolean switching() {
+	public boolean isSwitching() {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("isSwitching switchRequest=" + switchRequest + ", switching=" + switching);
+		}
 		return switchRequest != null || switching;
 	}
 
@@ -243,19 +250,26 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab) {
+	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab, boolean split) {
 		EditorGroup displayedGroup = groupPanel.getDisplayedGroup();
 		JBEditorTabs tabs = groupPanel.getTabs();
-		open(fileToOpen, displayedGroup, newWindow, newTab, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
+
+		EditorWindowHolder parentOfType = UIUtil.getParentOfType(EditorWindowHolder.class, groupPanel);
+		EditorWindow currentWindow = null;
+		if (parentOfType != null) {
+			currentWindow = parentOfType.getEditorWindow();
+		}
+
+		open2(currentWindow, fileToOpen, displayedGroup, newWindow, newTab, split, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
 	}
 
-	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, EditorGroup group, VirtualFile current) {
-		open(virtualFileByAbsolutePath, group, window, tab, current, new SwitchRequest(group, virtualFileByAbsolutePath));
+	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, boolean split, EditorGroup group, VirtualFile current) {
+		open2(null, virtualFileByAbsolutePath, group, window, tab, split, current, new SwitchRequest(group, virtualFileByAbsolutePath));
 	}
 
-	private void open(VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
+	private void open2(EditorWindow currentWindowParam, VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, boolean split, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
-			LOG.debug("open fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], switchingRequest = [" + switchRequest + "]");
+			LOG.debug("open2 fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], split = [" + split + "], switchingRequest = [" + switchRequest + "]");
 
 		switching(switchRequest);
 
@@ -280,18 +294,20 @@ public class EditorGroupManager {
 		CommandProcessor.getInstance().executeCommand(project, () -> {
 			final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
 
-			//must find window before opening the file!
-			VirtualFile selectedFile = null;
-			EditorWindow currentWindow = manager.getCurrentWindow();
-			if (currentWindow != null) {
+			VirtualFile selectedFile = currentFile;
+			EditorWindow currentWindow = currentWindowParam;
+			if (currentWindow == null) {
+				currentWindow = manager.getCurrentWindow();
+			}
+			if (selectedFile == null && currentWindow != null) {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 
-			if (fileToOpen.equals(selectedFile)) {
+			if (!split && !newWindow && fileToOpen.equals(selectedFile)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
 				}
-				enableSwitching();
+				resetSwitching();
 				return;
 			}
 			fileToOpen.putUserData(EditorGroupPanel.EDITOR_GROUP, group); // for project view colors
@@ -302,7 +318,18 @@ public class EditorGroupManager {
 
 			if (newWindow) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
-				manager.openFileInNewWindow(fileToOpen);
+				Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
+				if (pair.first.length == 0) {
+					LOG.debug("no editors opened");
+					resetSwitching();
+				}
+			} else if (split && currentWindow != null) {
+				if (LOG.isDebugEnabled()) LOG.debug("openFileInSplit " + fileToOpen);
+				EditorWindow split1 = currentWindow.split(SwingConstants.VERTICAL, true, fileToOpen, true);
+				if (split1 == null) {
+					LOG.debug("no editors opened");
+					resetSwitching();
+				}
 			} else {
 				boolean reuseNotModifiedTabs = UISettings.getInstance().getReuseNotModifiedTabs();
 //				boolean fileWasAlreadyOpen = currentWindow.isFileOpen(fileToOpen);
@@ -313,12 +340,13 @@ public class EditorGroupManager {
 					}
 
 					if (LOG.isDebugEnabled()) LOG.debug("openFile " + fileToOpen);
-					FileEditor[] fileEditors = manager.openFile(fileToOpen, true);
+					Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileWithProviders(fileToOpen, true, currentWindow);
+					FileEditor[] fileEditors = pair.first;
+
 					if (fileEditors.length == 0) {  //directory or some fail
 						Notifications.warning("Unable to open editor for file " + fileToOpen.getName(), null);
 						LOG.debug("no editors opened");
-						this.switchRequest = null;
-						enableSwitching();
+						resetSwitching();
 						return;
 					}
 					for (FileEditor fileEditor: fileEditors) {
@@ -345,8 +373,14 @@ public class EditorGroupManager {
 		}, null, null);
 	}
 
+	public void resetSwitching() {
+		clearSwitchingRequest();
+		enableSwitching();
+	}
 
-	public void clearSwitchingRequest() {
+
+	private void clearSwitchingRequest() {
+		LOG.debug("clearSwitchingRequest");
 		switchRequest = null;
 	}
 

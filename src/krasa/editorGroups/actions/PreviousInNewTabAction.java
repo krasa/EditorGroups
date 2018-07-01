@@ -8,7 +8,7 @@ public class PreviousInNewTabAction extends EditorGroupsAction {
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
 		if (panel != null) {
-			panel.previous(true, false);
+			panel.previous(true, false, false);
 		}
 	}
 }

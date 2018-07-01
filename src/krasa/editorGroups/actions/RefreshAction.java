@@ -7,6 +7,7 @@ import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.ui.PopupHandler;
+import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.icons.MyIcons;
 
@@ -25,6 +26,10 @@ public class RefreshAction extends EditorGroupsAction implements CustomComponent
 		if (panel != null) {
 			panel.refresh(true, null);
 		}
+
+
+		EditorGroupManager editorGroupManager = EditorGroupManager.getInstance(anActionEvent.getProject());
+		editorGroupManager.resetSwitching();
 	}
 
 	@Override

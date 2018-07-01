@@ -192,7 +192,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_MASK);
 					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_MASK);
 
-					openFile(fileByPath, ctrl || alt, shift);
+					openFile(fileByPath, ctrl, shift, alt);
 				}
 				return ActionCallback.DONE;
 			}
@@ -375,7 +375,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	public void previous(boolean newTab, boolean newWindow) {
+	public void previous(boolean newTab, boolean newWindow, boolean alt) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
@@ -412,11 +412,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("previous: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
 			}
 		}
-		openFile(fileByPath, newTab, newWindow);
+		openFile(fileByPath, newTab, newWindow, alt);
 
 	}
 
-	public void next(boolean newTab, boolean newWindow) {
+	public void next(boolean newTab, boolean newWindow, boolean alt) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
@@ -449,10 +449,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		}
 
-		openFile(fileByPath, newTab, newWindow);
+		openFile(fileByPath, newTab, newWindow, alt);
 	}
 
-	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow) {
+	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow, boolean split) {
 		if (disposed) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - already disposed");
 			return;
@@ -463,21 +463,22 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		if (fileToOpen.equals(file) && !newWindow) {
+		if (fileToOpen.equals(file) && !newWindow && !split) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - same file");
 			return;
 		}
 
 
-		if (groupManager.switching()) {
-			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - switching");
+		if (groupManager.isSwitching()) {
+			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - switching ");
 			return;
 		}
 		if (toBeRendered != null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - toBeRendered != null");
 			return;
 		}
-		groupManager.open(this, fileToOpen, newWindow, newTab);
+
+		groupManager.open(this, fileToOpen, newWindow, newTab, split);
 
 	}
 

@@ -8,7 +8,7 @@ public class NextInNewWindowAction extends EditorGroupsAction {
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
 		if (panel != null) {
-			panel.next(true, true);
+			panel.next(true, true, false);
 		}
 
 	}
