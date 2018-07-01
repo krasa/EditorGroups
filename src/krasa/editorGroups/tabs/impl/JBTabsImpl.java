@@ -1,6 +1,7 @@
 // Copyright 2000-2018 JetBrains s.r.o. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package krasa.editorGroups.tabs.impl;
 
+import com.intellij.ide.IdeEventQueue;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.ide.ui.UISettingsListener;
 import com.intellij.openapi.Disposable;
@@ -233,6 +234,8 @@ public class JBTabsImpl extends JComponent
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(final MouseEvent e) {
+				//EditorGroups hack
+				IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.ACTIONS);
 				if (mySingleRowLayout.myLastSingRowLayout != null &&
 					mySingleRowLayout.myLastSingRowLayout.moreRect != null &&
 					mySingleRowLayout.myLastSingRowLayout.moreRect.contains(e.getPoint())) {

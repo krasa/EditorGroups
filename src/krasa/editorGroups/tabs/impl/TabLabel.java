@@ -16,6 +16,7 @@
 package krasa.editorGroups.tabs.impl;
 
 import com.intellij.ide.DataManager;
+import com.intellij.ide.IdeEventQueue;
 import com.intellij.openapi.actionSystem.ActionGroup;
 import com.intellij.openapi.actionSystem.ActionPlaces;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
@@ -83,8 +84,12 @@ public class TabLabel extends JPanel implements Accessible {
 		myIcon = new LayeredIcon(2);
 
 		addMouseListener(new MouseAdapter() {
+
 			@Override
 			public void mousePressed(final MouseEvent e) {
+				//Editor eats those events too! BUT drag+release is still broken
+				IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.ACTIONS);
+				
 //				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_PRESSED)) return;
 				if (JBTabsImpl.isSelectionClick(e, false) && myInfo.isEnabled()) {
 					final TabInfo selectedInfo = myTabs.getSelectedInfo();
@@ -101,11 +106,13 @@ public class TabLabel extends JPanel implements Accessible {
 
 			@Override
 			public void mouseClicked(final MouseEvent e) {
+				IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.ACTIONS);
 				handlePopup(e);
 			}
 
 			@Override
 			public void mouseReleased(final MouseEvent e) {
+				IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.ACTIONS);
 				myInfo.setPreviousSelection(null);
 				handlePopup(e);
 			}
