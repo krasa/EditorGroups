@@ -85,12 +85,11 @@
             <keyboard-shortcut first-keystroke="ctrl alt SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button143" keymap="$default"/>
         </action>
-
         <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
                 id="krasa.editorGroups.PreviousInNewWindow"
-                text="Open Previous File in Editor Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt shift SEMICOLON" keymap="$default"/>
-            <mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>
+                text="Open Previous File in Editor Group in a New Window">
+            <keyboard-shortcut first-keystroke="ctrl shift SEMICOLON" keymap="$default"/>
+            <!--<mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>-->
         </action>
 
 
@@ -99,15 +98,15 @@
             <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
-        <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
-                text="Open Next File in Editor Group in a New Tab">
-            <keyboard-shortcut first-keystroke="ctrl alt shift QUOTE" keymap="$default"/>
-            <mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>
-        </action>
         <action class="krasa.editorGroups.actions.NextInNewTabAction" id="krasa.editorGroups.NextInNewTab"
                 text="Open Next File in Editor Group in a New Tab">
             <keyboard-shortcut first-keystroke="ctrl alt QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl alt button142" keymap="$default"/>
+        </action>
+        <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
+                text="Open Next File in Editor Group in a New Window">
+            <keyboard-shortcut first-keystroke="ctrl shift QUOTE" keymap="$default"/>
+            <!--<mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>-->
         </action>
 
 
