@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.14</version>
+    <version>0.15</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -173,6 +173,7 @@
 
 
         <action id="AddToCurrentFavoritesAction" class="krasa.editorGroups.actions.AddToCurrentFavoritesAction"
+                description="Provided by 'Editor Groups' plugin"
                 text="Add to Currently Opened Favorites" icon="AllIcons.Toolwindows.ToolWindowFavorites">
             <!--<add-to-group group-id="GuiDesigner.EditorPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>-->
             <add-to-group group-id="TypeHierarchyPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>
@@ -193,7 +194,7 @@
         </action>
 
         <action id="krasa.editorGroups.actions.RemoveFromCurrentFavorites"
-
+                description="Provided by 'Editor Groups' plugin"
                 class="krasa.editorGroups.actions.RemoveFromCurrentFavoritesAction"
                 text="Remove from Current Favorites">
             <!--<add-to-group group-id="GuiDesigner.EditorPopupMenu" anchor="before" relative-to-action="AddToFavorites"/>-->
