@@ -87,18 +87,18 @@ public class TabLabel extends JPanel implements Accessible {
 
 			@Override
 			public void mousePressed(final MouseEvent e) {
-				//Editor eats those events too! BUT drag+release is still broken
-				IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.ACTIONS);
-				
+
 //				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_PRESSED)) return;
 				if (JBTabsImpl.isSelectionClick(e, false) && myInfo.isEnabled()) {
+					//Editor eats those events too! BUT drag+release is still broken
+					IdeEventQueue.getInstance().blockNextEvents(e, IdeEventQueue.BlockMode.COMPLETE);
 					final TabInfo selectedInfo = myTabs.getSelectedInfo();
 					if (selectedInfo != myInfo) {
 						myInfo.setPreviousSelection(selectedInfo);
 					}
 					Component c = SwingUtilities.getDeepestComponentAt(e.getComponent(), e.getX(), e.getY());
 					if (c instanceof InplaceButton) return;
-					myTabs.select(info, true, e.getModifiers());
+					myTabs.select(info, true, e.getModifiersEx());
 				} else {
 					handlePopup(e);
 				}

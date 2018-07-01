@@ -19,6 +19,7 @@ import com.intellij.ui.PopupHandler;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.ExternalGroupProvider;
+import krasa.editorGroups.Splitters;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -178,12 +179,12 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			void run(EditorGroup editorGroup) {
 				VirtualFile file = editorGroup.getFirstExistingFile(project);
 				if (file != null) {
-					EditorGroupManager.getInstance(project).open(file, false, true, false, editorGroup, null);
+					EditorGroupManager.getInstance(project).open(file, false, true, Splitters.NONE, editorGroup, null);
 				} else {
 					String ownerPath = editorGroup.getOwnerPath();
 					VirtualFile virtualFileByAbsolutePath = Utils.getVirtualFileByAbsolutePath(ownerPath);
 					if (virtualFileByAbsolutePath != null) {
-						EditorGroupManager.getInstance(project).open(virtualFileByAbsolutePath, false, true, false, editorGroup, null);
+						EditorGroupManager.getInstance(project).open(virtualFileByAbsolutePath, false, true, Splitters.NONE, editorGroup, null);
 					} else {
 						if (LOG.isDebugEnabled())
 							LOG.debug("opening failed, no file and not even owner exist " + editorGroup);

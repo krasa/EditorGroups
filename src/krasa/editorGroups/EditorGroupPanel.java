@@ -149,7 +149,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		});
 		tabs.addTabMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseReleased(MouseEvent e) {
+			public void mouseReleased(MouseEvent e) {                
 				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_RELEASED)) {
 					final TabInfo info = tabs.findInfo(e);
 					if (info != null) {
@@ -188,11 +188,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						modifiers = 0;
 					}
 
-					boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_MASK);
-					boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_MASK);
-					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_MASK);
+					boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_DOWN_MASK);
+					boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_DOWN_MASK);
+					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_DOWN_MASK);
+					boolean button2 = BitUtil.isSet(modifiers, InputEvent.BUTTON2_DOWN_MASK);
 
-					openFile(fileByPath, ctrl, shift, alt);
+					openFile(fileByPath, ctrl, shift, Splitters.from(alt, button2));
 				}
 				return ActionCallback.DONE;
 			}
@@ -375,7 +376,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	public void previous(boolean newTab, boolean newWindow, boolean alt) {
+	public void previous(boolean newTab, boolean newWindow, Splitters split) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
@@ -412,11 +413,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("previous: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
 			}
 		}
-		openFile(fileByPath, newTab, newWindow, alt);
+		openFile(fileByPath, newTab, newWindow, split);
 
 	}
 
-	public void next(boolean newTab, boolean newWindow, boolean alt) {
+	public void next(boolean newTab, boolean newWindow, Splitters split) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
 			return;
@@ -449,10 +450,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		}
 
-		openFile(fileByPath, newTab, newWindow, alt);
+		openFile(fileByPath, newTab, newWindow, split);
 	}
 
-	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow, boolean split) {
+	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow, Splitters split) {
 		if (disposed) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - already disposed");
 			return;
@@ -463,7 +464,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		if (fileToOpen.equals(file) && !newWindow && !split) {
+		if (fileToOpen.equals(file) && !newWindow && !split.isSplit()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - same file");
 			return;
 		}

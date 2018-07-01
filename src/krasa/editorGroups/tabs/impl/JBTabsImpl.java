@@ -18,6 +18,7 @@ import com.intellij.openapi.wm.IdeGlassPane;
 import com.intellij.ui.*;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.switcher.QuickActionProvider;
+import com.intellij.util.BitUtil;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.ui.JBSwingUtilities;
@@ -2987,7 +2988,9 @@ public class JBTabsImpl extends JComponent
 	public static boolean isSelectionClick(final MouseEvent e, boolean canBeQuick) {
 		if (e.getClickCount() == 1 || canBeQuick) {
 			if (!e.isPopupTrigger()) {
-				return e.getButton() == MouseEvent.BUTTON1;
+				return e.getButton() == MouseEvent.BUTTON1
+					|| e.getButton() == MouseEvent.BUTTON2 && BitUtil.isSet(e.getModifiersEx(), InputEvent.ALT_DOWN_MASK)
+					;
 //				EditorGroups
 //					&& !e.isControlDown() && !e.isAltDown() && !e.isMetaDown();
 			}

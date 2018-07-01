@@ -250,7 +250,7 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab, boolean split) {
+	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab, Splitters split) {
 		EditorGroup displayedGroup = groupPanel.getDisplayedGroup();
 		JBEditorTabs tabs = groupPanel.getTabs();
 
@@ -263,11 +263,11 @@ public class EditorGroupManager {
 		open2(currentWindow, fileToOpen, displayedGroup, newWindow, newTab, split, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
 	}
 
-	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, boolean split, EditorGroup group, VirtualFile current) {
+	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, Splitters split, EditorGroup group, VirtualFile current) {
 		open2(null, virtualFileByAbsolutePath, group, window, tab, split, current, new SwitchRequest(group, virtualFileByAbsolutePath));
 	}
 
-	private void open2(EditorWindow currentWindowParam, VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, boolean split, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
+	private void open2(EditorWindow currentWindowParam, VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, Splitters split, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("open2 fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], split = [" + split + "], switchingRequest = [" + switchRequest + "]");
 
@@ -303,7 +303,7 @@ public class EditorGroupManager {
 				selectedFile = currentWindow.getSelectedFile();
 			}
 
-			if (!split && !newWindow && fileToOpen.equals(selectedFile)) {
+			if (!split.isSplit() && !newWindow && fileToOpen.equals(selectedFile)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
 				}
@@ -323,9 +323,9 @@ public class EditorGroupManager {
 					LOG.debug("no editors opened");
 					resetSwitching();
 				}
-			} else if (split && currentWindow != null) {
+			} else if (split.isSplit() && currentWindow != null) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInSplit " + fileToOpen);
-				EditorWindow split1 = currentWindow.split(SwingConstants.VERTICAL, true, fileToOpen, true);
+				EditorWindow split1 = currentWindow.split(split.getOrientation(), true, fileToOpen, true);
 				if (split1 == null) {
 					LOG.debug("no editors opened");
 					resetSwitching();

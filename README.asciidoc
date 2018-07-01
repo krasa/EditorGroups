@@ -19,9 +19,11 @@ image::example.gif[]
 - `Ctrl + Alt + Shift + Mouse Wheel` or `Ctrl + Alt + Shift + ; or '` - switch file into a new window                                              
            
 === Tab click modifiers
-- `Ctrl + click` - open a file in a new tab
-- `Shift + click` - open a file in a new window   
-- `Alt + click` - open a file in a split window
+- `Ctrl + Left Button` - open a file in a new tab
+- `Shift + Left Button` - open a file in a new window   
+- `Alt + Left Button` - open a file in a vertical split window
+- `Alt + Middle Button button` - open a file in a horizontal split window
+- `Middle Button` - remove from group (only for Favorites)
  
 === Advanced actions and settings
 - right click on the panel

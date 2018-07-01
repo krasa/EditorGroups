@@ -10,6 +10,7 @@ import com.intellij.openapi.actionSystem.impl.ActionButton;
 import com.intellij.ui.PopupHandler;
 import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupPanel;
+import krasa.editorGroups.Splitters;
 
 import javax.swing.*;
 import java.awt.*;
@@ -26,7 +27,7 @@ public class NextAction extends EditorGroupsAction implements CustomComponentAct
 				InputEvent e = anActionEvent.getInputEvent();
 
 				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
-				panel.next(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK));
+				panel.next(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), Splitters.from(e));
 			}
 
 	}
