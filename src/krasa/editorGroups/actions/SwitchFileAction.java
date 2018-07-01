@@ -5,6 +5,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataContext;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.impl.ActionMenuItem;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.project.DumbAware;
@@ -21,6 +22,7 @@ import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 
@@ -33,7 +35,12 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 		if (project != null) {
 			InputEvent inputEvent = e.getInputEvent();
 			if (inputEvent instanceof MouseEvent) {
-				popup.showInBestPositionFor(e.getDataContext());
+				Component component = inputEvent.getComponent();
+				if (component instanceof ActionMenuItem) { //from popup menu
+					popup.showInBestPositionFor(e.getDataContext());
+				} else {
+					popup.showUnderneathOf(component);
+				}
 			} else {
 				popup.showCenteredInCurrentWindow(project);
 			}

@@ -5,6 +5,7 @@ import com.intellij.ide.actions.QuickSwitchSchemeAction;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
 import com.intellij.openapi.actionSystem.impl.ActionButton;
+import com.intellij.openapi.actionSystem.impl.ActionMenuItem;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -41,7 +42,12 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		if (project != null) {
 			InputEvent inputEvent = e.getInputEvent();
 			if (inputEvent instanceof MouseEvent) {
-				popup.showInBestPositionFor(e.getDataContext());
+				Component component = inputEvent.getComponent();
+				if (component instanceof ActionMenuItem) { //from popup menu
+					popup.showInBestPositionFor(e.getDataContext());
+				} else {
+					popup.showUnderneathOf(component);
+				} 
 			} else {
 				popup.showCenteredInCurrentWindow(project);
 			}
