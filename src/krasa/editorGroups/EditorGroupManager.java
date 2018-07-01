@@ -22,12 +22,17 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class EditorGroupManager {
 	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(EditorGroupManager.class);
+	public static final Comparator<EditorGroup> COMPARATOR = new Comparator<EditorGroup>() {
+		@Override
+		public int compare(EditorGroup o1, EditorGroup o2) {
+			return o1.getTitle().toLowerCase().compareTo(o2.getTitle().toLowerCase());
+		}
+	};
 
 	private final Project project;
 	//	@NotNull
@@ -202,19 +207,16 @@ public class EditorGroupManager {
 	}
 
 	public List<EditorGroup> getGroups(VirtualFile file) {
-		return cache.findGroups(file.getCanonicalPath());
+		List<EditorGroup> groups = cache.findGroups(file.getCanonicalPath());
+		groups.sort(COMPARATOR);
+		return groups;
 	}
 
 	//TODO cache it?
 	public List<EditorGroupIndexValue> getAllGroups() throws IndexNotReadyException {
 		long start = System.currentTimeMillis();
 		List<EditorGroupIndexValue> allGroups = cache.getAllGroups();
-		Collections.sort(allGroups, new Comparator<EditorGroupIndexValue>() {
-			@Override
-			public int compare(EditorGroupIndexValue o1, EditorGroupIndexValue o2) {
-				return o1.getTitle().compareTo(o2.getTitle());
-			}
-		});
+		allGroups.sort(COMPARATOR);
 		if (LOG.isDebugEnabled()) LOG.debug("getAllGroups " + (System.currentTimeMillis() - start));
 		return allGroups;
 	}

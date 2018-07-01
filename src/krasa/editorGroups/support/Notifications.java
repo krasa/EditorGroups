@@ -62,7 +62,7 @@ public class Notifications {
 
 	@NotNull
 	public static String href(String name) {
-		return "<a href=\"#\">" + name + "<a/>";
+		return "<a href=\"" + name + "\">" + name + "<a/>";
 	}
 
 
@@ -72,24 +72,29 @@ public class Notifications {
 		});
 	}
 
-	public static void duplicateId(String id, List<EditorGroupIndexValue> values) {
+	public static void duplicateId(Project project, String id, List<EditorGroupIndexValue> values) {
 		StringBuilder sb = new StringBuilder("Duplicate Group ID '" + id + "' in: [");
 		for (int i = 0; i < values.size(); i++) {
 			EditorGroupIndexValue value = values.get(i);
 			String ownerPath = value.getOwnerPath();
-			sb.append(ownerPath);
+			sb.append(href(ownerPath));
 			if (i != values.size()) {
 				sb.append(", ");
 			}
 		}
 		sb.append("]");
 		String content = sb.toString();
-		warning(content, null);
+		warning(content, new NotificationListener.Adapter() {
+			@Override
+			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
+				OpenFileAction.openFile(e.getDescription(), project);
+			}
+		});
 	}
 
 	public static void warning(String content, NotificationListener listener) {
 		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, listener);
-		LOG.warn(new RuntimeException(content));                
+		LOG.warn(new RuntimeException(content));
 		show(notification);
 	}
 }

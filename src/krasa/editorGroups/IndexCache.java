@@ -107,7 +107,7 @@ public class IndexCache {
 	private EditorGroup getGroupFromIndexById(String id) {
 		List<EditorGroupIndexValue> values = FileBasedIndex.getInstance().getValues(EditorGroupIndex.NAME, id, GlobalSearchScope.projectScope(project));
 		if (values.size() > 1) {
-			Notifications.duplicateId(id, values);
+			Notifications.duplicateId(project, id, values);
 		}
 		EditorGroup editorGroup = values.size() == 0 ? EditorGroup.EMPTY : values.get(0);
 		if (LOG.isDebugEnabled()) {
