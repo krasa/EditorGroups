@@ -85,7 +85,7 @@ public class TabLabel extends JPanel implements Accessible {
 		addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(final MouseEvent e) {
-				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_PRESSED)) return;
+//				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_PRESSED)) return;
 				if (JBTabsImpl.isSelectionClick(e, false) && myInfo.isEnabled()) {
 					final TabInfo selectedInfo = myTabs.getSelectedInfo();
 					if (selectedInfo != myInfo) {

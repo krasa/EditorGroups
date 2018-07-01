@@ -2984,7 +2984,9 @@ public class JBTabsImpl extends JComponent
 	public static boolean isSelectionClick(final MouseEvent e, boolean canBeQuick) {
 		if (e.getClickCount() == 1 || canBeQuick) {
 			if (!e.isPopupTrigger()) {
-				return e.getButton() == MouseEvent.BUTTON1 && !e.isControlDown() && !e.isAltDown() && !e.isMetaDown();
+				return e.getButton() == MouseEvent.BUTTON1;
+//				EditorGroups
+//					&& !e.isControlDown() && !e.isAltDown() && !e.isMetaDown();
 			}
 		}
 
