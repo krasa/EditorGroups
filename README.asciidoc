@@ -30,7 +30,7 @@ image::example.gif[]
 - `File | Settings | Other Settings | Editor Groups`
    
 
-== Syntax
+== Manually Defined Groups Syntax
 
 === Relative paths to the current file
 - `@group.related file.txt`
