@@ -57,7 +57,7 @@ image::example.gif[]
 === All files with the same name anywhere in the project
 - `@group.related \*/foo/file.*`
                  
-=== Title customization
+=== Tab/Title customization
 - `@group.title yourTitle`
 - `@group.color yellow` (a name from https://www.w3schools.com/colors/colors_names.asp)  
 - `@group.color yellow+3` (or yellow+++ or yellow-3 or yellow--- for darker or brighter shade)
