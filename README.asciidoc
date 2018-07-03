@@ -2,12 +2,12 @@
 
 image::example.gif[]
 
-=== Type of groups
-- Favorites
-- by file name without extension anywhere in the project
-- by folder
+=== Types of groups
+- favorites
 - manually defined in `*.egroups` file (with language support) or in any other file 
 ** does not support refactoring yet
+- by file name without extension anywhere in the project
+- by folder
             
 === Shortcuts                    
 - `Ctrl + Alt + Q` - Refresh                                                           
@@ -30,7 +30,7 @@ image::example.gif[]
 - `File | Settings | Other Settings | Editor Groups`
    
 
-== Manually Defined Groups Syntax
+== Manually Defined Group Syntax
 
 === Relative paths to the current file
 - `@group.related file.txt`
