@@ -62,7 +62,9 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 
 				try {
 					Method rootChanged = ReflectionUtil.getDeclaredMethod(FavoritesManager.class, "rootsChanged");
-					rootChanged.invoke(favoritesManager);
+					if (rootChanged != null) { //TODO 2018
+						rootChanged.invoke(favoritesManager);
+					}
 				} catch (Exception e1) {
 					throw new RuntimeException(e1);
 				}
