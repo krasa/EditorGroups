@@ -32,11 +32,12 @@ public class UniqueTabNameBuilder {
 			put(path_name, name_path, paths_withDuplicateName, path);
 		}
 
-		String currentFilePath = currentFile.getCanonicalPath();
-		if (!path_name.containsKey(currentFilePath)) {
-			put(path_name, name_path, paths_withDuplicateName, currentFilePath);
+		if (currentFile != null) {
+			String currentFilePath = currentFile.getCanonicalPath();
+			if (!path_name.containsKey(currentFilePath)) {
+				put(path_name, name_path, paths_withDuplicateName, currentFilePath);
+			}
 		}
-
 
 		for (String path: paths_withDuplicateName) {
 			uniqueNameBuilder.addPath(path, path);

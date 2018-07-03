@@ -18,6 +18,7 @@ import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.Splitters;
+import krasa.editorGroups.UniqueTabNameBuilder;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.Utils;
@@ -29,6 +30,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.util.List;
+import java.util.Map;
 
 public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAware {
 
@@ -95,8 +98,13 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 				if (panel != null) {
 					String currentFile = panel.getFile().getCanonicalPath();
 					EditorGroup group = panel.getDisplayedGroup();
-					for (String link: group.getLinks(project)) {
-						defaultActionGroup.add(newAction(project, panel, currentFile, link));
+
+					List<String> links = group.getLinks(project);
+					UniqueTabNameBuilder uniqueTabNameBuilder = new UniqueTabNameBuilder(project);
+					Map<String, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
+
+					for (Map.Entry<String, String> link: namesByPath.entrySet()) {
+						defaultActionGroup.add(newAction(project, panel, currentFile, link.getKey(), link.getValue()));
 					}
 				}
 			}
@@ -106,11 +114,11 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 	}
 
 	@NotNull
-	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, String link) {
-		OpenFileAction action = new OpenFileAction(link, project, panel);
+	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, String link, String text) {
+		OpenFileAction action = new OpenFileAction(link, project, panel, text);
 		if (link.equals(currentFile)) {
 			action.getTemplatePresentation().setEnabled(false);
-			action.getTemplatePresentation().setText(Utils.toPresentableName(link) + " - current", false);
+			action.getTemplatePresentation().setText(text + " - current", false);
 			action.getTemplatePresentation().setIcon(null);
 		}
 		return action;
@@ -123,14 +131,14 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 		private final VirtualFile virtualFileByAbsolutePath;
 		private final Project project;
 
-		public OpenFileAction(String link, Project project, EditorGroupPanel panel) {
-			super(Utils.toPresentableName(link), link, Utils.getFileIcon(link));
+		public OpenFileAction(String link, Project project, EditorGroupPanel panel, String text) {
+			super(text, link, Utils.getFileIcon(link));
 			this.link = link;
 			this.panel = panel;
 			VirtualFile virtualFileByAbsolutePath = Utils.getVirtualFileByAbsolutePath(link);
 			this.virtualFileByAbsolutePath = virtualFileByAbsolutePath;
 			this.project = project;
-			getTemplatePresentation().setEnabled(virtualFileByAbsolutePath.exists());
+			getTemplatePresentation().setEnabled(virtualFileByAbsolutePath != null && virtualFileByAbsolutePath.exists());
 		}
 
 		@Override
