@@ -156,7 +156,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 						IdeEventQueue.getInstance().blockNextEvents(e);
 						tabs.setMyPopupInfo(info);
 						try {
-							ActionManager.getInstance().getAction(RemoveFromCurrentFavoritesAction.ID).actionPerformed(AnActionEvent.createFromInputEvent(e, ActionPlaces.UNKNOWN, null, DataManager.getInstance().getDataContext(tabs)));
+							ActionManager.getInstance().getAction(RemoveFromCurrentFavoritesAction.ID).actionPerformed(AnActionEvent.createFromInputEvent(e, ActionPlaces.UNKNOWN, new Presentation(), DataManager.getInstance().getDataContext(tabs)));
 						} finally {
 							tabs.setMyPopupInfo(null);
 						}

@@ -1,6 +1,5 @@
 package krasa.editorGroups.actions;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.ide.actions.QuickSwitchSchemeAction;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.ex.CustomComponentAction;
@@ -20,6 +19,7 @@ import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.ExternalGroupProvider;
 import krasa.editorGroups.Splitters;
+import krasa.editorGroups.icons.MyIcons;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -60,7 +60,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	@Override
 	public JComponent createCustomComponent(Presentation presentation) {
 		ActionButton button = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		presentation.setIcon(AllIcons.Actions.GroupBy);
+		presentation.setIcon(MyIcons.groupBy);
 		button.addMouseListener(new PopupHandler() {
 			public void invokePopup(Component comp, int x, int y) {
 				popupInvoked(comp, x, y);

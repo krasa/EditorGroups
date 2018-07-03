@@ -1,8 +1,8 @@
 package krasa.editorGroups.model;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
 import krasa.editorGroups.IndexCache;
+import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -87,7 +87,7 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 
 	@Override
 	public Icon icon() {
-		return AllIcons.Actions.GroupBy;
+		return MyIcons.groupBy;
 	}
 
 	@Override

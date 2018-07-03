@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.16</version>
+    <version>0.17</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -19,7 +19,7 @@
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="182.3458"/>
+    <idea-version since-build="181.4892"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -88,8 +88,8 @@
         <action class="krasa.editorGroups.actions.PreviousInNewWindowAction"
                 id="krasa.editorGroups.PreviousInNewWindow"
                 text="Open Previous File in Editor Group in a New Window">
-            <keyboard-shortcut first-keystroke="ctrl shift SEMICOLON" keymap="$default"/>
-            <!--<mouse-shortcut keystroke="ctrl alt shift button143" keymap="$default"/>-->
+            <!--<keyboard-shortcut first-keystroke="ctrl shift SEMICOLON" keymap="$default"/>-->
+            <mouse-shortcut keystroke="ctrl shift button143" keymap="$default"/>
         </action>
 
 
@@ -105,8 +105,8 @@
         </action>
         <action class="krasa.editorGroups.actions.NextInNewWindowAction" id="krasa.editorGroups.NextInNewWindow"
                 text="Open Next File in Editor Group in a New Window">
-            <keyboard-shortcut first-keystroke="ctrl shift QUOTE" keymap="$default"/>
-            <!--<mouse-shortcut keystroke="ctrl alt shift button142" keymap="$default"/>-->
+            <!--<keyboard-shortcut first-keystroke="ctrl shift QUOTE" keymap="$default"/>-->
+            <mouse-shortcut keystroke="ctrl shift button142" keymap="$default"/>
         </action>
 
 
@@ -157,11 +157,12 @@
 
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"
-                text="Switch Editor Group" icon="AllIcons.Actions.GroupBy">
+                text="Switch Editor Group" icon="/krasa/editorGroups/icons/groupBy.svg">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
         <action id="krasa.editorGroups.SwitchFile" class="krasa.editorGroups.actions.SwitchFileAction"
-                text="Switch File" description="Switch File in Editor Group" icon="AllIcons.Actions.ListFiles">
+                text="Switch File" description="Switch File in Editor Group"
+                icon="/krasa/editorGroups/icons/listFiles.svg">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt W"/>
         </action>
 

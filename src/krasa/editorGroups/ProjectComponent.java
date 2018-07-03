@@ -32,14 +32,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 	public void projectOpened() {
 		EditorGroupManager.getInstance(project).initCache();
 
-		FileEditorManagerListener.Before before = new FileEditorManagerListener.Before() {
 
-			@Override
-			public void beforeFileClosed(@NotNull FileEditorManager source, @NotNull VirtualFile file) {
-				if (LOG.isDebugEnabled()) LOG.debug("beforeFileClosed [" + file + "]");
-			}
-		};
-		project.getMessageBus().connect().subscribe(FileEditorManagerListener.Before.FILE_EDITOR_MANAGER, before);
 		project.getMessageBus().connect().subscribe(FileEditorManagerListener.FILE_EDITOR_MANAGER, new FileEditorManagerListener() {
 
 			//IJ 2018.2
@@ -55,10 +48,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 						continue;
 					}
 					long start = System.currentTimeMillis();
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
 
-					manager.addTopComponent(fileEditor, panel.getRoot());
-					panel.postConstruct();
+					createPanel(manager, file, switchRequest, fileEditor);
 
 
 					if (LOG.isDebugEnabled()) {
@@ -66,8 +57,12 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 							LOG.debug("sync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
 					}
 				}
+			}
 
-
+			private void createPanel(@NotNull FileEditorManager manager, @NotNull VirtualFile file, SwitchRequest switchRequest, FileEditor fileEditor) {
+				EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
+				manager.addTopComponent(fileEditor, panel.getRoot());
+				panel.postConstruct();
 			}
 
 			/**on EDT*/
@@ -85,10 +80,8 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					}
 					long start = System.currentTimeMillis();
 
-					instance.setMyScrollOffset(0);
-					EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
+					createPanel(manager, file, switchRequest, fileEditor);
 
-					manager.addTopComponent(fileEditor, panel.getRoot());
 					if (LOG.isDebugEnabled()) {
 						if (LOG.isDebugEnabled())
 							LOG.debug("async EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
@@ -120,6 +113,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			}
 		});
 	}
+
 
 	@Nullable
 	@Override

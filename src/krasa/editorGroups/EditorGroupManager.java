@@ -384,12 +384,4 @@ public class EditorGroupManager {
 		switchRequest = null;
 	}
 
-
-	public void setMyScrollOffset(int myScrollOffset) {
-		if (switchRequest != null) {
-			switchRequest.myScrollOffset = myScrollOffset;
-		}
-	}
-
-
 }

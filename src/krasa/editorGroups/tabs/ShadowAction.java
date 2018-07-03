@@ -7,7 +7,6 @@ import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.keymap.Keymap;
 import com.intellij.openapi.keymap.KeymapManager;
-import com.intellij.openapi.keymap.KeymapManagerListener;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.util.ui.update.Activatable;
 import com.intellij.util.ui.update.UiNotifyConnector;
@@ -71,19 +70,20 @@ public final class ShadowAction {
 		if (listenerDisposable == null) {
 			listenerDisposable = Disposer.newDisposable();
 			Disposer.register(parentDisposable, listenerDisposable);
-			application.getMessageBus().connect(listenerDisposable).subscribe(KeymapManagerListener.TOPIC, new KeymapManagerListener() {
-				@Override
-				public void activeKeymapChanged(@Nullable Keymap keymap) {
-					rebound();
-				}
-
-				@Override
-				public void shortcutChanged(@NotNull Keymap keymap, @NotNull String actionId) {
-					if (myActionId == null || actionId.equals(myActionId)) {
-						rebound();
-					}
-				}
-			});
+			//2018.2
+//			application.getMessageBus().connect(listenerDisposable).subscribe(KeymapManagerListener.TOPIC, new KeymapManagerListener() {
+//				@Override
+//				public void activeKeymapChanged(@Nullable Keymap keymap) {
+//					rebound();
+//				}
+//
+//				@Override
+//				public void shortcutChanged(@NotNull Keymap keymap, @NotNull String actionId) {
+//					if (myActionId == null || actionId.equals(myActionId)) {
+//						rebound();
+//					}
+//				}
+//			});
 		}
 
 		rebound();

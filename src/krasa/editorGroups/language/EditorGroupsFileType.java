@@ -1,8 +1,8 @@
 package krasa.editorGroups.language;
 
-import com.intellij.icons.AllIcons;
 import com.intellij.openapi.fileTypes.LanguageFileType;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -38,7 +38,7 @@ public class EditorGroupsFileType extends LanguageFileType {
 
 	@Override
 	public Icon getIcon() {
-		return AllIcons.Actions.GroupBy;
+		return MyIcons.groupBy;
 	}
 
 	@Override
