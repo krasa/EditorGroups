@@ -3,7 +3,7 @@
 image::example.gif[]
 
 === Type of groups
-- from Favorites tool window
+- Favorites
 - by file name without extension anywhere in the project
 - by folder
 - manually defined in `*.egroups` file (with language support) or in any other file 
