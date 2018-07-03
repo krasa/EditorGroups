@@ -9,8 +9,8 @@ import java.awt.event.InputEvent;
 public enum Splitters {
 	NONE, VERTICAL, HORIZONTAL;
 
-	public static Splitters from(boolean alt, boolean button2) {
-		if (alt && button2) {
+	public static Splitters from(boolean alt, boolean shift) {
+		if (alt && shift) {
 			return HORIZONTAL;
 		}
 		if (alt) {
@@ -31,7 +31,12 @@ public enum Splitters {
 	}
 
 	public static Splitters from(AnActionEvent e) {
-		return from(BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK));
+		boolean alt = BitUtil.isSet(e.getModifiers(), InputEvent.ALT_MASK);
+		boolean shift = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
+		if (alt && shift) {
+			return HORIZONTAL;
+		}
+		return from(alt);
 	}
 
 	boolean isSplit() {

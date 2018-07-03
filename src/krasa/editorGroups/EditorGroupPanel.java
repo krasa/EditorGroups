@@ -193,7 +193,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_DOWN_MASK);
 					boolean button2 = BitUtil.isSet(modifiers, InputEvent.BUTTON2_DOWN_MASK);
 
-					openFile(fileByPath, ctrl, shift, Splitters.from(alt, button2));
+					openFile(fileByPath, ctrl, shift, Splitters.from(alt, shift));
 				}
 				return ActionCallback.DONE;
 			}

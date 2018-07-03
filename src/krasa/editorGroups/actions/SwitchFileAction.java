@@ -1,10 +1,8 @@
 package krasa.editorGroups.actions;
 
+import com.intellij.ide.DataManager;
 import com.intellij.ide.actions.QuickSwitchSchemeAction;
-import com.intellij.openapi.actionSystem.AnActionEvent;
-import com.intellij.openapi.actionSystem.DataContext;
-import com.intellij.openapi.actionSystem.DefaultActionGroup;
-import com.intellij.openapi.actionSystem.PlatformDataKeys;
+import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.actionSystem.impl.ActionMenuItem;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -14,6 +12,8 @@ import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.popup.ListPopup;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.ui.popup.PopupFactoryImpl;
+import com.intellij.ui.popup.list.ListPopupImpl;
 import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
@@ -23,8 +23,11 @@ import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 
 public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAware {
@@ -32,6 +35,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 	private static final Logger LOG = Logger.getInstance(SwitchFileAction.class);
 
 	protected void showPopup(AnActionEvent e, ListPopup popup) {
+		registerActions((ListPopupImpl) popup);
 		Project project = e.getProject();
 		if (project != null) {
 			InputEvent inputEvent = e.getInputEvent();
@@ -48,8 +52,38 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 		} else {
 			popup.showInBestPositionFor(e.getDataContext());
 		}
-	}                 
-	
+	}
+
+	private void registerActions(ListPopupImpl popup) {
+		popup.registerAction("newTab", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), customAction(popup));
+		popup.registerAction("newWindow", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), customAction(popup));
+		popup.registerAction("verticalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK), customAction(popup));
+		popup.registerAction("horizontalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK), customAction(popup));
+	}
+
+	@NotNull
+	private AbstractAction customAction(ListPopupImpl popup) {
+		return new AbstractAction() {
+			public void actionPerformed(ActionEvent e) {
+				JList list = popup.getList();
+				PopupFactoryImpl.ActionItem selectedValue = (PopupFactoryImpl.ActionItem) list.getSelectedValue();
+				if (selectedValue != null) {
+					AnAction action1 = selectedValue.getAction();
+					action1.actionPerformed(new AnActionEvent(null, getDataContext(popup), myActionPlace, getTemplatePresentation(), ActionManager.getInstance(), e.getModifiers()));
+					popup.closeOk(null);
+				}
+			}
+		};
+	}
+
+	private DataContext getDataContext(ListPopupImpl popup) {
+		DataContext dataContext = DataManager.getInstance().getDataContext(popup.getOwner());
+		Project project = dataContext.getData(CommonDataKeys.PROJECT);
+		if (project == null) {
+			throw new IllegalStateException("Project is null for " + popup.getOwner());
+		}
+		return dataContext;
+	}
 
 	@Override
 	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {

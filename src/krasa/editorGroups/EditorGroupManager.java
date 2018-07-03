@@ -315,18 +315,17 @@ public class EditorGroupManager {
 			if (initial_editor_index != null) {
 				fileToOpen.putUserData(initial_editor_index, null);
 			}
-
-			if (newWindow) {
-				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
-				Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
-				if (pair.first.length == 0) {
-					LOG.debug("no editors opened");
-					resetSwitching();
-				}
-			} else if (split.isSplit() && currentWindow != null) {
+			if (split.isSplit() && currentWindow != null) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInSplit " + fileToOpen);
 				EditorWindow split1 = currentWindow.split(split.getOrientation(), true, fileToOpen, true);
 				if (split1 == null) {
+					LOG.debug("no editors opened");
+					resetSwitching();
+				}
+			} else if (newWindow) {
+				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
+				Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
+				if (pair.first.length == 0) {
 					LOG.debug("no editors opened");
 					resetSwitching();
 				}
