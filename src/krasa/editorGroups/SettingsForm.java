@@ -21,6 +21,7 @@ public class SettingsForm {
 	private JCheckBox excludeEGroups;
 	private JPanel tabColors;
 	private JCheckBox rememberLastGroup;
+	private JCheckBox groupSwitchGroupAction;
 	private TabsColors tabsColors;
 
 
@@ -67,6 +68,7 @@ public class SettingsForm {
 		indexOnlyEditorGroupsFileCheckBox.setSelected(data.isIndexOnlyEditorGroupsFiles());
 		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
 		rememberLastGroup.setSelected(data.isRememberLastGroup());
+		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
 	}
 
 	public void getData(ApplicationConfiguration data) {
@@ -80,6 +82,7 @@ public class SettingsForm {
 		data.setIndexOnlyEditorGroupsFiles(indexOnlyEditorGroupsFileCheckBox.isSelected());
 		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
 		data.setRememberLastGroup(rememberLastGroup.isSelected());
+		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
@@ -93,6 +96,7 @@ public class SettingsForm {
 		if (indexOnlyEditorGroupsFileCheckBox.isSelected() != data.isIndexOnlyEditorGroupsFiles()) return true;
 		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
 		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
+		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
 		return false;
 	}
 }

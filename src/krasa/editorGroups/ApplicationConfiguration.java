@@ -23,6 +23,7 @@ public class ApplicationConfiguration {
 	private Integer tabFgColor;
 	private boolean tabFgColorEnabled;
 	private boolean rememberLastGroup = true;
+	private boolean groupSwitchGroupAction = false;
 
 	public static ApplicationConfiguration state() {
 		return ApplicationConfigurationComponent.getInstance().getState();
@@ -172,6 +173,14 @@ public class ApplicationConfiguration {
 
 	public void setRememberLastGroup(final boolean rememberLastGroup) {
 		this.rememberLastGroup = rememberLastGroup;
+	}
+
+	public boolean isGroupSwitchGroupAction() {
+		return groupSwitchGroupAction;
+	}
+
+	public void setGroupSwitchGroupAction(final boolean groupSwitchGroupAction) {
+		this.groupSwitchGroupAction = groupSwitchGroupAction;
 	}
 
 
