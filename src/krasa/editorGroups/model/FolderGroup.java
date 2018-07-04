@@ -12,7 +12,7 @@ public class FolderGroup extends AutoGroup {
 
 	private final String folderPath;
 
-	public FolderGroup(String folderPath, List<String> links) {
+	public FolderGroup(String folderPath, List<Link> links) {
 		super(links);
 		this.folderPath = folderPath;
 	}

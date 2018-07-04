@@ -12,6 +12,7 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
+import krasa.editorGroups.model.Link;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -102,13 +103,6 @@ public class Utils {
 		return file;
 	}
 
-
-	public static boolean isTheSameFile(@NotNull String path, @NotNull VirtualFile file) {
-		if (file != null) {
-			return path.equals(file.getCanonicalPath());
-		}
-		return false;
-	}
 
 	@NotNull
 	public static String toPresentableName(String path) {
@@ -490,5 +484,9 @@ public class Utils {
 		}
 		final String name = file.getName();
 		return StringUtil.endsWithIgnoreCase(name, ".jar") || StringUtil.endsWithIgnoreCase(name, ".zip");
+	}
+
+	public static VirtualFile getFileByPath(Link link) {
+		return getFileByPath(link.getPath());
 	}
 }

@@ -11,6 +11,7 @@ import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.Link;
 import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
@@ -43,7 +44,7 @@ public class AutoGroupProvider {
 
 		VirtualFile parent = file.getParent();
 		String folder = parent.getCanonicalPath();
-		List<String> links = FileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"), null);
+		List<Link> links = FileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"), null);
 		return new FolderGroup(folder, links);
 	}
 
@@ -105,7 +106,7 @@ public class AutoGroupProvider {
 		if (LOG.isDebugEnabled())
 			LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
-		return new SameNameGroup(nameWithoutExtension, paths);
+		return new SameNameGroup(nameWithoutExtension, Link.from(paths));
 	}
 
 

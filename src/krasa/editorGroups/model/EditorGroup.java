@@ -23,7 +23,7 @@ public abstract class EditorGroup {
 	public String getOwnerPath() {
 		return getId();
 	}
-	
+
 	public abstract String getTitle();
 
 	public abstract boolean isValid();
@@ -38,7 +38,7 @@ public abstract class EditorGroup {
 		return !isValid();
 	}
 
-	public abstract List<String> getLinks(Project project);
+	public abstract List<Link> getLinks(Project project);
 
 	public abstract boolean isOwner(String ownerPath);
 
@@ -64,12 +64,12 @@ public abstract class EditorGroup {
 		return presentableNameForUI;
 	}
 
-	public String getSwitchDescription() {   
-		
+	public String getSwitchDescription() {
+
 		if (this instanceof AutoGroup) {
 			return null;
 		}
-		if (!(this instanceof FavoritesGroup)) {
+		if (!(this instanceof FavoritesGroup) && !(this instanceof BookmarkGroup)) {
 			return "Owner:" + getOwnerPath();
 		}
 		return null;
@@ -81,7 +81,13 @@ public abstract class EditorGroup {
 	}
 
 	public boolean containsLink(Project project, String currentFilePath) {
-		return getLinks(project).contains(currentFilePath);
+		List<Link> links = getLinks(project);
+		for (Link link: links) {
+			if (link.getPath().equals(currentFilePath)) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	public boolean equalsVisually(Project project, EditorGroup group) {
@@ -106,8 +112,8 @@ public abstract class EditorGroup {
 	}
 
 	public VirtualFile getFirstExistingFile(Project project) {
-		List<String> links = getLinks(project);
-		for (String link : links) {
+		List<Link> links = getLinks(project);
+		for (Link link: links) {
 			VirtualFile fileByPath = Utils.getFileByPath(link);
 			if (fileByPath != null && fileByPath.exists() && !fileByPath.isDirectory()) {
 				return fileByPath;
@@ -132,6 +138,8 @@ public abstract class EditorGroup {
 	public String switchTitle(Project project) {
 		String title;
 		if (this instanceof FavoritesGroup) {
+			title = getTitle();
+		} else if (this instanceof BookmarkGroup) {
 			title = getTitle();
 		} else {
 			String ownerPath = getOwnerPath();

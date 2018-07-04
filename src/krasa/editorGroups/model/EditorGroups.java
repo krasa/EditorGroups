@@ -57,6 +57,9 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 		if (editorGroup instanceof FavoritesGroup) {
 			return;
 		}
+		if (editorGroup instanceof BookmarkGroup) {
+			return;
+		}
 		put(editorGroup);
 	}
 
@@ -100,7 +103,7 @@ public class EditorGroups extends EditorGroup implements GroupsHolder {
 	}
 
 	@Override
-	public List<String> getLinks(Project project) {
+	public List<Link> getLinks(Project project) {
 		return Collections.emptyList();
 	}
 

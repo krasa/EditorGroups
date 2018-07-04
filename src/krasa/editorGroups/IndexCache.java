@@ -117,21 +117,21 @@ public class IndexCache {
 	}
 
 
-	private void addToCache(List<String> links, EditorGroupIndexValue group) {
+	private void addToCache(List<Link> links, EditorGroupIndexValue group) {
 		add(group, group.getOwnerPath());
 
-		for (String link : links) {
-			add(group, link);
+		for (Link link: links) {
+			add(group, link.getPath());
 		}
 	}
 
 
-	private void add(@NotNull EditorGroupIndexValue group, @NotNull String link) {
-		EditorGroups editorGroups = groupsByLinks.get(link);
+	private void add(@NotNull EditorGroupIndexValue group, String path) {
+		EditorGroups editorGroups = groupsByLinks.get(path);
 		if (editorGroups == null) {
 			EditorGroups value = new EditorGroups();
 			value.add(group);
-			groupsByLinks.put(link, value);
+			groupsByLinks.put(path, value);
 		} else {
 			editorGroups.add(group);
 		}
@@ -153,7 +153,7 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		List<String> links = FileResolver.resolveLinks(group, project);
+		List<Link> links = FileResolver.resolveLinks(group, project);
 		if (links.size() > LINKS_LIMIT) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
 			links = new ArrayList<>(links.subList(0, LINKS_LIMIT));
@@ -187,6 +187,8 @@ public class IndexCache {
 					if (favoritesGroup.containsLink(project, currentFilePath)) {
 						result = favoritesGroup;
 					}
+				} else if (includeFavorites && last.equals(BookmarkGroup.ID)) {
+					result = externalGroupProvider.getBookmarkGroup();
 				} else {
 					EditorGroup lastGroup = getById(last);
 					if (lastGroup.containsLink(project, currentFilePath) || lastGroup.isOwner(currentFilePath)) {
@@ -352,9 +354,9 @@ public class IndexCache {
 		}
 
 		if (group != null) {
-			List<String> links = group.getLinks(project);
-			for (String link : links) {
-				EditorGroups editorGroups = groupsByLinks.get(link);
+			List<Link> links = group.getLinks(project);
+			for (Link link: links) {
+				EditorGroups editorGroups = groupsByLinks.get(link.getPath());
 				if (editorGroups != null) {
 					editorGroups.remove(group);
 				}

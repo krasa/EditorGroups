@@ -20,6 +20,7 @@ import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.Splitters;
 import krasa.editorGroups.UniqueTabNameBuilder;
 import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.Link;
 import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -99,12 +100,13 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 					String currentFile = panel.getFile().getCanonicalPath();
 					EditorGroup group = panel.getDisplayedGroup();
 
-					List<String> links = group.getLinks(project);
+					List<Link> links = group.getLinks(project);
 					UniqueTabNameBuilder uniqueTabNameBuilder = new UniqueTabNameBuilder(project);
-					Map<String, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
+					Map<Link, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
 
-					for (Map.Entry<String, String> link: namesByPath.entrySet()) {
-						defaultActionGroup.add(newAction(project, panel, currentFile, link.getKey(), link.getValue()));
+					for (Map.Entry<Link, String> link: namesByPath.entrySet()) {
+						Link linkKey = link.getKey();
+						defaultActionGroup.add(newAction(project, panel, currentFile, linkKey.getPath(), link.getValue()));
 					}
 				}
 			}
@@ -147,7 +149,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 				boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
 				boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				instance.open(panel, virtualFileByAbsolutePath, window, tab, Splitters.from(e));
+				instance.open(panel, virtualFileByAbsolutePath, null, window, tab, Splitters.from(e));
 			} else {
 				Notifications.warning("File not found " + link, null);
 			}

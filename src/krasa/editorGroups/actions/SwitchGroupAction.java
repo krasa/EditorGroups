@@ -76,20 +76,24 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			EditorGroup displayedGroup = EditorGroup.EMPTY;
 			List<EditorGroup> editorGroups = Collections.emptyList();
 			DefaultActionGroup tempGroup = new DefaultActionGroup();
+			VirtualFile file = null;
 
 
 			if (data != null) {
 				panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 				if (panel != null) {
-					VirtualFile file = panel.getFile();
+					file = panel.getFile();
 					displayedGroup = panel.getDisplayedGroup();
 
 					defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refreshHandler(panel)));
 					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refreshHandler(panel)));
 
+
 					editorGroups = fillCurrentFileGroups(project, tempGroup, panel, file);
 				}
 			}
+
+			addBookmarkGroup(project, defaultActionGroup, panel, displayedGroup, file);
 			fillOtherGroup(tempGroup, editorGroups, displayedGroup, project);
 			fillFavorites(tempGroup, project, editorGroups, displayedGroup);
 
@@ -115,6 +119,25 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		} catch (IndexNotReadyException e) {
 			LOG.error("That should not happen", e);
 		}
+	}
+
+	private void addBookmarkGroup(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel, EditorGroup displayedGroup, VirtualFile file) {
+		BookmarkGroup bookmarkGroup = ExternalGroupProvider.getInstance(project).getBookmarkGroup();
+		DumbAwareAction action = createAction(displayedGroup, bookmarkGroup, project, new Handler() {
+			@Override
+			void run(EditorGroup groupLink) {
+				if (panel != null && file != null && bookmarkGroup.containsLink(project, file.getCanonicalPath())) {
+					refreshHandler(panel).run(bookmarkGroup);
+				} else {
+					otherGroupHandler(project).run(bookmarkGroup);
+				}
+			}
+		});
+		if (bookmarkGroup.size(project) == 0) {
+			action.getTemplatePresentation().setEnabled(false);
+			action.getTemplatePresentation().setText(bookmarkGroup.getName() + " - empty");
+		}
+		defaultActionGroup.add(action);
 	}
 
 	private List<EditorGroup> fillCurrentFileGroups(Project project, @NotNull DefaultActionGroup group, EditorGroupPanel panel, VirtualFile file) {
@@ -179,7 +202,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	}
 
 	@NotNull
-	private Handler refreshHandler(EditorGroupPanel panel) {
+	private Handler refreshHandler(@NotNull EditorGroupPanel panel) {
 		return new Handler() {
 			@Override
 			void run(EditorGroup editorGroup) {

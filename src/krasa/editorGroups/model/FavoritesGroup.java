@@ -114,10 +114,12 @@ public class FavoritesGroup extends EditorGroup {
 	}
 
 	@Override
-	public List<String> getLinks(Project project) {
-		ArrayList<String> paths = new ArrayList<>(files.size());
+	public List<Link> getLinks(Project project) {
+		ArrayList<Link> paths = new ArrayList<>(files.size());
 		for (VirtualFile file : files) {
-			paths.add(file.getCanonicalPath());
+			if (file.getCanonicalPath() != null) {
+				paths.add(new Link(file.getCanonicalPath()));
+			}
 		}
 		return paths;
 	}

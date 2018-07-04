@@ -92,6 +92,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 			@Override
 			public void selectionChanged(@NotNull FileEditorManagerEvent event) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("selectionChanged " + event);
+				}
 				FileEditor fileEditor = event.getNewEditor();
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
@@ -102,7 +105,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 							EditorGroup switchingGroup = switchRequest.group;
 							int scrollOffset = switchRequest.myScrollOffset;
 							panel.refreshOnSelectionChanged(false, switchingGroup, scrollOffset);
-						}
+						} else {
+							panel.refresh(false, null);
+						} 
 					}
 				}
 			}

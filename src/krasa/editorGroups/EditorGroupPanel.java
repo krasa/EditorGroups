@@ -40,10 +40,10 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
@@ -72,6 +72,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private boolean disposed;
 	private volatile boolean brokenScroll;
 	private UniqueTabNameBuilder uniqueNameBuilder;
+	private Integer line;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
@@ -85,6 +86,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		this.myScrollOffset = switchRequest == null ? 0 : switchRequest.myScrollOffset;
 		toBeRendered = switchRequest == null ? null : switchRequest.group;
+		line = switchRequest == null ? null : switchRequest.getLine();
 
 		groupManager = EditorGroupManager.getInstance(this.project);
 		fileEditorManager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
@@ -131,8 +133,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
 					TabInfo targetInfo = tabs.getTargetInfo();
 					if (targetInfo instanceof MyTabInfo) {
-						String path = ((MyTabInfo) targetInfo).path;
-						return Utils.getVirtualFileByAbsolutePath(path);
+						Link path = ((MyTabInfo) targetInfo).link;
+						return path.getVirtualFile();
 					}
 				}
 				if (FAVORITE_GROUP.is(dataId)) {
@@ -146,10 +148,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 				return null;
 			}
+
 		});
 		tabs.addTabMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseReleased(MouseEvent e) {                
+			public void mouseReleased(MouseEvent e) {
 				if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_RELEASED)) {
 					final TabInfo info = tabs.findInfo(e);
 					if (info != null) {
@@ -178,7 +181,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					refresh(false, ((MyGroupTabInfo) info).editorGroup);
 				} else {
 					MyTabInfo myTabInfo = (MyTabInfo) info;
-					VirtualFile fileByPath = Utils.getFileByPath(myTabInfo.path);
+					VirtualFile fileByPath = myTabInfo.link.getVirtualFile();
 					if (fileByPath == null) {
 						setEnabled(false);
 						return null;
@@ -193,7 +196,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_DOWN_MASK);
 					boolean button2 = BitUtil.isSet(modifiers, InputEvent.BUTTON2_DOWN_MASK);
 
-					openFile(fileByPath, ctrl, shift, Splitters.from(alt, shift));
+					openFile(myTabInfo.link, ctrl, shift, Splitters.from(alt, shift));
 				}
 				return ActionCallback.DONE;
 			}
@@ -286,9 +289,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void reloadTabs(boolean paintNow) {
 		tabs.removeAllTabs();
+		currentIndex = NOT_INITIALIZED;
 
-		List<String> paths = displayedGroup.getLinks(project);
-		Map<String, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
+		List<Link> paths = displayedGroup.getLinks(project);
+		Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
 
 		createLinks(paths, path_name);
 
@@ -307,36 +311,42 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private void createLinks(List<String> paths, Map<String, String> path_name) {
+	private void createLinks(List<Link> links, Map<Link, String> path_name) {
 
-		for (int i1 = 0; i1 < paths.size(); i1++) {
-			String path = paths.get(i1);
+		for (int i1 = 0; i1 < links.size(); i1++) {
+			Link link = links.get(i1);
 
-			MyTabInfo tab = new MyTabInfo(path, path_name.get(path));
+			MyTabInfo tab = new MyTabInfo(link, path_name.get(link));
 
 			tabs.addTab(tab);
 //			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
 //				tab.setText("[" + displayedGroup.getTitle() + "]");
 //			}
-			if (Utils.isTheSameFile(path, fileFromTextEditor)) {
+			if (link.isTheSameFile(fileFromTextEditor) && Objects.equals(link.getLine(), line)) {
 				tabs.setMySelectedInfo(tab);
 				customizeSelectedColor(tab);
 				currentIndex = i1;
 			}
 		}
-
-
+		if (currentIndex == NOT_INITIALIZED) {
+			selectTabFallback();
+		}
 	}
 
-	private void addCurrentFileTab(Map<String, String> path_name) {
+
+	private void addCurrentFileTab(Map<Link, String> path_name) {
 		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
 			String path = file.getCanonicalPath();
-			MyTabInfo info = new MyTabInfo(path, path_name.get(path));
+			Link link = new Link(path);
+			MyTabInfo info = new MyTabInfo(link, path_name.get(link));
 			customizeSelectedColor(info);
-			currentIndex = -1;
+			currentIndex = 0;
 			tabs.addTab(info, 0);
 			tabs.setMySelectedInfo(info);
-		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY && !(displayedGroup instanceof EditorGroups)) {
+		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY
+			&& !(displayedGroup instanceof EditorGroups)
+			&& !(displayedGroup instanceof BookmarkGroup)
+		) {
 			LOG.error("current file is not contained in group " + file + " " + displayedGroup);
 		}
 	}
@@ -350,16 +360,24 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 	class MyTabInfo extends TabInfo {
-		String path;
+		Link link;
 
-		public MyTabInfo(String path, String name) {
-			this.path = path;
+		public MyTabInfo(Link link, String name) {
+			this.link = link;
+			Integer line = link.getLine();
+			if (line != null) {
+				name += ":" + line;
+			}
 			setText(name);
-			setTooltipText(path);
-			setIcon(Utils.getFileIcon(path));
-			if (!new File(path).exists()) {
+			setTooltipText(link.getPath());
+			setIcon(link.getFileIcon());
+			if (!link.exists()) {
 				setEnabled(false);
 			}
+		}
+
+		public Link getLink() {
+			return link;
 		}
 	}
 
@@ -391,10 +409,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 
 		int iterations = 0;
-		List<String> paths = displayedGroup.getLinks(project);
-		VirtualFile fileByPath = null;
+		List<TabInfo> tabs = this.tabs.getTabs();
+		Link link = null;
 
-		while (fileByPath == null && iterations < paths.size()) {
+		while (link == null && iterations < tabs.size()) {
 			iterations++;
 
 			int index = currentIndex - iterations;
@@ -404,17 +422,23 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 
 			if (index < 0) {
-				index = paths.size() - Math.abs(index);
+				index = tabs.size() - Math.abs(index);
 			}
-			String s = paths.get(index);
-
-			fileByPath = Utils.getVirtualFileByAbsolutePath(s);
+			link = getLink(tabs, index);
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("previous: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
+				LOG.debug("previous: index=" + index + ", link=" + link);
 			}
 		}
-		openFile(fileByPath, newTab, newWindow, split);
+		openFile(link, newTab, newWindow, split);
 
+	}
+
+	private Link getLink(List<TabInfo> tabs, int index) {
+		TabInfo tabInfo = tabs.get(index);
+		if (tabInfo instanceof MyTabInfo) {
+			return ((MyTabInfo) tabInfo).link;
+		}
+		return null;
 	}
 
 	public void next(boolean newTab, boolean newWindow, Splitters split) {
@@ -430,41 +454,45 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - !isVisible()");
 			return;
 		}
-		VirtualFile fileByPath = null;
 		int iterations = 0;
-		List<String> paths = displayedGroup.getLinks(project);
+		List<TabInfo> tabs = this.tabs.getTabs();
+		Link link = null;
 
-		while (fileByPath == null && iterations < paths.size()) {
+		while (link == null && iterations < tabs.size()) {
 			iterations++;
 
-			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex + iterations >= paths.size()) {
+			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex + iterations >= tabs.size()) {
 				return;
 			}
 
-			int index = (currentIndex + iterations) % paths.size();
-			String s = paths.get(index);
-			fileByPath = Utils.getVirtualFileByAbsolutePath(s);
+			int index = (currentIndex + iterations) % tabs.size();
+			link = getLink(tabs, index);
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("next: index=" + index + ", path=" + s + ", fileByPath=" + fileByPath);
+				LOG.debug("next: index=" + index + ", link=" + link);
 			}
 
 		}
 
-		openFile(fileByPath, newTab, newWindow, split);
+		openFile(link, newTab, newWindow, split);
 	}
 
-	private void openFile(VirtualFile fileToOpen, boolean newTab, boolean newWindow, Splitters split) {
+	private void openFile(@Nullable Link link, boolean newTab, boolean newWindow, Splitters split) {
 		if (disposed) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - already disposed");
 			return;
 		}
 
-		if (fileToOpen == null) {
-			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - file is null");
+		if (link == null) {
+			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - link is null");
 			return;
 		}
 
-		if (fileToOpen.equals(file) && !newWindow && !split.isSplit()) {
+		if (link.getVirtualFile() == null) {
+			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - file is null for " + link);
+			return;
+		}
+
+		if (file.equals(link.getVirtualFile()) && !newWindow && !split.isSplit() && link.getLine() == null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - same file");
 			return;
 		}
@@ -479,8 +507,46 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			return;
 		}
 
-		groupManager.open(this, fileToOpen, newWindow, newTab, split);
+		EditorGroupManager.Result result = groupManager.open(this, link.getVirtualFile(), link.getLine(), newWindow, newTab, split);
 
+
+		if (result != null && result.isScrolledOnly()) {
+			selectTab(link);
+		}
+	}
+
+	private void selectTabFallback() {
+		List<TabInfo> tabs1 = tabs.getTabs();
+		for (int i = 0; i < tabs1.size(); i++) {
+			TabInfo t = tabs1.get(i);
+			if (t instanceof MyTabInfo) {
+				MyTabInfo tab = (MyTabInfo) t;
+				if (tab.link.isTheSameFile(fileFromTextEditor)) {
+					tabs.setMySelectedInfo(tab);
+					customizeSelectedColor(tab);
+					currentIndex = i;
+				}
+			}
+		}
+	}
+
+	private void selectTab(@NotNull Link link) {
+		List<TabInfo> tabs = this.tabs.getTabs();
+		for (int i = 0; i < tabs.size(); i++) {
+			TabInfo tab = tabs.get(i);
+			if (tab instanceof MyTabInfo) {
+				Link link1 = ((MyTabInfo) tab).getLink();
+				if (link1.equals(link)) {
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("selectTab selecting " + link);
+					}
+					this.tabs.setMySelectedInfo(tab);
+					this.tabs.repaint();
+					currentIndex = i;
+					break;
+				}
+			}
+		}
 	}
 
 	public JBEditorTabs getTabs() {
@@ -490,12 +556,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@Override
 	public double getWeight() {
 		return Integer.MIN_VALUE;
-	}
-
-
-	private void focusGained() {
-		refresh(false, null);
-		groupManager.enableSwitching();
 	}
 
 
@@ -536,6 +596,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		refresh2();
 	}
 
+	private void focusGained() {
+		refresh(false, null);
+		groupManager.enableSwitching();
+	}
+
 	public void refreshOnSelectionChanged(boolean refresh, EditorGroup switchingGroup, int scrollOffset) {
 		if (LOG.isDebugEnabled()) LOG.debug("refreshOnSelectionChanged");
 		myScrollOffset = scrollOffset;
@@ -543,6 +608,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			tabs.scroll(myScrollOffset);
 		}
 		refresh(refresh, switchingGroup);
+		groupManager.enableSwitching();
 	}
 
 	private void refresh2() {
@@ -565,7 +631,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 							return;
 						}
 					}
-					     
+
 					refresh3();
 				}
 
@@ -595,7 +661,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup requestedGroup = request.requestedGroup;
 		boolean refresh = request.refresh;
 
-		           
+
 		try {
 			EditorGroup group = ApplicationManager.getApplication().runReadAction(new ThrowableComputable<EditorGroup, Throwable>() {
 				@Override
@@ -609,10 +675,21 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
-			if (!brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup))) {
+			boolean skipRefresh = !brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
+			if (skipRefresh) {
 				if (!(fileEditor instanceof TextEditorImpl)) {
 					groupManager.enableSwitching(); //need for UI forms - when switching to open editors , focus listener does not do that
+				} else {
+					//switched by bookmark shortcut -> need to select the right tab
+					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
+					String canonicalPath = file.getCanonicalPath();
+					if (canonicalPath != null) {
+						int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
+						selectTab(new Link(canonicalPath, null, line));
+					}
 				}
+
+
 				if (LOG.isDebugEnabled()) LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered);
 				return;
 			}

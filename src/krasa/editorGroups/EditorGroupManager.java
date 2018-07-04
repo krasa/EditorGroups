@@ -4,12 +4,16 @@ import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.editor.Editor;
+import com.intellij.openapi.editor.LogicalPosition;
+import com.intellij.openapi.editor.ScrollType;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorProvider;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
 import com.intellij.openapi.fileEditor.impl.EditorWindowHolder;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
@@ -28,6 +32,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupManager {
 	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(EditorGroupManager.class);
@@ -89,7 +94,7 @@ public class EditorGroupManager {
 
 
 			boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
-			if (force && !(requestedGroup instanceof FavoritesGroup)) {
+			if (force && !(requestedGroup instanceof FavoritesGroup) && !(requestedGroup instanceof BookmarkGroup)) {
 				if (result.isInvalid()) {
 					result = cache.getOwningOrSingleGroup(currentFilePath);
 				}
@@ -137,6 +142,8 @@ public class EditorGroupManager {
 					result = autogroupProvider.getFolderGroup(currentFile);
 				} else if (result instanceof FavoritesGroup) {
 					result = externalGroupProvider.getFavoritesGroup(result.getTitle());
+				} else if (result instanceof BookmarkGroup) {
+					result = externalGroupProvider.getBookmarkGroup();
 				}
 
 
@@ -250,7 +257,7 @@ public class EditorGroupManager {
 		return null;
 	}
 
-	public void open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, boolean newWindow, boolean newTab, Splitters split) {
+	public Result open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, Integer line, boolean newWindow, boolean newTab, Splitters split) {
 		EditorGroup displayedGroup = groupPanel.getDisplayedGroup();
 		JBEditorTabs tabs = groupPanel.getTabs();
 
@@ -260,17 +267,17 @@ public class EditorGroupManager {
 			currentWindow = parentOfType.getEditorWindow();
 		}
 
-		open2(currentWindow, fileToOpen, displayedGroup, newWindow, newTab, split, groupPanel.getFile(), new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth()));
+		return open2(currentWindow, groupPanel.getFile(), fileToOpen, line, displayedGroup, newWindow, newTab, split, new SwitchRequest(displayedGroup, fileToOpen, tabs.getMyScrollOffset(), tabs.getWidth(), line));
 	}
 
-	public void open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, Splitters split, EditorGroup group, VirtualFile current) {
-		open2(null, virtualFileByAbsolutePath, group, window, tab, split, current, new SwitchRequest(group, virtualFileByAbsolutePath));
+	public Result open(VirtualFile virtualFileByAbsolutePath, boolean window, boolean tab, Splitters split, EditorGroup group, VirtualFile current) {
+		return open2(null, current, virtualFileByAbsolutePath, null, group, window, tab, split, new SwitchRequest(group, virtualFileByAbsolutePath));
 	}
 
-	private void open2(EditorWindow currentWindowParam, VirtualFile fileToOpen, EditorGroup group, boolean newWindow, boolean newTab, Splitters split, @Nullable VirtualFile currentFile, SwitchRequest switchRequest) {
+	private Result open2(EditorWindow currentWindowParam, @Nullable VirtualFile currentFile, VirtualFile fileToOpen, Integer line, EditorGroup group, boolean newWindow, boolean newTab, Splitters split, SwitchRequest switchRequest) {
 		if (LOG.isDebugEnabled())
 			LOG.debug("open2 fileToOpen = [" + fileToOpen + "], currentFile = [" + currentFile + "], group = [" + group + "], newWindow = [" + newWindow + "], newTab = [" + newTab + "], split = [" + split + "], switchingRequest = [" + switchRequest + "]");
-
+		AtomicReference<Result> resultAtomicReference = new AtomicReference<Result>();
 		switching(switchRequest);
 
 		if (!warningShown && UISettings.getInstance().getReuseNotModifiedTabs()) {
@@ -304,6 +311,11 @@ public class EditorGroupManager {
 			}
 
 			if (!split.isSplit() && !newWindow && fileToOpen.equals(selectedFile)) {
+				FileEditor editors = currentWindow.getManager().getSelectedEditor(fileToOpen);
+				boolean scroll = scroll(line, editors);
+				if (scroll) {
+					resultAtomicReference.set(new Result(true));
+				}
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("fileToOpen.equals(selectedFile) [fileToOpen=" + fileToOpen + ", selectedFile=" + selectedFile + ", currentFile=" + currentFile + "]");
 				}
@@ -325,6 +337,7 @@ public class EditorGroupManager {
 			} else if (newWindow) {
 				if (LOG.isDebugEnabled()) LOG.debug("openFileInNewWindow fileToOpen = " + fileToOpen);
 				Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileInNewWindow(fileToOpen);
+				scroll(line, pair.first);
 				if (pair.first.length == 0) {
 					LOG.debug("no editors opened");
 					resetSwitching();
@@ -351,7 +364,7 @@ public class EditorGroupManager {
 					for (FileEditor fileEditor: fileEditors) {
 						if (LOG.isDebugEnabled()) LOG.debug("opened fileEditor = " + fileEditor);
 					}
-
+					scroll(line, fileEditors);
 
 					if (reuseNotModifiedTabs  //it is bugged, do no close files - bad workaround -> when switching to an already opened file, the previous tab would not close   
 //						&& !fileWasAlreadyOpen  //this mostly works, but not always - sometimes current file gets closed and editor loses focus
@@ -366,10 +379,31 @@ public class EditorGroupManager {
 				} finally {
 					UISettings.getInstance().setReuseNotModifiedTabs(reuseNotModifiedTabs);
 				}
-
-
 			}
+
+
 		}, null, null);
+
+
+		return resultAtomicReference.get();
+	}
+
+	private boolean scroll(Integer line, FileEditor... fileEditors) {
+		if (line != null) {
+			for (FileEditor fileEditor: fileEditors) {
+				if (fileEditor instanceof TextEditorImpl) {
+					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
+					LogicalPosition position = new LogicalPosition(line, 0);
+					editor.getCaretModel().removeSecondaryCarets();
+					editor.getCaretModel().moveToLogicalPosition(position);
+					editor.getScrollingModel().scrollToCaret(ScrollType.CENTER);
+					editor.getSelectionModel().removeSelection();
+					IdeFocusManager.getGlobalInstance().requestFocus(editor.getContentComponent(), true);
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	public void resetSwitching() {
@@ -383,4 +417,15 @@ public class EditorGroupManager {
 		switchRequest = null;
 	}
 
+	class Result {
+		boolean scrolledOnly;
+
+		public Result(boolean scrolledOnly) {
+			this.scrolledOnly = scrolledOnly;
+		}
+
+		public boolean isScrolledOnly() {
+			return scrolledOnly;
+		}
+	}
 }

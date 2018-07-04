@@ -16,10 +16,10 @@ public abstract class AutoGroup extends EditorGroup {
 	public static final SameNameGroup SAME_NAME_INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList());
 
 
-	protected final List<String> links;
+	protected final List<Link> links;
 	protected volatile boolean valid = true;
 
-	public AutoGroup(List<String> links) {
+	public AutoGroup(List<Link> links) {
 		this.links = links;
 	}
 
@@ -49,7 +49,7 @@ public abstract class AutoGroup extends EditorGroup {
 	}
 
 	@Override
-	public List<String> getLinks(Project project) {
+	public List<Link> getLinks(Project project) {
 		return links;
 	}
 

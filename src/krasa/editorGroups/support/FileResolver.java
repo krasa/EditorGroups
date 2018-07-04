@@ -19,6 +19,7 @@ import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.EditorGroupIndexValue;
+import krasa.editorGroups.model.Link;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -32,7 +33,10 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
@@ -46,7 +50,7 @@ public class FileResolver {
 
 
 	@NotNull
-	public static List<String> resolveLinks(@NotNull EditorGroupIndexValue group, @NotNull Project project) {
+	public static List<Link> resolveLinks(@NotNull EditorGroupIndexValue group, @NotNull Project project) {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug(">resolveLinks [" + group + "], project = [" + project + "]");
 		}
@@ -55,7 +59,7 @@ public class FileResolver {
 	}
 
 	@NotNull
-	public static List<String> resolveLinks(@NotNull Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
+	public static List<Link> resolveLinks(@NotNull Project project, @Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
 		return new FileResolver(project).resolve(ownerFilePath, root, relatedPaths, group);
 	}
 
@@ -86,7 +90,7 @@ public class FileResolver {
 	}
 
 	@NotNull
-	private List<String> resolve(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
+	private List<Link> resolve(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) {
 		try {
 			return resolve2(ownerFilePath, root, relatedPaths, group);
 		} catch (IOException e) {
@@ -95,7 +99,7 @@ public class FileResolver {
 	}
 
 	@NotNull
-	private List<String> resolve2(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) throws IOException {
+	private List<Link> resolve2(@Nullable String ownerFilePath, String root, List<String> relatedPaths, EditorGroupIndexValue group) throws IOException {
 		long start = System.currentTimeMillis();
 
 
@@ -142,7 +146,7 @@ public class FileResolver {
 		if (LOG.isDebugEnabled())
 			LOG.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
 
-		return new ArrayList<>(links);
+		return Link.from(links);
 	}
 
 	private String resolveRootFolder(@Nullable String ownerFilePath, String root, EditorGroupIndexValue group, VirtualFile ownerFile) throws IOException {

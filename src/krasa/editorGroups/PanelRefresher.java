@@ -1,5 +1,7 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.bookmarks.Bookmark;
+import com.intellij.ide.bookmarks.BookmarksListener;
 import com.intellij.ide.favoritesTreeView.FavoritesListener;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.openapi.application.ApplicationManager;
@@ -15,15 +17,13 @@ import com.intellij.util.Processor;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.EditorGroupIndexValue;
-import krasa.editorGroups.model.FavoritesGroup;
-import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
 
 public class PanelRefresher {
 	private static final Logger LOG = Logger.getInstance(PanelRefresher.class);
@@ -49,6 +49,40 @@ public class PanelRefresher {
 			}
 		});
 		addFavouritesListener();
+		addBookmarksListener();
+	}
+
+	private void addBookmarksListener() {
+		project.getMessageBus().connect(project).subscribe(BookmarksListener.TOPIC, new BookmarksListener() {
+			@Override
+			public void bookmarkAdded(@NotNull Bookmark b) {
+				refresh();
+			}
+
+			@Override
+			public void bookmarkRemoved(@NotNull Bookmark b) {
+				refresh();
+			}
+
+			@Override
+			public void bookmarkChanged(@NotNull Bookmark b) {
+				refresh();
+			}
+
+			@Override
+			public void bookmarksOrderChanged() {
+				refresh();
+			}
+
+			private void refresh() {
+				iteratePanels((panel, displayedGroup) -> {
+					if (displayedGroup instanceof BookmarkGroup) {
+						LOG.debug("BookmarksListener refreshing " + panel.getFile().getName());
+						panel.refresh(true, displayedGroup);
+					}
+				});
+			}
+		});
 	}
 
 	private void addFavouritesListener() {
@@ -59,17 +93,12 @@ public class PanelRefresher {
 					if (LOG.isDebugEnabled()) {
 						LOG.debug("FavoritesListener rootsChanged");
 					}
-					final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
-					for (FileEditor selectedEditor: manager.getAllEditors()) { 
-						EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-						if (panel != null) {
-							EditorGroup displayedGroup = panel.getDisplayedGroup();
-							if (displayedGroup instanceof FavoritesGroup) {
-								LOG.debug("FavoritesListener refreshing " + selectedEditor.getName());
-								panel.refresh(true, displayedGroup);
-							}
+					iteratePanels((panel, displayedGroup) -> {
+						if (displayedGroup instanceof FavoritesGroup) {
+							LOG.debug("FavoritesListener refreshing " + panel.getFile().getName());
+							panel.refresh(true, displayedGroup);
 						}
-					}
+					});
 				}
 
 				@Override
@@ -83,6 +112,17 @@ public class PanelRefresher {
 				}
 			};
 			FavoritesManager.getInstance(project).addFavoritesListener(favoritesListener, project);
+		}
+	}
+
+	private void iteratePanels(BiConsumer<EditorGroupPanel, EditorGroup> biConsumer) {
+		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+		for (FileEditor selectedEditor: manager.getAllEditors()) {
+			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				EditorGroup displayedGroup = panel.getDisplayedGroup();
+				biConsumer.accept(panel, displayedGroup);
+			}
 		}
 	}
 

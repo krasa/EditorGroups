@@ -25,7 +25,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	private List<String> relatedPaths = new ArrayList<>();
 
 	/*runtime data*/
-	private transient volatile List<String> links;
+	private transient volatile List<Link> links;
 	private transient volatile boolean valid = true;
 	private transient volatile Color bgColorInstance = null;
 	private transient volatile Color fgColorInstance = null;
@@ -103,7 +103,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 
 	@Override
 	@NotNull
-	public List<String> getLinks(Project project) {
+	public List<Link> getLinks(Project project) {
 		if (links == null) {
 			IndexCache.getInstance(project).initGroup(this);
 		}
@@ -178,7 +178,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	}
 
 
-	public EditorGroupIndexValue setLinks(List<String> links) {
+	public EditorGroupIndexValue setLinks(List<Link> links) {
 		this.links = links;
 		return this;
 	}

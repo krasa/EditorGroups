@@ -8,6 +8,7 @@ image::example.gif[]
 ** does not support refactoring yet
 - by file name without extension anywhere in the project
 - by folder
+- bookmarks
             
 === Shortcuts                    
 - `Ctrl + Alt + Q` - Refresh                                                           

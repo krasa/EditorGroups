@@ -11,7 +11,7 @@ public class SameNameGroup extends AutoGroup {
 
 	private final String fileNameWithoutExtension;
 
-	public SameNameGroup(String fileNameWithoutExtension, List<String> links) {
+	public SameNameGroup(String fileNameWithoutExtension, List<Link> links) {
 		super(links);
 		this.fileNameWithoutExtension = fileNameWithoutExtension;
 	}

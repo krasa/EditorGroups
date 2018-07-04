@@ -1,5 +1,7 @@
 package krasa.editorGroups;
 
+import com.intellij.ide.bookmarks.Bookmark;
+import com.intellij.ide.bookmarks.BookmarkManager;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.ide.projectView.impl.AbstractUrl;
 import com.intellij.openapi.components.ServiceManager;
@@ -8,6 +10,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.Pair;
 import com.intellij.util.TreeItem;
+import krasa.editorGroups.model.BookmarkGroup;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.FavoritesGroup;
 import org.jetbrains.annotations.NotNull;
@@ -37,7 +40,7 @@ public class ExternalGroupProvider {
 		List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
 
 		ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
-		for (String name : availableFavoritesListNames) {
+		for (String name: availableFavoritesListNames) {
 			List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
 			if (favoritesListRootUrls.isEmpty()) {
 				continue;
@@ -65,7 +68,7 @@ public class ExternalGroupProvider {
 		List<EditorGroup> favoritesGroups = new ArrayList<>();
 		long start = System.currentTimeMillis();
 
-		for (FavoritesGroup group : getFavoritesGroups()) {
+		for (FavoritesGroup group: getFavoritesGroups()) {
 			if (group.containsLink(project, currentFilePath)) {
 				favoritesGroups.add(group);
 			}
@@ -79,5 +82,10 @@ public class ExternalGroupProvider {
 
 		return favoritesGroups;
 
+	}
+
+	public BookmarkGroup getBookmarkGroup() {
+		List<Bookmark> validBookmarks = BookmarkManager.getInstance(project).getValidBookmarks();
+		return new BookmarkGroup(validBookmarks);
 	}
 }
