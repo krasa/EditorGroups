@@ -280,7 +280,7 @@ public class FileResolver {
 	}
 
 	protected void add(File file, boolean definedManually) throws IOException {
-		if (file.isAbsolute() && !(!definedManually && excluded(file))) {
+		if (file.isFile() && !(!definedManually && excluded(file))) {
 			Path path = Paths.get(file.toURI());
 			if (Files.isSymbolicLink(path)) {//TODO profile and optimize
 				links.add(path.toRealPath().toString());
