@@ -33,6 +33,9 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -277,8 +280,13 @@ public class FileResolver {
 	}
 
 	protected void add(File file, boolean definedManually) throws IOException {
-		if (file.isFile() && !(!definedManually && excluded(file))) {
-			links.add(file.getCanonicalPath());
+		if (file.isAbsolute() && !(!definedManually && excluded(file))) {
+			Path path = Paths.get(file.toURI());
+			if (Files.isSymbolicLink(path)) {//TODO profile and optimize
+				links.add(path.toRealPath().toString());
+			} else {
+				links.add(file.getCanonicalPath());
+			}
 		}
 	}
 
