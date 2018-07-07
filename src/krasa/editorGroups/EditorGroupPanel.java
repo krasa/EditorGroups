@@ -322,7 +322,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
 //				tab.setText("[" + displayedGroup.getTitle() + "]");
 //			}
-			if (link.isTheSameFile(fileFromTextEditor) && Objects.equals(link.getLine(), line)) {
+			if (Objects.equals(link.getLine(), line) && link.isTheSameFile(fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
 				customizeSelectedColor(tab);
 				currentIndex = i1;
