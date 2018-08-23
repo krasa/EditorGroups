@@ -45,7 +45,11 @@ public class AddToCurrentFavoritesAction extends EditorGroupsAction {
 	private FavoritesGroup getFavoritesGroup(AnActionEvent e) {
 		EditorGroupPanel editorGroupPanel = null;
 
-		FileEditorManagerEx instance = (FileEditorManagerEx) FileEditorManager.getInstance(getEventProject(e));
+		Project eventProject = getEventProject(e);
+		if (eventProject == null) {
+			return null;
+		}
+		FileEditorManagerEx instance = (FileEditorManagerEx) FileEditorManager.getInstance(eventProject);
 		EditorWindow currentWindow = instance.getCurrentWindow();
 		if (currentWindow != null) {
 			EditorWithProviderComposite editor = currentWindow.getSelectedEditor(true);
