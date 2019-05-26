@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.20</version>
+    <version>0.21</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -19,7 +19,7 @@
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="181.4892"/>
+    <idea-version since-build="182.000"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
