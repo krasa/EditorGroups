@@ -1,5 +1,29 @@
 package krasa.editorGroups;
 
+import java.awt.*;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.swing.*;
+
+import krasa.editorGroups.actions.PopupMenu;
+import krasa.editorGroups.actions.RemoveFromCurrentFavoritesAction;
+import krasa.editorGroups.language.EditorGroupsLanguage;
+import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.Utils;
+import krasa.editorGroups.tabs.JBTabs;
+import krasa.editorGroups.tabs.TabInfo;
+import krasa.editorGroups.tabs.impl.JBEditorTabs;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import com.intellij.ide.DataManager;
 import com.intellij.ide.IdeEventQueue;
 import com.intellij.ide.ui.customization.CustomActionsSchema;
@@ -24,27 +48,6 @@ import com.intellij.ui.components.JBPanel;
 import com.intellij.util.BitUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
-import krasa.editorGroups.actions.PopupMenu;
-import krasa.editorGroups.actions.RemoveFromCurrentFavoritesAction;
-import krasa.editorGroups.language.EditorGroupsLanguage;
-import krasa.editorGroups.model.*;
-import krasa.editorGroups.support.Utils;
-import krasa.editorGroups.tabs.JBTabs;
-import krasa.editorGroups.tabs.TabInfo;
-import krasa.editorGroups.tabs.impl.JBEditorTabs;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public static final DataKey<FavoritesGroup> FAVORITE_GROUP = DataKey.create("krasa.FavoritesGroup");
@@ -184,7 +187,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					VirtualFile fileByPath = myTabInfo.link.getVirtualFile();
 					if (fileByPath == null) {
 						setEnabled(false);
-						return null;
+						return ActionCallback.DONE;
 					}
 
 					if (modifiers == null) {
@@ -347,6 +350,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			&& !(displayedGroup instanceof EditorGroups)
 			&& !(displayedGroup instanceof BookmarkGroup)
 		) {
+			// TODO
 			LOG.error("current file is not contained in group " + file + " " + displayedGroup);
 		}
 	}
