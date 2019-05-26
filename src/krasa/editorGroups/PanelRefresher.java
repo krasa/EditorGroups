@@ -1,5 +1,15 @@
 package krasa.editorGroups;
 
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.BiConsumer;
+
+import krasa.editorGroups.index.EditorGroupIndex;
+import krasa.editorGroups.model.*;
+
+import org.jetbrains.annotations.NotNull;
+
 import com.intellij.ide.bookmarks.Bookmark;
 import com.intellij.ide.bookmarks.BookmarksListener;
 import com.intellij.ide.favoritesTreeView.FavoritesListener;
@@ -11,19 +21,12 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.DumbService;
+import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.Processor;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.indexing.FileBasedIndex;
-import krasa.editorGroups.index.EditorGroupIndex;
-import krasa.editorGroups.model.*;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 
 public class PanelRefresher {
 	private static final Logger LOG = Logger.getInstance(PanelRefresher.class);
@@ -216,16 +219,23 @@ public class PanelRefresher {
 					long start = System.currentTimeMillis();
 					FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
 					IndexCache cache = IndexCache.getInstance(project);
+				try {
 					fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, new Processor<String>() {
 						@Override
 						public boolean process(String s) {
 							List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-							for (EditorGroupIndexValue value: values) {
+							for (EditorGroupIndexValue value : values) {
 								cache.initGroup(value);
 							}
 							return true;
 						}
 					}, project);
+				} catch (IndexNotReadyException e) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("initCache failed on IndexNotReadyException, will be executed again");
+					initCache();
+					return;
+				}
 					cacheReady();
 					if (LOG.isDebugEnabled()) LOG.debug("initCache " + (System.currentTimeMillis() - start));
 				}
