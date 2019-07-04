@@ -51,11 +51,11 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 			return Collections.emptyMap();
 		}
 
-		String ownerPath = file.getCanonicalPath();
+		String ownerPath = file.getPath();
 		try {
 			File folder = null;
 			try {
-				folder = new File(inputData.getFile().getParent().getCanonicalPath());
+				folder = new File(inputData.getFile().getParent().getPath());
 			} catch (Exception e) {
 				return Collections.emptyMap();
 			}

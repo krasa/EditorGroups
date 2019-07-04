@@ -28,6 +28,7 @@ import krasa.editorGroups.actions.PopupMenu;
 import krasa.editorGroups.actions.RemoveFromCurrentFavoritesAction;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
 import krasa.editorGroups.tabs.JBTabs;
 import krasa.editorGroups.tabs.TabInfo;
@@ -40,6 +41,7 @@ import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.File;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -336,7 +338,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void addCurrentFileTab(Map<Link, String> path_name) {
 		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
-			String path = file.getCanonicalPath();
+			String path = file.getPath();
 			Link link = new Link(path);
 			MyTabInfo info = new MyTabInfo(link, path_name.get(link));
 			customizeSelectedColor(info);
@@ -348,14 +350,17 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			&& !(displayedGroup instanceof BookmarkGroup)
 		) {
 
-			// TODO       
-			LOG.warn("current file is not contained in group " + file + " " + displayedGroup);
+			if (!FileResolver.excluded(new File(file.getPath()), ApplicationConfiguration.state().isExcludeEditorGroupsFiles())) {
+				LOG.error("current file is not contained in group " + file + " " + displayedGroup);
+			} else {
+				LOG.warn("current file is excluded from the group " + file + " " + displayedGroup);
+			}
 		}
 	}
 
 
 	private void createGroupLinks(Collection<EditorGroup> groups) {
-		for (EditorGroup editorGroup: groups) {
+		for (EditorGroup editorGroup : groups) {
 			tabs.addTab(new MyGroupTabInfo(editorGroup));
 		}
 	}
@@ -684,7 +689,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				} else {
 					//switched by bookmark shortcut -> need to select the right tab
 					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
-					String canonicalPath = file.getCanonicalPath();
+					String canonicalPath = file.getPath();
 					if (canonicalPath != null) {
 						int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
 						selectTab(new Link(canonicalPath, null, line));
@@ -854,7 +859,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private boolean isSelected() {
 		boolean selected = false;
-		for (FileEditor selectedEditor: fileEditorManager.getSelectedEditors()) {
+		for (FileEditor selectedEditor : fileEditorManager.getSelectedEditors()) {
 			if (selectedEditor == fileEditor) {
 				selected = true;
 				break;

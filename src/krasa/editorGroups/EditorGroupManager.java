@@ -90,7 +90,7 @@ public class EditorGroupManager {
 			}
 
 
-			String currentFilePath = currentFile.getCanonicalPath();
+			String currentFilePath = currentFile.getPath();
 
 
 			boolean force = refresh && ApplicationConfiguration.state().isForceSwitch();
@@ -221,7 +221,7 @@ public class EditorGroupManager {
 	}
 
 	public List<EditorGroup> getGroups(VirtualFile file) {
-		List<EditorGroup> groups = cache.findGroups(file.getCanonicalPath());
+		List<EditorGroup> groups = cache.findGroups(file.getPath());
 		groups.sort(COMPARATOR);
 		return groups;
 	}
@@ -240,7 +240,7 @@ public class EditorGroupManager {
 	}
 
 	public Color getColor(VirtualFile file) {
-		String canonicalPath = file.getCanonicalPath();
+		String canonicalPath = file.getPath();
 		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
 		if (group != null) {
 			return group.getBgColor();
@@ -249,7 +249,7 @@ public class EditorGroupManager {
 	}
 
 	public Color getFgColor(VirtualFile file) {
-		String canonicalPath = file.getCanonicalPath();
+		String canonicalPath = file.getPath();
 		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
 		if (group != null) {
 			return group.getFgColor();

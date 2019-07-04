@@ -33,7 +33,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
@@ -189,9 +188,9 @@ public class FileResolver {
 		Collection<VirtualFile> virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, fileName, !SystemInfo.isWindows, GlobalSearchScope.allScope(project));
 		for (VirtualFile file : virtualFilesByName) {
 
-			String canonicalPath = file.getCanonicalPath();
+			String canonicalPath = file.getPath();
 			if (canonicalPath != null) {
-				if (substringBeforeLast(file.getCanonicalPath(), ".").endsWith(sanitizedPath)) {
+				if (substringBeforeLast(file.getPath(), ".").endsWith(sanitizedPath)) {
 					add(canonicalPath);
 				}
 			}
@@ -209,7 +208,7 @@ public class FileResolver {
 		Collection<VirtualFile> virtualFilesByName = FilenameIndex.getVirtualFilesByName(project, fileName, !SystemInfo.isWindows, GlobalSearchScope.allScope(project));
 		for (VirtualFile file : virtualFilesByName) {
 
-			String canonicalPath = file.getCanonicalPath();
+			String canonicalPath = file.getPath();
 			if (canonicalPath != null) {
 				if (canonicalPath.endsWith(sanitizedPath)) {
 					add(canonicalPath);
@@ -235,8 +234,8 @@ public class FileResolver {
 		}
 	}
 
-	private boolean excluded(File file) throws IOException {
-		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(file.getCanonicalPath())) {
+	public static boolean excluded(File file, boolean excludeEditorGroupsFiles) {
+		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(file.getAbsolutePath())) {
 			return true;
 		}
 		if (FileUtil.isJarOrZip(file)) {
@@ -280,20 +279,16 @@ public class FileResolver {
 	}
 
 	protected void add(File file, boolean definedManually) throws IOException {
-		if (file.isFile() && !(!definedManually && excluded(file))) {
+		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
 			Path path = Paths.get(file.toURI());
-			if (Files.isSymbolicLink(path)) {//TODO profile and optimize
-				links.add(path.toRealPath().toString());
-			} else {
-				links.add(file.getCanonicalPath());
-			}
+			links.add(file.getCanonicalPath());
 		}
 	}
 
 	protected String useMacros(VirtualFile virtualFile, String folder) {
 		if (folder.startsWith("PROJECT")) {
 			VirtualFile baseDir = project.getBaseDir();
-			String canonicalPath = baseDir.getCanonicalPath();
+			String canonicalPath = baseDir.getPath();
 			folder = folder.replaceAll("^PROJECT", canonicalPath);
 		} else if (virtualFile != null && folder.startsWith("MODULE")) {
 			Module moduleForFile = ProjectRootManager.getInstance(project).getFileIndex().getModuleForFile(virtualFile);

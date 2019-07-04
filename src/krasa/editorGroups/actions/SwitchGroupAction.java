@@ -26,8 +26,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static krasa.editorGroups.actions.PopupMenu.popupInvoked;
@@ -86,7 +86,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					displayedGroup = panel.getDisplayedGroup();
 
 					defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refreshHandler(panel)));
-					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getCanonicalPath(), Collections.emptyList()), project, refreshHandler(panel)));
+					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getPath(), Collections.emptyList()), project, refreshHandler(panel)));
 
 
 					editorGroups = fillCurrentFileGroups(project, tempGroup, panel, file);
@@ -126,7 +126,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		DumbAwareAction action = createAction(displayedGroup, bookmarkGroup, project, new Handler() {
 			@Override
 			void run(EditorGroup groupLink) {
-				if (panel != null && file != null && bookmarkGroup.containsLink(project, file.getCanonicalPath())) {
+				if (panel != null && file != null && bookmarkGroup.containsLink(project, file.getPath())) {
 					refreshHandler(panel).run(bookmarkGroup);
 				} else {
 					otherGroupHandler(project).run(bookmarkGroup);

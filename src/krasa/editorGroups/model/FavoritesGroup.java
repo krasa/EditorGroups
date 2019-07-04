@@ -117,8 +117,8 @@ public class FavoritesGroup extends EditorGroup {
 	public List<Link> getLinks(Project project) {
 		ArrayList<Link> paths = new ArrayList<>(files.size());
 		for (VirtualFile file : files) {
-			if (file.getCanonicalPath() != null) {
-				paths.add(new Link(file.getCanonicalPath()));
+			if (file.getPath() != null) {
+				paths.add(new Link(file.getPath()));
 			}
 		}
 		return paths;

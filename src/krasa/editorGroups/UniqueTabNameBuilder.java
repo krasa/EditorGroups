@@ -33,7 +33,7 @@ public class UniqueTabNameBuilder {
 		}
 
 		if (currentFile != null) {
-			String currentFilePath = currentFile.getCanonicalPath();
+			String currentFilePath = currentFile.getPath();
 			if (currentFilePath != null) {
 				boolean containsCurrentFile = path_name.keySet().stream().anyMatch(link1 -> link1.getPath().equals(currentFilePath));
 				if (!containsCurrentFile) {

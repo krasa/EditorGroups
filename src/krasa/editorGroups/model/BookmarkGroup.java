@@ -22,7 +22,7 @@ public class BookmarkGroup extends EditorGroup {
 			VirtualFile file = validBookmark.getFile();
 			Icon icon = validBookmark.getIcon();
 			int line = validBookmark.getLine();
-			String canonicalPath = file.getCanonicalPath();
+			String canonicalPath = file.getPath();
 			if (canonicalPath != null) {
 				links.add(new Link(canonicalPath, icon, line));
 			}

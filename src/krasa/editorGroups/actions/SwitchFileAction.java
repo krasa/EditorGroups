@@ -97,7 +97,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 			if (data != null) {
 				panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
 				if (panel != null) {
-					String currentFile = panel.getFile().getCanonicalPath();
+					String currentFile = panel.getFile().getPath();
 					EditorGroup group = panel.getDisplayedGroup();
 
 					List<Link> links = group.getLinks(project);

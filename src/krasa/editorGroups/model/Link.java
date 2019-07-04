@@ -40,7 +40,7 @@ public class Link {
 	}
 
 	public boolean isTheSameFile(@NotNull VirtualFile file) {
-		return getPath().equals(file.getCanonicalPath());
+		return getPath().equals(file.getPath());
 	}
 
 	@NotNull

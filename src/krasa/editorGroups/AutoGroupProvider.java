@@ -43,7 +43,7 @@ public class AutoGroupProvider {
 		}
 
 		VirtualFile parent = file.getParent();
-		String folder = parent.getCanonicalPath();
+		String folder = parent.getPath();
 		List<Link> links = FileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"), null);
 		return new FolderGroup(folder, links);
 	}
@@ -83,11 +83,11 @@ public class AutoGroupProvider {
 					LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
 					break;
 				}
-				paths.add(file.getCanonicalPath());
+				paths.add(file.getPath());
 			}
 
-			if (!paths.contains(currentFile.getCanonicalPath())) {
-				paths.add(0, currentFile.getCanonicalPath());
+			if (!paths.contains(currentFile.getPath())) {
+				paths.add(0, currentFile.getPath());
 			}
 			Collections.sort(paths);
 		} catch (IndexNotReadyException | ProcessCanceledException e) {
@@ -95,7 +95,7 @@ public class AutoGroupProvider {
 				LOG.debug(e);
 			}
 			paths = new ArrayList<>();
-			paths.add(currentFile.getCanonicalPath());
+			paths.add(currentFile.getPath());
 			paths.add("Indexing...");
 		}
 
