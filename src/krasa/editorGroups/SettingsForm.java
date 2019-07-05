@@ -1,8 +1,15 @@
 package krasa.editorGroups;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.ui.AnActionButton;
+import com.intellij.ui.AnActionButtonRunnable;
+import com.intellij.ui.DoubleClickListener;
+import com.intellij.ui.ToolbarDecorator;
+import krasa.editorGroups.gui.RegexTable;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.MouseEvent;
 
 public class SettingsForm {
 
@@ -22,33 +29,78 @@ public class SettingsForm {
 	private JPanel tabColors;
 	private JCheckBox rememberLastGroup;
 	private JCheckBox groupSwitchGroupAction;
+	private JPanel modelsPanel;
+	private JCheckBox selectRegexGroup;
 	private TabsColors tabsColors;
 
+	private RegexTable regexTable;
 
 	public JPanel getRoot() {
 		return root;
 	}
 
 	public SettingsForm() {
-		latencyOverFlicker.setVisible(false);
+//		latencyOverFlicker.setVisible(false);
+
+		regexTable = new RegexTable();
+		modelsPanel.add(
+			ToolbarDecorator.createDecorator(regexTable)
+				.setAddAction(new AnActionButtonRunnable() {
+					@Override
+					public void run(AnActionButton button) {
+						regexTable.addAlias();
+					}
+				}).setRemoveAction(new AnActionButtonRunnable() {
+				@Override
+				public void run(AnActionButton button) {
+					regexTable.removeSelectedAliases();
+				}
+			}).setEditAction(new AnActionButtonRunnable() {
+				@Override
+				public void run(AnActionButton button) {
+					regexTable.editAlias();
+				}
+			}).setMoveUpAction(new AnActionButtonRunnable() {
+				@Override
+				public void run(AnActionButton anActionButton) {
+					regexTable.moveUp();
+				}
+			}).setMoveDownAction(new AnActionButtonRunnable() {
+				@Override
+				public void run(AnActionButton anActionButton) {
+					regexTable.moveDown();
+				}
+			}).createPanel(), BorderLayout.CENTER);
+
+		new DoubleClickListener() {
+			@Override
+			protected boolean onDoubleClick(MouseEvent e) {
+				return regexTable.editAlias();
+			}
+		}.installOn(regexTable);
+
+
 	}
 
 	public boolean isSettingsModified(ApplicationConfiguration data) {
 		if (tabsColors.isModified(data, data.getTabs())) return true;
+		if (regexTable.isModified(data)) return true;
 		return isModified(data);
 	}
 
-	public void importFrom(ApplicationConfiguration applicationConfiguration) {
-		setData(applicationConfiguration);
-		tabsColors.setData(applicationConfiguration, applicationConfiguration.getTabs());
+	public void importFrom(ApplicationConfiguration data) {
+		setData(data);
+		tabsColors.setData(data, data.getTabs());
+		regexTable.reset(data);
 	}
 
 	public void apply() {
 		if (LOG.isDebugEnabled()) LOG.debug("apply " + "");
-		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
+		ApplicationConfiguration data = ApplicationConfiguration.state();
 
-		getData(applicationConfiguration);
-		tabsColors.getData(applicationConfiguration, applicationConfiguration.getTabs());
+		getData(data);
+		regexTable.commit(data);
+		tabsColors.getData(data, data.getTabs());
 	}
 
 
@@ -69,6 +121,7 @@ public class SettingsForm {
 		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
 		rememberLastGroup.setSelected(data.isRememberLastGroup());
 		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
+		selectRegexGroup.setSelected(data.isSelectRegexGroup());
 	}
 
 	public void getData(ApplicationConfiguration data) {
@@ -83,6 +136,7 @@ public class SettingsForm {
 		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
 		data.setRememberLastGroup(rememberLastGroup.isSelected());
 		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
+		data.setSelectRegexGroup(selectRegexGroup.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
@@ -97,6 +151,7 @@ public class SettingsForm {
 		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
 		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
 		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
+		if (selectRegexGroup.isSelected() != data.isSelectRegexGroup()) return true;
 		return false;
 	}
 }

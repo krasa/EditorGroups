@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
@@ -22,18 +23,18 @@ public class Link {
 	private Integer line;
 
 	public Link(@NotNull String path) {
-		this.path = path;
+		this.path = FileUtil.toSystemIndependentName(path);
 	}
 
 	public Link(@NotNull String path, @Nullable Icon icon, @Nullable Integer line) {
-		this.path = path;
+		this.path = FileUtil.toSystemIndependentName(path);
 		this.icon = icon;
 		this.line = line;
 	}
 
 	public static List<Link> from(Collection<String> links) {
 		ArrayList<Link> links1 = new ArrayList<>();
-		for (String link: links) {
+		for (String link : links) {
 			links1.add(new Link(link));
 		}
 		return links1;

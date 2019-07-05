@@ -78,7 +78,7 @@ public abstract class JBEditorTabsPainter {
 				g2d.fillRect(rect.x + rect.width - thickness + 1, rect.y, thickness, rect.height);
 			} else if (position == JBTabsPosition.right) {
 				g2d.fillRect(rect.x, rect.y, thickness, rect.height);
-			}     
+			}
 
 			return;
 		}

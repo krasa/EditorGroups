@@ -30,7 +30,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 			out.writeUTF(value.getTitle());
 			out.writeUTF(value.getBackgroundColor());
 			out.writeUTF(value.getForegroundColor());
-			
+
 			out.writeInt(value.getRelatedPaths().size());
 			List<String> related = value.getRelatedPaths();
 			for (String s : related) {
@@ -49,7 +49,7 @@ public class EditorGroupIndex extends FileBasedIndexExtension<String, EditorGrou
 			value.setTitle(in.readUTF());
 			value.setBackgroundColor(in.readUTF());
 			value.setForegroundColor(in.readUTF());
-			
+
 			int i = in.readInt();
 			for (int j = 0; j < i; j++) {
 				value.addRelated(in.readUTF());

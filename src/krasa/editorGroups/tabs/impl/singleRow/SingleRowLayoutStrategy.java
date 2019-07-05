@@ -209,7 +209,7 @@ public abstract class SingleRowLayoutStrategy {
 							new Rectangle(toolbarX, data.insets.top + 1, myTabs.getSize().width - data.insets.left - toolbarX, myTabs.myHeaderFitSize.height);
 						myTabs.layout(hToolbar, rec);
 					}
-				} 
+				}
 			}
 		}
 	}

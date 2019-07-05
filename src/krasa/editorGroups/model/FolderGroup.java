@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.io.FileUtil;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
@@ -14,12 +15,12 @@ public class FolderGroup extends AutoGroup {
 
 	public FolderGroup(String folderPath, List<Link> links) {
 		super(links);
-		this.folderPath = folderPath;
+		this.folderPath = FileUtil.toSystemIndependentName(folderPath);
 	}
 
 	@Override
 	public boolean isValid() {
-		return valid && new File(folderPath).isDirectory();
+		return valid && ("DIRECTORY_INSTANCE".equals(folderPath) || new File(folderPath).isDirectory());
 	}
 
 	@Override

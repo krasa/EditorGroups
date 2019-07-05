@@ -7,6 +7,7 @@ image::example.gif[]
 - manually defined in `*.egroups` file (with language support) or in any other file 
 ** does not support refactoring yet
 - by file name without extension anywhere in the project
+- by regex (supporting regex groups, defined in settings)
 - by folder
 - bookmarks
             

@@ -8,8 +8,8 @@ public class PreviousInNewWindowAction extends EditorGroupsAction {
 	@Override
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
-			if (panel != null) {
-				panel.previous(true, true, Splitters.NONE);
+		if (panel != null) {
+			panel.previous(true, true, Splitters.NONE);
 		}
 	}
 }

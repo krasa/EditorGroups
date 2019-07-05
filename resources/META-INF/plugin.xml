@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.21</version>
+    <version>0.22</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -169,6 +169,14 @@
         <action id="krasa.editorGroups.OpenConfiguration" class="krasa.editorGroups.actions.OpenConfigurationAction"
                 icon="AllIcons.General.Settings"
                 text="Open configuration" description="Open EditorGroups configuration">
+        </action>
+        <action id="krasa.editorGroups.TogglePanelVisibility"
+                class="krasa.editorGroups.actions.TogglePanelVisibilityAction" text="Toggle Panel Visibility"/>
+
+        <action id="krasa.editorGroups.ViewPanelToggleAction"
+                class="krasa.editorGroups.actions.ViewPanelToggleAction">
+            <add-to-group group-id="UIToggleActions"/>
+
         </action>
 
 

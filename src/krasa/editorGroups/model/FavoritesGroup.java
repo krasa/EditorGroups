@@ -89,6 +89,12 @@ public class FavoritesGroup extends EditorGroup {
 		return name;
 	}
 
+
+	@Override
+	public String switchTitle(Project project) {
+		return getTitle();
+	}
+
 	public String getName() {
 		return name;
 	}

@@ -182,7 +182,16 @@ public class PanelRefresher {
 				}
 			}
 		}
+	}
 
+	public void refresh() {
+		final FileEditorManagerImpl manager = (FileEditorManagerImpl) FileEditorManagerEx.getInstance(project);
+		for (FileEditor selectedEditor : manager.getAllEditors()) {
+			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
+			if (panel != null) {
+				panel.refresh(true, null);
+			}
+		}
 	}
 
 	public EditorGroupIndexValue onIndexingDone(@NotNull String ownerPath, @NotNull EditorGroupIndexValue group) {

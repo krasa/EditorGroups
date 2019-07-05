@@ -18,7 +18,7 @@ public class BookmarkGroup extends EditorGroup {
 
 	public BookmarkGroup(List<Bookmark> validBookmarks) {
 		links = new ArrayList<>(validBookmarks.size());
-		for (Bookmark validBookmark: validBookmarks) {
+		for (Bookmark validBookmark : validBookmarks) {
 			VirtualFile file = validBookmark.getFile();
 			Icon icon = validBookmark.getIcon();
 			int line = validBookmark.getLine();
@@ -39,6 +39,12 @@ public class BookmarkGroup extends EditorGroup {
 	@Override
 	public String getTitle() {
 		return name;
+	}
+
+
+	@Override
+	public String switchTitle(Project project) {
+		return getTitle();
 	}
 
 	public String getName() {

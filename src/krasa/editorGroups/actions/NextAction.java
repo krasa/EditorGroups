@@ -23,12 +23,12 @@ public class NextAction extends EditorGroupsAction implements CustomComponentAct
 	@Override
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
-			if (panel != null) {
-				InputEvent e = anActionEvent.getInputEvent();
+		if (panel != null) {
+			InputEvent e = anActionEvent.getInputEvent();
 
-				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
-				panel.next(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), Splitters.from(e));
-			}
+			boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
+			panel.next(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), Splitters.from(e));
+		}
 
 	}
 

@@ -23,13 +23,13 @@ public class PreviousAction extends EditorGroupsAction implements CustomComponen
 	@Override
 	public void actionPerformed(AnActionEvent anActionEvent) {
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
-			if (panel != null) {
-				InputEvent e = anActionEvent.getInputEvent();
+		if (panel != null) {
+			InputEvent e = anActionEvent.getInputEvent();
 
-				boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
+			boolean newTab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK) && (e instanceof MouseEvent) && ((MouseEvent) e).getClickCount() > 0;
 
-				panel.previous(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), Splitters.from(e));
-			}
+			panel.previous(newTab, BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK), Splitters.from(e));
+		}
 	}
 
 	@Override

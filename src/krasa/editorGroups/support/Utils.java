@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class Utils {
 
 	public static Map<String, Color> colorMap;
 	public static Set<String> colorSet;
+
 	/**
 	 * not good enough for UI forms sometimes
 	 */
@@ -488,5 +490,14 @@ public class Utils {
 
 	public static VirtualFile getFileByPath(Link link) {
 		return getFileByPath(link.getPath());
+	}
+
+	@NotNull
+	public static String getCanonicalPath(File file) {
+		try {
+			return file.getCanonicalPath();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

@@ -82,7 +82,7 @@ public abstract class EditorGroup {
 
 	public boolean containsLink(Project project, String currentFilePath) {
 		List<Link> links = getLinks(project);
-		for (Link link: links) {
+		for (Link link : links) {
 			if (link.getPath().equals(currentFilePath)) {
 				return true;
 			}
@@ -113,7 +113,7 @@ public abstract class EditorGroup {
 
 	public VirtualFile getFirstExistingFile(Project project) {
 		List<Link> links = getLinks(project);
-		for (Link link: links) {
+		for (Link link : links) {
 			VirtualFile fileByPath = Utils.getFileByPath(link);
 			if (fileByPath != null && fileByPath.exists() && !fileByPath.isDirectory()) {
 				return fileByPath;
@@ -136,18 +136,9 @@ public abstract class EditorGroup {
 	}
 
 	public String switchTitle(Project project) {
-		String title;
-		if (this instanceof FavoritesGroup) {
-			title = getTitle();
-		} else if (this instanceof BookmarkGroup) {
-			title = getTitle();
-		} else {
-			String ownerPath = getOwnerPath();
-			String name = Utils.toPresentableName(ownerPath);
-			title = getPresentableTitle(project, name, false);   //never show size - initializes links and lags
-
-		}
-		return title;
+		String ownerPath = getOwnerPath();
+		String name = Utils.toPresentableName(ownerPath);
+		return getPresentableTitle(project, name, false);
 	}
 
 	public String getTabGroupTooltipText(Project project) {

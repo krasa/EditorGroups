@@ -132,7 +132,7 @@ public class MyFilePathCompletionContributor extends CompletionContributor {
 							if (concat.length <= 0) {
 								continue;
 							}
-							for (final PsiFileSystemItem file: concat) {
+							for (final PsiFileSystemItem file : concat) {
 								ProgressManager.checkCanceled();
 
 								final VirtualFile virtualFile = file.getVirtualFile();

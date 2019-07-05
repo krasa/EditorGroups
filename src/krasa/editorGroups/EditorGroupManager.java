@@ -101,6 +101,9 @@ public class EditorGroupManager {
 				if (result.isInvalid()) {
 					result = cache.getLastEditorGroup(currentFilePath, false, true);
 				}
+				if (result.isInvalid()) {
+					result = AutoGroupProvider.getInstance(project).findFirstMatchingRegexGroup(currentFile);
+				}
 			}
 
 			if (result.isInvalid()) {
@@ -122,7 +125,9 @@ public class EditorGroupManager {
 			}
 
 			if (result.isInvalid()) {
-				if (config.getState().isAutoSameName()) {
+				if (config.getState().isSelectRegexGroup()) {
+					result = AutoGroupProvider.getInstance(project).findFirstMatchingRegexGroup(currentFile);
+				} else if (config.getState().isAutoSameName()) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
 				} else if (config.getState().isAutoFolders()) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
@@ -138,6 +143,8 @@ public class EditorGroupManager {
 					cache.initGroup((EditorGroupIndexValue) result);
 				} else if (result instanceof SameNameGroup) {
 					result = autogroupProvider.getSameNameGroup(currentFile);
+				} else if (result instanceof RegexGroup) {
+					result = autogroupProvider.getRegexGroup((RegexGroup) result, project, currentFile);
 				} else if (result instanceof FolderGroup) {
 					result = autogroupProvider.getFolderGroup(currentFile);
 				} else if (result instanceof FavoritesGroup) {
@@ -361,7 +368,7 @@ public class EditorGroupManager {
 						resetSwitching();
 						return;
 					}
-					for (FileEditor fileEditor: fileEditors) {
+					for (FileEditor fileEditor : fileEditors) {
 						if (LOG.isDebugEnabled()) LOG.debug("opened fileEditor = " + fileEditor);
 					}
 					scroll(line, fileEditors);
@@ -390,7 +397,7 @@ public class EditorGroupManager {
 
 	private boolean scroll(Integer line, FileEditor... fileEditors) {
 		if (line != null) {
-			for (FileEditor fileEditor: fileEditors) {
+			for (FileEditor fileEditor : fileEditors) {
 				if (fileEditor instanceof TextEditorImpl) {
 					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
 					LogicalPosition position = new LogicalPosition(line, 0);
@@ -416,6 +423,7 @@ public class EditorGroupManager {
 		LOG.debug("clearSwitchingRequest");
 		switchRequest = null;
 	}
+
 
 	class Result {
 		boolean scrolledOnly;

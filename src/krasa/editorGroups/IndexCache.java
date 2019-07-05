@@ -120,7 +120,7 @@ public class IndexCache {
 	private void addToCache(List<Link> links, EditorGroupIndexValue group) {
 		add(group, group.getOwnerPath());
 
-		for (Link link: links) {
+		for (Link link : links) {
 			add(group, link.getPath());
 		}
 	}
@@ -187,6 +187,8 @@ public class IndexCache {
 					if (favoritesGroup.containsLink(project, currentFilePath)) {
 						result = favoritesGroup;
 					}
+				} else if (includeFavorites && last.startsWith(RegexGroup.ID_PREFIX)) {
+					result = AutoGroupProvider.getInstance(project).findRegexGroup(currentFilePath, last.substring(RegexGroup.ID_PREFIX.length()));
 				} else if (includeFavorites && last.equals(BookmarkGroup.ID)) {
 					result = externalGroupProvider.getBookmarkGroup();
 				} else {
@@ -355,7 +357,7 @@ public class IndexCache {
 
 		if (group != null) {
 			List<Link> links = group.getLinks(project);
-			for (Link link: links) {
+			for (Link link : links) {
 				EditorGroups editorGroups = groupsByLinks.get(link.getPath());
 				if (editorGroups != null) {
 					editorGroups.remove(group);

@@ -28,7 +28,7 @@ public class UniqueTabNameBuilder {
 		Map<String, Link> name_path = new THashMap<>();
 		Set<Link> paths_withDuplicateName = new THashSet<>();
 
-		for (Link link: paths) {
+		for (Link link : paths) {
 			put(path_name, name_path, paths_withDuplicateName, link);
 		}
 
@@ -43,11 +43,11 @@ public class UniqueTabNameBuilder {
 			}
 		}
 
-		for (Link link: paths_withDuplicateName) {
+		for (Link link : paths_withDuplicateName) {
 			uniqueNameBuilder.addPath(link, link.getPath());
 		}
 
-		for (Link link: paths_withDuplicateName) {
+		for (Link link : paths_withDuplicateName) {
 			String uniqueName = uniqueNameBuilder.getShortPath(link);
 			path_name.put(link, uniqueName);
 		}

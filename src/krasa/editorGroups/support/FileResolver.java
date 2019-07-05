@@ -20,6 +20,8 @@ import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.Link;
+import krasa.editorGroups.model.RegexGroup;
+import krasa.editorGroups.model.RegexGroupModel;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -33,12 +35,13 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
@@ -65,7 +68,7 @@ public class FileResolver {
 		return new FileResolver(project).resolve(ownerFilePath, root, relatedPaths, group);
 	}
 
-	protected FileResolver(Project project) {
+	public FileResolver(Project project) {
 		this.project = project;
 		excludeEditorGroupsFiles = ApplicationConfiguration.state().isExcludeEditorGroupsFiles();
 		links = new LinkedHashSet<String>() {
@@ -86,6 +89,75 @@ public class FileResolver {
 			}
 		};
 	}
+
+
+	public List<Link> resolveRegexGroupLinks(RegexGroup regexGroup, VirtualFile currentFile) {
+		try {
+			long start = System.currentTimeMillis();
+			String folderPath = regexGroup.getFolderPath();
+			if (regexGroup.getRegexGroupModel().getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
+				folderPath = project.getBasePath();
+			}
+			String fileName = regexGroup.getFileName();
+			RegexGroupModel regexGroupModel = regexGroup.getRegexGroupModel();
+			Matcher referenceMatcher = regexGroupModel.getRegexPattern().matcher(fileName);
+			boolean matches = referenceMatcher.matches();
+			if (!matches) {
+				throw new RuntimeException(fileName + " does not match " + regexGroup.getRegexGroupModel());
+			}
+			//always include it in case there are to many matches
+			links.add(currentFile.getPath());
+
+			String finalFolderPath = folderPath;
+			Files.walkFileTree(Paths.get(folderPath), new SimpleFileVisitor<Path>() {
+				@Override
+				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+					if (regexGroupModel.getScope() == RegexGroupModel.Scope.CURRENT_FOLDER) {
+						if (dir.equals(Paths.get(finalFolderPath))) {
+							return FileVisitResult.CONTINUE;
+						} else {
+							return FileVisitResult.SKIP_SUBTREE;
+						}
+					} else {
+						return super.preVisitDirectory(dir, attrs);
+					}
+				}
+
+				@Override
+				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+					String string = file.getFileName().toString();
+					Matcher matcher = regexGroupModel.getRegexPattern().matcher(string);
+					if (matcher.matches()) {
+						for (int j = 1; j <= matcher.groupCount(); j++) {
+							String refGroup = referenceMatcher.group(j);
+							String group = matcher.group(j);
+							if (!refGroup.equals(group)) {
+								return FileVisitResult.CONTINUE;
+							}
+						}
+						links.add(file.toAbsolutePath().toString());
+						if (links.size() > 100) {
+							LOG.warn("Found too many matching files, aborting. size=" + links.size() + " " + regexGroup);
+							return FileVisitResult.TERMINATE;
+						}
+					}
+
+					return super.visitFile(file, attrs);
+				}
+			});
+			long duration = System.currentTimeMillis() - start;
+			if (duration > 500) {
+				LOG.warn("<resolveRegexGroup " + duration + "ms " + regexGroup + "; links=" + links);
+			} else if (LOG.isDebugEnabled()) {
+				LOG.debug("<resolveRegexGroup " + duration + "ms links=" + links);
+			}
+
+			return Link.from(links);
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 
 	public Set<String> getLinks() {
 		return links;
@@ -157,7 +229,7 @@ public class FileResolver {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("root " + file + "  exists=" + file.exists());
 			}
-			root = file.getCanonicalPath();
+			root = Utils.getCanonicalPath(file);
 		}
 
 		root = useMacros(ownerFile, root);
@@ -235,7 +307,7 @@ public class FileResolver {
 	}
 
 	public static boolean excluded(File file, boolean excludeEditorGroupsFiles) {
-		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(file.getAbsolutePath())) {
+		if (excludeEditorGroupsFiles && EditorGroupsLanguage.isEditorGroupsLanguage(Utils.getCanonicalPath(file))) {
 			return true;
 		}
 		if (FileUtil.isJarOrZip(file)) {
@@ -253,7 +325,7 @@ public class FileResolver {
 
 	protected void addMatching(File file) throws IOException {
 		File parentDir = file.getParentFile();
-		String canonicalPath = sanitize(file.getAbsolutePath());
+		String canonicalPath = sanitize(Utils.getCanonicalPath(file));
 		String fileName = StringUtils.substringAfterLast(canonicalPath, "/");
 
 		if (fileName.length() > 0 && !file.isDirectory() && parentDir.isDirectory()) {
@@ -281,7 +353,7 @@ public class FileResolver {
 	protected void add(File file, boolean definedManually) throws IOException {
 		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
 			Path path = Paths.get(file.toURI());
-			links.add(file.getCanonicalPath());
+			links.add(Utils.getCanonicalPath(file));
 		}
 	}
 

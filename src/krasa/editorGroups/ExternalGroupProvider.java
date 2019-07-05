@@ -40,7 +40,7 @@ public class ExternalGroupProvider {
 		List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
 
 		ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
-		for (String name: availableFavoritesListNames) {
+		for (String name : availableFavoritesListNames) {
 			List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
 			if (favoritesListRootUrls.isEmpty()) {
 				continue;
@@ -68,7 +68,7 @@ public class ExternalGroupProvider {
 		List<EditorGroup> favoritesGroups = new ArrayList<>();
 		long start = System.currentTimeMillis();
 
-		for (FavoritesGroup group: getFavoritesGroups()) {
+		for (FavoritesGroup group : getFavoritesGroups()) {
 			if (group.containsLink(project, currentFilePath)) {
 				favoritesGroups.add(group);
 			}

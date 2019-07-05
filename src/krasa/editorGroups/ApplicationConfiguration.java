@@ -1,14 +1,19 @@
 package krasa.editorGroups;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.xmlb.annotations.Transient;
+import krasa.editorGroups.model.RegExpGroupModels;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 
 public class ApplicationConfiguration {
+	private static final Logger LOG = Logger.getInstance(ApplicationConfiguration.class);
 
 	private Tabs tabs = new Tabs();
+	private RegExpGroupModels regExpGroupModels = new RegExpGroupModels();
 
+	private boolean selectRegexGroup = true;
 	private boolean autoFolders = true;
 	private boolean autoSameName = true;
 	private boolean forceSwitch = true;
@@ -24,9 +29,26 @@ public class ApplicationConfiguration {
 	private boolean tabFgColorEnabled;
 	private boolean rememberLastGroup = true;
 	private boolean groupSwitchGroupAction = false;
+	private boolean hidePanel = false;
 
 	public static ApplicationConfiguration state() {
 		return ApplicationConfigurationComponent.getInstance().getState();
+	}
+
+	public RegExpGroupModels getRegExpGroupModels() {
+		return regExpGroupModels;
+	}
+
+	public void setRegExpGroupModels(RegExpGroupModels regExpGroupModels) {
+		this.regExpGroupModels = regExpGroupModels;
+	}
+
+	public boolean isHidePanel() {
+		return hidePanel;
+	}
+
+	public void setHidePanel(boolean hidePanel) {
+		this.hidePanel = hidePanel;
 	}
 
 	public Tabs getTabs() {
@@ -183,6 +205,14 @@ public class ApplicationConfiguration {
 		this.groupSwitchGroupAction = groupSwitchGroupAction;
 	}
 
+	public boolean isSelectRegexGroup() {
+		return selectRegexGroup;
+	}
+
+	public void setSelectRegexGroup(final boolean selectRegexGroup) {
+		this.selectRegexGroup = selectRegexGroup;
+	}
+
 
 	public static class Tabs {
 		public static final Color DEFAULT_MASK = new Color(0x262626);
@@ -278,4 +308,5 @@ public class ApplicationConfiguration {
 		}
 		return new Color(color);
 	}
+
 }

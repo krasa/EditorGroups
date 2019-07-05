@@ -90,6 +90,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 
 					editorGroups = fillCurrentFileGroups(project, tempGroup, panel, file);
+					fillRegexGroups(project, tempGroup, panel, file);
 				}
 			}
 
@@ -115,11 +116,13 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			}
 
 			defaultActionGroup.add(new Separator());
+			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.TogglePanelVisibility"));
 			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
 		} catch (IndexNotReadyException e) {
 			LOG.error("That should not happen", e);
 		}
 	}
+
 
 	private void addBookmarkGroup(Project project, @NotNull DefaultActionGroup defaultActionGroup, EditorGroupPanel panel, EditorGroup displayedGroup, VirtualFile file) {
 		BookmarkGroup bookmarkGroup = ExternalGroupProvider.getInstance(project).getBookmarkGroup();
@@ -147,10 +150,19 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 		group.add(new Separator("Groups for the current file"));
 
-		for (EditorGroup g: groups) {
+		for (EditorGroup g : groups) {
 			group.add(createAction(displayedGroup, g, project, refreshHandler(panel)));
 		}
 		return groups;
+	}
+
+	private void fillRegexGroups(Project project, @NotNull DefaultActionGroup group, EditorGroupPanel panel, VirtualFile file) {
+		List<RegexGroup> regexGroups = AutoGroupProvider.getInstance(project).findMatchingRegexGroups(file);
+
+		for (RegexGroup regexGroup : regexGroups) {
+			group.add(createAction(panel.getDisplayedGroup(), regexGroup, project, refreshHandler(panel)));
+		}
+
 	}
 
 	private void fillOtherGroup(DefaultActionGroup group, List<EditorGroup> currentGroups, EditorGroup displayedGroup, Project project) {
@@ -160,7 +172,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 		try {
 			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
-			for (EditorGroupIndexValue g: allGroups) {
+			for (EditorGroupIndexValue g : allGroups) {
 				if (!((Collection<EditorGroup>) currentGroups).contains(g)) {
 					group.add(createAction(displayedGroup, g, project, otherGroupHandler(project)));
 				}
@@ -184,7 +196,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		Collection<FavoritesGroup> favoritesGroups = ExternalGroupProvider.getInstance(project).getFavoritesGroups();
 
 		Set<String> alreadyDisplayedFavourites = new HashSet<>();
-		for (EditorGroup group: editorGroups) {
+		for (EditorGroup group : editorGroups) {
 			if (group instanceof FavoritesGroup) {
 				alreadyDisplayedFavourites.add(((FavoritesGroup) group).getName());
 			}
@@ -193,7 +205,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		if (!favoritesGroups.isEmpty()) {
 			Separator favourites = new Separator("Favourites");
 			defaultActionGroup.add(favourites);
-			for (FavoritesGroup favoritesGroup: favoritesGroups) {
+			for (FavoritesGroup favoritesGroup : favoritesGroups) {
 				if (!alreadyDisplayedFavourites.contains(favoritesGroup.getName())) {
 					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project)));
 				}

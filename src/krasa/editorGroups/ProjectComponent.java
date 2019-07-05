@@ -43,7 +43,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
 
-				for (FileEditor fileEditor: editors.getFirst()) {
+				for (FileEditor fileEditor : editors.getFirst()) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
@@ -74,7 +74,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
 
-				for (final FileEditor fileEditor: fileEditors) {
+				for (final FileEditor fileEditor : fileEditors) {
 					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
 						continue;
 					}
@@ -98,7 +98,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				FileEditor fileEditor = event.getNewEditor();
 				if (fileEditor != null) {
 					EditorGroupPanel panel = fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
-					if (panel != null) { 
+					if (panel != null) {
 						EditorGroupManager instance = EditorGroupManager.getInstance(project);
 						SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(panel.getFile());
 						if (switchRequest != null) {
@@ -107,7 +107,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 							panel.refreshOnSelectionChanged(false, switchingGroup, scrollOffset);
 						} else {
 							panel.refresh(false, null);
-						} 
+						}
 					}
 				}
 			}

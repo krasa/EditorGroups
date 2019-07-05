@@ -25,8 +25,8 @@ import com.intellij.util.ui.JBSwingUtilities;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.TimedDeadzone;
 import com.intellij.util.ui.UIUtil;
-import krasa.editorGroups.tabs.*;
 import krasa.editorGroups.tabs.ShadowAction;
+import krasa.editorGroups.tabs.*;
 import krasa.editorGroups.tabs.impl.singleRow.ScrollableSingleRowLayout;
 import krasa.editorGroups.tabs.impl.singleRow.SingleRowLayout;
 import krasa.editorGroups.tabs.impl.singleRow.SingleRowPassInfo;
@@ -47,8 +47,8 @@ import java.awt.geom.Line2D;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 
 import static com.intellij.openapi.wm.IdeFocusManager.getGlobalInstance;
 
@@ -330,7 +330,7 @@ public class JBTabsImpl extends JComponent
 	@Override
 	public void uiSettingsChanged(UISettings uiSettings) {
 		myImage = null;
-		for (Map.Entry<TabInfo, TabLabel> entry: myInfo2Label.entrySet()) {
+		for (Map.Entry<TabInfo, TabLabel> entry : myInfo2Label.entrySet()) {
 			entry.getKey().revalidate();
 			entry.getValue().setInactiveStateImage(null);
 		}
@@ -430,7 +430,7 @@ public class JBTabsImpl extends JComponent
 
 	private void repaintAttractions() {
 		boolean needsUpdate = false;
-		for (TabInfo each: myVisibleInfos) {
+		for (TabInfo each : myVisibleInfos) {
 			TabLabel eachLabel = myInfo2Label.get(each);
 			needsUpdate |= eachLabel.repaintAttraction();
 		}
@@ -583,7 +583,7 @@ public class JBTabsImpl extends JComponent
 
 	public void updateTabActions(final boolean validateNow) {
 		final Ref<Boolean> changed = new Ref<>(Boolean.FALSE);
-		for (final TabInfo eachInfo: myInfo2Label.keySet()) {
+		for (final TabInfo eachInfo : myInfo2Label.keySet()) {
 			updateTab(() -> {
 				final boolean changes = myInfo2Label.get(eachInfo).updateTabActions();
 				changed.set(changed.get().booleanValue() || changes);
@@ -610,7 +610,7 @@ public class JBTabsImpl extends JComponent
 			return;
 		}
 		mySingleRowLayout.myMorePopup = new JBPopupMenu();
-		for (final TabInfo each: getVisibleInfos()) {
+		for (final TabInfo each : getVisibleInfos()) {
 			if (!mySingleRowLayout.isTabHidden(each)) continue;
 			final JBMenuItem item = new JBMenuItem(each.getText(), each.getIcon());
 			item.setForeground(each.getDefaultForeground());
@@ -886,7 +886,7 @@ public class JBTabsImpl extends JComponent
 		if (oldInfo != newInfo) {
 			myOldSelection = oldInfo;
 			try {
-				for (TabsListener eachListener: myTabListeners) {
+				for (TabsListener eachListener : myTabListeners) {
 					eachListener.beforeSelectionChanged(oldInfo, newInfo);
 				}
 			} finally {
@@ -897,7 +897,7 @@ public class JBTabsImpl extends JComponent
 
 	private void fireSelectionChanged(@Nullable TabInfo oldInfo, TabInfo newInfo) {
 		if (oldInfo != newInfo) {
-			for (TabsListener eachListener: myTabListeners) {
+			for (TabsListener eachListener : myTabListeners) {
 				if (eachListener != null) {
 					eachListener.selectionChanged(oldInfo, newInfo);
 				}
@@ -906,7 +906,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 	void fireTabsMoved() {
-		for (TabsListener eachListener: myTabListeners) {
+		for (TabsListener eachListener : myTabListeners) {
 			if (eachListener != null) {
 				eachListener.tabsMoved();
 			}
@@ -915,7 +915,7 @@ public class JBTabsImpl extends JComponent
 
 
 	void fireTabRemoved(TabInfo info) {
-		for (TabsListener eachListener: myTabListeners) {
+		for (TabsListener eachListener : myTabListeners) {
 			if (eachListener != null) {
 				eachListener.tabRemoved(info);
 			}
@@ -976,7 +976,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void removeDeferredNow() {
-		for (Component each: myDeferredToRemove.keySet()) {
+		for (Component each : myDeferredToRemove.keySet()) {
 			if (each != null && each.getParent() == this) {
 				remove(each);
 			}
@@ -1014,7 +1014,7 @@ public class JBTabsImpl extends JComponent
 
 	private void updateEnabling() {
 		final List<TabInfo> all = getTabs();
-		for (TabInfo each: all) {
+		for (TabInfo each : all) {
 			final TabLabel eachLabel = myInfo2Label.get(each);
 			eachLabel.setTabEnabled(each.isEnabled());
 		}
@@ -1266,7 +1266,7 @@ public class JBTabsImpl extends JComponent
 
 		ArrayList<TabInfo> result = new ArrayList<>(myVisibleInfos);
 
-		for (TabInfo each: myHiddenInfos.keySet()) {
+		for (TabInfo each : myHiddenInfos.keySet()) {
 			result.add(getIndexInVisibleArray(each), each);
 		}
 		if (isAlphabeticalMode()) {
@@ -1396,7 +1396,7 @@ public class JBTabsImpl extends JComponent
 		try {
 			myHeaderFitSize = computeHeaderFitSize();
 			final Collection<TabLabel> labels = myInfo2Label.values();
-			for (TabLabel each: labels) {
+			for (TabLabel each : labels) {
 				each.setTabActionsAutoHide(myTabLabelActionsAutoHide);
 			}
 
@@ -1512,7 +1512,7 @@ public class JBTabsImpl extends JComponent
 			mySingleRowLayout.myRightGhost.reset();
 		}
 
-		for (TabInfo each: myVisibleInfos) {
+		for (TabInfo each : myVisibleInfos) {
 			reset(each, resetLabels);
 		}
 
@@ -1520,11 +1520,11 @@ public class JBTabsImpl extends JComponent
 			reset(myDropInfo, resetLabels);
 		}
 
-		for (TabInfo each: myHiddenInfos.keySet()) {
+		for (TabInfo each : myHiddenInfos.keySet()) {
 			reset(each, resetLabels);
 		}
 
-		for (Component eachDeferred: myDeferredToRemove.keySet()) {
+		for (Component eachDeferred : myDeferredToRemove.keySet()) {
 			resetLayout((JComponent) eachDeferred);
 		}
 	}
@@ -1886,7 +1886,7 @@ public class JBTabsImpl extends JComponent
 		TabInfo selected = getSelectedInfo();
 		if (myLastPaintedSelection == null || !myLastPaintedSelection.equals(selected)) {
 			List<TabInfo> tabs = getTabs();
-			for (TabInfo each: tabs) {
+			for (TabInfo each : tabs) {
 				myInfo2Label.get(each).setInactiveStateImage(null);
 			}
 		}
@@ -2215,7 +2215,7 @@ public class JBTabsImpl extends JComponent
 
 	private Max computeMaxSize() {
 		Max max = new Max();
-		for (TabInfo eachInfo: myVisibleInfos) {
+		for (TabInfo eachInfo : myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
 			max.myLabel.height = Math.max(max.myLabel.height, label.getPreferredSize().height);
 			max.myLabel.width = Math.max(max.myLabel.width, label.getPreferredSize().width);
@@ -2461,7 +2461,7 @@ public class JBTabsImpl extends JComponent
 
 	@Override
 	public void removeAllTabs() {
-		for (TabInfo each: getTabs()) {
+		for (TabInfo each : getTabs()) {
 			removeTab(each);
 		}
 	}
@@ -2522,9 +2522,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void addListeners() {
-		for (TabInfo eachInfo: myVisibleInfos) {
+		for (TabInfo eachInfo : myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
-			for (EventListener eachListener: myTabMouseListeners) {
+			for (EventListener eachListener : myTabMouseListeners) {
 				if (eachListener instanceof MouseListener) {
 					label.addMouseListener((MouseListener) eachListener);
 				} else if (eachListener instanceof MouseMotionListener) {
@@ -2537,9 +2537,9 @@ public class JBTabsImpl extends JComponent
 	}
 
 	private void removeListeners() {
-		for (TabInfo eachInfo: myVisibleInfos) {
+		for (TabInfo eachInfo : myVisibleInfos) {
 			final TabLabel label = myInfo2Label.get(eachInfo);
-			for (EventListener eachListener: myTabMouseListeners) {
+			for (EventListener eachListener : myTabMouseListeners) {
 				if (eachListener instanceof MouseListener) {
 					label.removeMouseListener((MouseListener) eachListener);
 				} else if (eachListener instanceof MouseMotionListener) {
@@ -2797,7 +2797,7 @@ public class JBTabsImpl extends JComponent
 	public JBTabsPresentation setSideComponentVertical(final boolean vertical) {
 		myHorizontalSide = !vertical;
 
-		for (TabInfo each: myVisibleInfos) {
+		for (TabInfo each : myVisibleInfos) {
 			each.getChangeSupport().firePropertyChange(TabInfo.ACTION_GROUP, "new1", "new2");
 		}
 
@@ -2915,7 +2915,7 @@ public class JBTabsImpl extends JComponent
 	private void applyDecoration() {
 		if (myUiDecorator != null) {
 			UiDecorator.UiDecoration uiDecoration = myUiDecorator.getDecoration();
-			for (TabLabel each: myInfo2Label.values()) {
+			for (TabLabel each : myInfo2Label.values()) {
 				each.apply(uiDecoration);
 			}
 		}
@@ -3046,7 +3046,7 @@ public class JBTabsImpl extends JComponent
 	public JBTabsPresentation setTabLabelActionsMouseDeadzone(final TimedDeadzone.Length length) {
 		myTabActionsMouseDeadzone = length;
 		final List<TabInfo> all = getTabs();
-		for (TabInfo each: all) {
+		for (TabInfo each : all) {
 			final TabLabel eachLabel = myInfo2Label.get(each);
 			eachLabel.updateTabActions();
 		}

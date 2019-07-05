@@ -75,6 +75,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private volatile boolean brokenScroll;
 	private UniqueTabNameBuilder uniqueNameBuilder;
 	private Integer line;
+	private boolean hideGlobally;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
@@ -351,9 +352,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		) {
 
 			if (!FileResolver.excluded(new File(file.getPath()), ApplicationConfiguration.state().isExcludeEditorGroupsFiles())) {
-				LOG.error("current file is not contained in group " + file + " " + displayedGroup);
+				String message = "current file is not contained in group. file=" + file + ", group=" + displayedGroup + ", links=" + displayedGroup.getLinks(project);
+				if (ApplicationManager.getApplication().isInternal()) {
+					LOG.error(message);
+				} else {
+					LOG.warn(message);
+				}
 			} else {
-				LOG.warn("current file is excluded from the group " + file + " " + displayedGroup);
+				LOG.debug("current file is excluded from the group " + file + " " + displayedGroup + " " + displayedGroup.getLinks(project));
 			}
 		}
 	}
@@ -683,6 +689,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
 			boolean skipRefresh = !brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
+			boolean updateVisibility = hideGlobally != ApplicationConfiguration.state().isHidePanel();
+			if (updateVisibility) {
+				skipRefresh = false;
+			}
 			if (skipRefresh) {
 				if (!(fileEditor instanceof TextEditorImpl)) {
 					groupManager.enableSwitching(); //need for UI forms - when switching to open editors , focus listener does not do that
@@ -795,7 +805,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {
 		boolean visible;
-		if (ApplicationConfiguration.state().isHideEmpty()) {
+		hideGlobally = ApplicationConfiguration.state().isHidePanel();
+		if (ApplicationConfiguration.state().isHidePanel()) {
+			visible = false;
+		} else if (ApplicationConfiguration.state().isHideEmpty()) {
 			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
 			visible = !hide;
 		} else {

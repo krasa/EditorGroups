@@ -63,7 +63,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 //			if (LOG.isDebugEnabled()) {
 //				LOG.debug("Indexing " + inputData.getFile());
 //			}
-			
+
 			EditorGroupIndexValue currentGroup = null;
 			EditorGroupIndexValue lastGroup = null;
 			int index = 0;

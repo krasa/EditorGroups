@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import krasa.editorGroups.IndexCache;
 import krasa.editorGroups.support.Utils;
@@ -50,7 +51,7 @@ public class EditorGroupIndexValue extends EditorGroup {
 	}
 
 	public void setOwnerPath(String ownerPath) {
-		this.ownerPath = ownerPath;
+		this.ownerPath = FileUtil.toSystemIndependentName(ownerPath);
 	}
 
 	@NotNull
@@ -170,7 +171,6 @@ public class EditorGroupIndexValue extends EditorGroup {
 		}
 		return fgColorInstance;
 	}
-
 
 
 	public String getForegroundColor() {
