@@ -153,6 +153,9 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
+		if (group.getId().equals("NOT_EXISTS")) {
+			return;
+		}
 		List<Link> links = FileResolver.resolveLinks(group, project);
 		if (links.size() > LINKS_LIMIT) {
 			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);

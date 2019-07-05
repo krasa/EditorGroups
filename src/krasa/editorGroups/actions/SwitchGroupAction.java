@@ -87,7 +87,8 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 					defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refreshHandler(panel)));
 					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getPath(), Collections.emptyList()), project, refreshHandler(panel)));
-
+					defaultActionGroup.add(createAction(displayedGroup, new EmptyGroup(), project, refreshHandler(panel)));
+					
 
 					editorGroups = fillCurrentFileGroups(project, tempGroup, panel, file);
 					fillRegexGroups(project, tempGroup, panel, file);
@@ -115,8 +116,6 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 				defaultActionGroup.addAll(list);
 			}
 
-			defaultActionGroup.add(new Separator());
-			defaultActionGroup.add(createAction(displayedGroup, new EmptyGroup(), project, refreshHandler(panel)));
 			defaultActionGroup.add(new Separator());
 			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.TogglePanelVisibility"));
 			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));

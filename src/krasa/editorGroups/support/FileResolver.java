@@ -325,8 +325,9 @@ public class FileResolver {
 
 	protected void addMatching(File file) throws IOException {
 		File parentDir = file.getParentFile();
-		String canonicalPath = sanitize(Utils.getCanonicalPath(file));
-		String fileName = StringUtils.substringAfterLast(canonicalPath, "/");
+		//could be some shit like '/*', do not use canonical path
+		String path = sanitize(file.getAbsolutePath());
+		String fileName = StringUtils.substringAfterLast(path, "/");
 
 		if (fileName.length() > 0 && !file.isDirectory() && parentDir.isDirectory()) {
 			FileFilter filter = new WildcardFileFilter(fileName, IOCase.SYSTEM);
