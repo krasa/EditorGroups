@@ -40,7 +40,7 @@ public class SettingsForm {
 	}
 
 	public SettingsForm() {
-//		latencyOverFlicker.setVisible(false);
+		latencyOverFlicker.setVisible(false);
 
 		regexTable = new RegexTable();
 		modelsPanel.add(
