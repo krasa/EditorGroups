@@ -14,7 +14,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-    Added regex groups (defined in Settings).
+    Added regex groups (defined in Settings); fixed symlink handling; a lot of small things
     ]]>
     </change-notes>
 
