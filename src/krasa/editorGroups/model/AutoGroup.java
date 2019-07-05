@@ -12,6 +12,7 @@ public abstract class AutoGroup extends EditorGroup {
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
 
+	public static final EmptyGroup HIDE_GROUP_INSTANCE = new EmptyGroup();
 	public static final FolderGroup DIRECTORY_INSTANCE = new FolderGroup("DIRECTORY_INSTANCE", Collections.emptyList());
 	public static final SameNameGroup SAME_NAME_INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList());
 

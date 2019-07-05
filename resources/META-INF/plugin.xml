@@ -14,6 +14,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
+    Added regex groups (defined in Settings).
     ]]>
     </change-notes>
 
