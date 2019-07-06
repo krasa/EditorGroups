@@ -360,7 +360,12 @@ public class EditorGroupManager {
 					}
 
 					if (LOG.isDebugEnabled()) LOG.debug("openFile " + fileToOpen);
-					Pair<FileEditor[], FileEditorProvider[]> pair = manager.openFileWithProviders(fileToOpen, true, currentWindow);
+					Pair<FileEditor[], FileEditorProvider[]> pair;
+					if (currentWindow == null) {
+						pair = manager.openFileWithProviders(fileToOpen, true, true);
+					} else {
+						pair = manager.openFileWithProviders(fileToOpen, true, currentWindow);
+					} 
 					FileEditor[] fileEditors = pair.first;
 
 					if (fileEditors.length == 0) {  //directory or some fail
