@@ -242,9 +242,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			try {
 				long start = System.currentTimeMillis();
 				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, true);
+				toBeRendered = editorGroup;
 				long delta = System.currentTimeMillis() - start;
 				if (LOG.isDebugEnabled())
-					LOG.debug("#getGroup:stub - on editor opening took " + delta + " ms for " + file);
+					LOG.debug("#getGroup:stub - on editor opening took " + delta + " ms for " + file + " " + editorGroup);
 			} catch (IndexNotReady indexNotReady) {
 				LOG.warn("Getting stub group failed" + indexNotReady);
 			}
@@ -254,15 +255,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			setVisible(false);
 			refresh(false, null);
 		} else {
-			boolean visible = updateVisibility(editorGroup);
-			boolean b = true;
-//			b = false;
-			if (b) {
-				getLayout().layoutContainer(this.getParent());
-				render2(false);
-			} else {
-				renderLater();
-			}
+			boolean visible;
+			visible = updateVisibility(editorGroup);
+			getLayout().layoutContainer(this.getParent()); //  forgot what this does :( 
+			render2(false);
+
 			if (visible && editorGroup.isStub()) {
 				refresh(false, null);
 			}
@@ -307,11 +304,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		add(component, BorderLayout.WEST);
 	}
 
-	private void reloadTabs(boolean paintNow) {
+	private boolean reloadTabs(boolean paintNow) {
 		tabs.removeAllTabs();
 		currentIndex = NOT_INITIALIZED;
 
 		List<Link> paths = displayedGroup.getLinks(project);
+		boolean visible = updateVisibility(displayedGroup);
+
 		Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
 
 		createLinks(paths, path_name);
@@ -329,6 +328,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			tabs.validate();
 			RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
 		}
+		return visible;
 	}
 
 	private void createLinks(List<Link> links, Map<Link, String> path_name) {
@@ -804,7 +804,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		reloadTabs(paintNow);
 
-		updateVisibility(rendering);
 		fileEditor.putUserData(EDITOR_GROUP, displayedGroup); // for titles
 		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 		fileEditorManager.updateFilePresentation(file);
@@ -823,12 +822,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		boolean visible;
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
 		hideGlobally = applicationConfiguration.isHidePanel();
-		if (applicationConfiguration.isHidePanel()) {
-			visible = false;
-		} else if (rendering instanceof EmptyGroup) {
+		if (applicationConfiguration.isHidePanel() || rendering instanceof EmptyGroup || rendering == EditorGroup.EMPTY) {
 			visible = false;
 		} else if (applicationConfiguration.isHideEmpty() && !rendering.isStub()) {
-			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
+			boolean hide = rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty();
 			visible = !hide;
 		} else {
 			visible = true;

@@ -127,23 +127,24 @@ public class EditorGroupManager {
 			if (result.isInvalid()) {
 				if (config.getState().isSelectRegexGroup()) {
 					result = AutoGroupProvider.getInstance(project).findFirstMatchingRegexGroup(currentFile);
-				} else if (config.getState().isAutoSameName()) {
+				}
+				if (result.isInvalid() && config.getState().isAutoSameName()) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
-				} else if (config.getState().isAutoFolders()) {
+				} else if (result.isInvalid() && config.getState().isAutoFolders()) {
 					result = AutoGroup.DIRECTORY_INSTANCE;
 				}
 			}
 
-			if (!stub && (refresh || (result instanceof AutoGroup && result.size(project) == 0))) {
+			if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("refreshing result");
 				}
 				//refresh
-				if (result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
+				if (!stub && result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
 					cache.initGroup((EditorGroupIndexValue) result);
-				} else if (result instanceof SameNameGroup) {
+				} else if (!stub && result instanceof SameNameGroup) {
 					result = autogroupProvider.getSameNameGroup(currentFile);
-				} else if (result instanceof RegexGroup) {
+				} else if (!stub && result instanceof RegexGroup) {
 					result = autogroupProvider.getRegexGroup((RegexGroup) result, project, currentFile);
 				} else if (result instanceof FolderGroup) {
 					result = autogroupProvider.getFolderGroup(currentFile);
@@ -154,12 +155,11 @@ public class EditorGroupManager {
 				}
 
 
-				if (result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup)) {
+				if (!stub && result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup && !requestedGroup.isStub())) {
 					EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
 					if (slaveGroup.isValid()) {
 						result = slaveGroup;
-					} else if (config.getState().isAutoFolders()
-						&& !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
+					} else if (config.getState().isAutoFolders() && !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 						result = autogroupProvider.getFolderGroup(currentFile);
 					}
 				}

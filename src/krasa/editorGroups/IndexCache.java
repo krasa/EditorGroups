@@ -272,7 +272,7 @@ public class IndexCache {
 
 
 	public void setLast(String currentFile, EditorGroup result) {
-		if (!result.isValid()) {
+		if (!result.isValid() || result.isStub()) {
 			return;
 		}
 
