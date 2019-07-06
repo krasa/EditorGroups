@@ -40,8 +40,6 @@ public class SettingsForm {
 	}
 
 	public SettingsForm() {
-		latencyOverFlicker.setVisible(false);
-
 		regexTable = new RegexTable();
 		modelsPanel.add(
 			ToolbarDecorator.createDecorator(regexTable)

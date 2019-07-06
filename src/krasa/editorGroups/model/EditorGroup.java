@@ -16,6 +16,7 @@ import static com.intellij.openapi.util.text.StringUtil.isNotEmpty;
 
 public abstract class EditorGroup {
 	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
+	private boolean stub;
 
 	@NotNull
 	public abstract String getId();
@@ -145,5 +146,11 @@ public abstract class EditorGroup {
 		return getPresentableTitle(project, "Owner: " + getOwnerPath(), true);
 	}
 
+	public boolean isStub() {
+		return stub;
+	}
 
+	public void setStub(boolean stub) {
+		this.stub = stub;
+	}
 }

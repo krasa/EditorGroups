@@ -216,13 +216,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	public void postConstruct() {
+		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
+
 		EditorGroup editorGroup = toBeRendered;
+
 		//minimize flicker for the price of latency
-		boolean preferLatencyOverFlicker = ApplicationConfiguration.state().isPreferLatencyOverFlicker();
+		boolean preferLatencyOverFlicker = applicationConfiguration.isPreferLatencyOverFlicker();
 		if (editorGroup == null && preferLatencyOverFlicker && !DumbService.isDumb(project)) {
 			long start = System.currentTimeMillis();
 			try {
-				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file);
+				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, applicationConfiguration.isHidePanel());
 				toBeRendered = editorGroup;
 			} catch (IndexNotReady e) {
 				LOG.debug(e);
@@ -230,17 +233,28 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.error(e);
 			}
 			long delta = System.currentTimeMillis() - start;
-			if (delta > 500) {
+			if (delta > 200) {
 				LOG.warn("lag on editor opening - #getGroup took " + delta + " ms for " + file);
 			}
 		}
 
-
+		if (editorGroup == null && !preferLatencyOverFlicker) {
+			try {
+				long start = System.currentTimeMillis();
+				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, true);
+				long delta = System.currentTimeMillis() - start;
+				if (LOG.isDebugEnabled())
+					LOG.debug("#getGroup:stub - on editor opening took " + delta + " ms for " + file);
+			} catch (IndexNotReady indexNotReady) {
+				LOG.warn("Getting stub group failed" + indexNotReady);
+			}
+		}
+		
 		if (editorGroup == null) {
 			setVisible(false);
 			refresh(false, null);
 		} else {
-			updateVisibility(editorGroup);
+			boolean visible = updateVisibility(editorGroup);
 			boolean b = true;
 //			b = false;
 			if (b) {
@@ -248,6 +262,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				render2(false);
 			} else {
 				renderLater();
+			}
+			if (visible && editorGroup.isStub()) {
+				refresh(false, null);
 			}
 		}
 	}
@@ -352,7 +369,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			&& !(displayedGroup instanceof EmptyGroup)
 		) {
 
-			if (!FileResolver.excluded(new File(file.getPath()), ApplicationConfiguration.state().isExcludeEditorGroupsFiles())) {
+			if (!displayedGroup.isStub() && !FileResolver.excluded(new File(file.getPath()), ApplicationConfiguration.state().isExcludeEditorGroupsFiles())) {
 				String message = "current file is not contained in group. file=" + file + ", group=" + displayedGroup + ", links=" + displayedGroup.getLinks(project);
 				if (ApplicationManager.getApplication().isInternal()) {
 					LOG.error(message);
@@ -682,7 +699,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				public EditorGroup compute() throws Throwable {
 					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
 					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
-					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file);
+					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
 				}
 			});
 
@@ -810,7 +827,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			visible = false;
 		} else if (rendering instanceof EmptyGroup) {
 			visible = false;
-		} else if (applicationConfiguration.isHideEmpty()) {
+		} else if (applicationConfiguration.isHideEmpty() && !rendering.isStub()) {
 			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
 			visible = !hide;
 		} else {

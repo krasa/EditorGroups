@@ -133,7 +133,7 @@ public class ModelEditor extends DialogWrapper {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			@Override
 			public void run() {
-				myEditor.getDocument().setText(sb.toString());
+				myEditor.getDocument().setText(sb.toString().replace("\\r\\n", "\\n"));
 				testResult.validate();
 				testResult.repaint();
 			}

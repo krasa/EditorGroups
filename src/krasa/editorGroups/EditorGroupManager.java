@@ -77,9 +77,9 @@ public class EditorGroupManager {
 	 * Index throws exceptions, nothing we can do about it here, let the caller try it again later
 	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile) throws IndexNotReady {
+	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile, boolean stub) throws IndexNotReady {
 		if (LOG.isDebugEnabled())
-			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]");
+			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]");
 
 		long start = System.currentTimeMillis();
 
@@ -134,7 +134,7 @@ public class EditorGroupManager {
 				}
 			}
 
-			if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
+			if (!stub && (refresh || (result instanceof AutoGroup && result.size(project) == 0))) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("refreshing result");
 				}
@@ -168,10 +168,11 @@ public class EditorGroupManager {
 //		if (result instanceof AutoGroup) {
 //			result = cache.updateGroups((AutoGroup) result, currentFilePath);
 //		}
+			result.setStub(stub);
 
-
-			if (LOG.isDebugEnabled())
-				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
+			}
 			cache.setLast(currentFilePath, result);
 		} catch (IndexNotReadyException | ProcessCanceledException e) {
 			throw new IndexNotReady(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);

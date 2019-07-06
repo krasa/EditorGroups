@@ -20,7 +20,7 @@ public class ApplicationConfiguration {
 	private boolean hideEmpty = true;
 	private boolean showSize;
 	private boolean continuousScrolling;
-	private boolean preferLatencyOverFlicker = true;
+	private boolean preferLatencyOverFlicker = false;
 	private boolean indexOnlyEditorGroupsFiles;
 	private boolean excludeEditorGroupsFiles;
 	private Integer tabBgColor;
