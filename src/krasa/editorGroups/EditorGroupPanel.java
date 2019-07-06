@@ -700,11 +700,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				} else {
 					//switched by bookmark shortcut -> need to select the right tab
 					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
-					String canonicalPath = file.getPath();
-					if (canonicalPath != null) {
-						int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
-						selectTab(new Link(canonicalPath, null, line));
-					}
+					String filePath = file.getPath();
+					int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
+					selectTab(new Link(filePath, null, line));
 				}
 
 
@@ -806,12 +804,13 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {
 		boolean visible;
-		hideGlobally = ApplicationConfiguration.state().isHidePanel();
-		if (ApplicationConfiguration.state().isHidePanel()) {
+		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
+		hideGlobally = applicationConfiguration.isHidePanel();
+		if (applicationConfiguration.isHidePanel()) {
 			visible = false;
 		} else if (rendering instanceof EmptyGroup) {
 			visible = false;
-		} else if (ApplicationConfiguration.state().isHideEmpty()) {
+		} else if (applicationConfiguration.isHideEmpty()) {
 			boolean hide = (rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty()) || rendering == EditorGroup.EMPTY;
 			visible = !hide;
 		} else {
