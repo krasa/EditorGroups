@@ -101,7 +101,7 @@ public class RegexTable extends JBTable {
 	}
 
 	public void commit(ApplicationConfiguration settings) {
-		settings.getRegExpGroupModels().setRegexGroupModels(new ArrayList<>(myRegexGroupModels));
+		settings.getRegexGroupModels().setRegexGroupModels(new ArrayList<>(myRegexGroupModels));
 	}
 
 
@@ -123,7 +123,7 @@ public class RegexTable extends JBTable {
 
 	private void obtainAliases(@NotNull List<RegexGroupModel> aliases, ApplicationConfiguration settings) {
 		aliases.clear();
-		List<RegexGroupModel> regexGroupModels = settings.getRegExpGroupModels().getRegexGroupModels();
+		List<RegexGroupModel> regexGroupModels = settings.getRegexGroupModels().getRegexGroupModels();
 		for (RegexGroupModel regexGroupModel : regexGroupModels) {
 			aliases.add(regexGroupModel.copy());
 		}

@@ -5,7 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class RegExpGroupModels {
+public class RegexGroupModels {
 	private List<RegexGroupModel> regexGroupModels = new ArrayList<>();
 
 	public List<RegexGroupModel> getRegexGroupModels() {
@@ -21,7 +21,7 @@ public class RegExpGroupModels {
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 
-		RegExpGroupModels that = (RegExpGroupModels) o;
+		RegexGroupModels that = (RegexGroupModels) o;
 
 		return regexGroupModels != null ? regexGroupModels.equals(that.regexGroupModels) : that.regexGroupModels == null;
 	}

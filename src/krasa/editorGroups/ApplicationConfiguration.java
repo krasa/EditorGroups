@@ -2,7 +2,7 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.xmlb.annotations.Transient;
-import krasa.editorGroups.model.RegExpGroupModels;
+import krasa.editorGroups.model.RegexGroupModels;
 import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
@@ -11,7 +11,7 @@ public class ApplicationConfiguration {
 	private static final Logger LOG = Logger.getInstance(ApplicationConfiguration.class);
 
 	private Tabs tabs = new Tabs();
-	private RegExpGroupModels regExpGroupModels = new RegExpGroupModels();
+	private RegexGroupModels regexGroupModels = new RegexGroupModels();
 
 	private boolean selectRegexGroup = true;
 	private boolean autoFolders = true;
@@ -35,12 +35,12 @@ public class ApplicationConfiguration {
 		return ApplicationConfigurationComponent.getInstance().getState();
 	}
 
-	public RegExpGroupModels getRegExpGroupModels() {
-		return regExpGroupModels;
+	public RegexGroupModels getRegexGroupModels() {
+		return regexGroupModels;
 	}
 
-	public void setRegExpGroupModels(RegExpGroupModels regExpGroupModels) {
-		this.regExpGroupModels = regExpGroupModels;
+	public void setRegexGroupModels(RegexGroupModels regexGroupModels) {
+		this.regexGroupModels = regexGroupModels;
 	}
 
 	public boolean isHidePanel() {

@@ -1,11 +1,11 @@
-package krasa.editorGroups;
+package krasa.editorGroups.gui;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.ui.AnActionButton;
 import com.intellij.ui.AnActionButtonRunnable;
 import com.intellij.ui.DoubleClickListener;
 import com.intellij.ui.ToolbarDecorator;
-import krasa.editorGroups.gui.RegexTable;
+import krasa.editorGroups.ApplicationConfiguration;
 
 import javax.swing.*;
 import java.awt.*;

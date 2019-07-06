@@ -1,8 +1,8 @@
 package krasa.editorGroups.gui;
 
 
-import krasa.editorGroups.model.RegExpGroupModels;
 import krasa.editorGroups.model.RegexGroupModel;
+import krasa.editorGroups.model.RegexGroupModels;
 
 import javax.swing.*;
 import javax.swing.event.ListDataEvent;
@@ -14,9 +14,9 @@ import java.util.List;
  */
 public class MyListDataListener implements ListDataListener {
 	private DefaultListModel<RegexGroupModel> model;
-	private RegExpGroupModels models;
+	private RegexGroupModels models;
 
-	public MyListDataListener(DefaultListModel<RegexGroupModel> model, RegExpGroupModels models) {
+	public MyListDataListener(DefaultListModel<RegexGroupModel> model, RegexGroupModels models) {
 		this.model = model;
 		this.models = models;
 	}

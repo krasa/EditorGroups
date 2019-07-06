@@ -1,8 +1,9 @@
-package krasa.editorGroups;
+package krasa.editorGroups.gui;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.ui.JBDimension;
 import com.intellij.util.ui.UIUtil;
+import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.support.CheckBoxWithColorChooser;
 
 import javax.swing.*;

@@ -41,7 +41,7 @@ public class AutoGroupProvider {
 
 		long start = System.currentTimeMillis();
 		String fileName = file.getName();
-		RegexGroupModel matching = ApplicationConfiguration.state().getRegExpGroupModels().findFirstMatching(fileName);
+		RegexGroupModel matching = ApplicationConfiguration.state().getRegexGroupModels().findFirstMatching(fileName);
 		if (LOG.isDebugEnabled()) LOG.debug("findMatchingRegexGroups: " + (System.currentTimeMillis() - start) + "ms");
 
 		if (matching == null) {
@@ -58,7 +58,7 @@ public class AutoGroupProvider {
 
 		long start = System.currentTimeMillis();
 		String fileName = file.getName();
-		List<RegexGroupModel> matching = ApplicationConfiguration.state().getRegExpGroupModels().findMatching(fileName);
+		List<RegexGroupModel> matching = ApplicationConfiguration.state().getRegexGroupModels().findMatching(fileName);
 		if (LOG.isDebugEnabled()) LOG.debug("findMatchingRegexGroups: " + (System.currentTimeMillis() - start) + "ms");
 
 
@@ -83,8 +83,8 @@ public class AutoGroupProvider {
 	}
 
 	public EditorGroup findRegexGroup(String filePath, String substring) {
-		RegExpGroupModels regExpGroupModels = ApplicationConfiguration.state().getRegExpGroupModels();
-		RegexGroupModel regexGroupModel = regExpGroupModels.find(substring);
+		RegexGroupModels regexGroupModels = ApplicationConfiguration.state().getRegexGroupModels();
+		RegexGroupModel regexGroupModel = regexGroupModels.find(substring);
 		if (regexGroupModel == null) {
 			return EditorGroup.EMPTY;
 		}
