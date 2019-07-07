@@ -74,7 +74,9 @@
         </component>
     </project-components>
     <actions>
-        <group id="EditorGroupsTabPopupMenu"/>
+        <group id="EditorGroupsTabPopupMenu">
+            <reference id="CompareFileWithEditor"/>
+        </group>
 
         <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
                 text="Open Previous File in Editor Group" icon="/krasa/editorGroups/icons/back.png">
