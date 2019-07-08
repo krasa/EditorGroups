@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.24</version>
+    <version>0.25</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -14,7 +14,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-    Added regex groups (defined in Settings); fixed symlink handling; a lot of small things
+    Added regex groups (defined in Settings); fixed symlink handling; faster and better tab panel; a lot of small things
     ]]>
     </change-notes>
 
