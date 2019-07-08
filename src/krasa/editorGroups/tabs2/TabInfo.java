@@ -38,7 +38,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
-public final class TabInfo implements Queryable, PlaceProvider<String> {
+public class TabInfo implements Queryable, PlaceProvider<String> {
 
 	public static final String ACTION_GROUP = "actionGroup";
 	public static final String ICON = "icon";

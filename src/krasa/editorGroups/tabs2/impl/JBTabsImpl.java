@@ -7,6 +7,7 @@ import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.rd.RdIdeaKt;
 import com.intellij.openapi.ui.*;
@@ -23,6 +24,7 @@ import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.switcher.QuickActionProvider;
 import com.intellij.util.Alarm;
 import com.intellij.util.Function;
+import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.*;
@@ -54,6 +56,7 @@ import static com.intellij.openapi.wm.IdeFocusManager.getGlobalInstance;
 public class JBTabsImpl extends JComponent
 	implements JBTabsEx, PropertyChangeListener, TimerListener, DataProvider, PopupMenuListener, Disposable, JBTabsPresentation, Queryable,
 	UISettingsListener, QuickActionProvider, Accessible {
+	private static final Logger LOG = Logger.getInstance(JBTabsImpl.class);
 
 	@NonNls
 	public static final Key<Integer> SIDE_TABS_SIZE_LIMIT_KEY = Key.create("SIDE_TABS_SIZE_LIMIT_KEY");
@@ -65,11 +68,11 @@ public class JBTabsImpl extends JComponent
 
 	@NotNull
 	final ActionManager myActionManager;
-	private final List<TabInfo> myVisibleInfos = new ArrayList<>();
+	protected final List<TabInfo> myVisibleInfos = new ArrayList<>();
 	private final Map<TabInfo, AccessibleTabPage> myInfo2Page = new HashMap<>();
 	private final Map<TabInfo, Integer> myHiddenInfos = new HashMap<>();
 
-	private TabInfo mySelectedInfo;
+	protected TabInfo mySelectedInfo;
 	public final Map<TabInfo, krasa.editorGroups.tabs2.impl.TabLabel> myInfo2Label = new HashMap<>();
 	public final Map<TabInfo, Toolbar> myInfo2Toolbar = new HashMap<>();
 	public Dimension myHeaderFitSize;
@@ -83,7 +86,7 @@ public class JBTabsImpl extends JComponent
 	private Getter<? extends ActionGroup> myPopupGroup;
 	private String myPopupPlace;
 
-	TabInfo myPopupInfo;
+	protected TabInfo myPopupInfo;
 	final DefaultActionGroup myNavigationActions;
 
 	final PopupMenuListener myPopupListener;
@@ -101,7 +104,7 @@ public class JBTabsImpl extends JComponent
 
 	private final WeakHashMap<Component, Component> myDeferredToRemove = new WeakHashMap<>();
 
-	private SingleRowLayout mySingleRowLayout;
+	protected SingleRowLayout mySingleRowLayout;
 	private final TableLayout myTableLayout = new TableLayout(this);
 	private final TabsSideSplitter mySplitter = new TabsSideSplitter(this);
 
@@ -328,6 +331,7 @@ public class JBTabsImpl extends JComponent
 		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
 			@Override
 			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
+			 try{
 				if (myProject == null && project != null) {
 					myProject = project;
 				}
@@ -362,6 +366,15 @@ public class JBTabsImpl extends JComponent
 				if (myProject != null && myFocusManager == getGlobalInstance()) {
 					myFocusManager = IdeFocusManager.getInstance(myProject);
 				}
+					
+			} catch (IncorrectOperationException e) {  //already disposed
+				LOG.warn("EditorGroups plugin: " + e);
+				myAnimator.dispose();
+				removeTimerUpdate();
+				if (myTabActionsAutoHideListenerDisposable != null) {
+					Disposer.dispose( myTabActionsAutoHideListenerDisposable);
+				}
+			}
 			}
 		};
 		UIUtil.putClientProperty(
@@ -1243,7 +1256,7 @@ public class JBTabsImpl extends JComponent
 		revalidateAndRepaint(true);
 	}
 
-	void revalidateAndRepaint(final boolean layoutNow) {
+	protected void revalidateAndRepaint(final boolean layoutNow) {
 		if (myVisibleInfos.isEmpty()) {
 			setOpaque(false);
 			Component nonOpaque = UIUtil.findUltimateParent(this);
@@ -1264,7 +1277,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 
-	private void updateAttraction(final TabInfo tabInfo, boolean start) {
+	protected void updateAttraction(final TabInfo tabInfo, boolean start) {
 		if (start) {
 			myAttractions.add(tabInfo);
 		} else {
@@ -1288,7 +1301,7 @@ public class JBTabsImpl extends JComponent
 		revalidateAndRepaint();
 	}
 
-	private void updateSideComponent(final TabInfo tabInfo) {
+	protected void updateSideComponent(final TabInfo tabInfo) {
 		final Toolbar old = myInfo2Toolbar.get(tabInfo);
 		if (old != null) {
 			remove(old);
@@ -2518,7 +2531,7 @@ public class JBTabsImpl extends JComponent
 	}
 
 
-	public static boolean isSelectionClick(final MouseEvent e, boolean canBeQuick) {
+	public boolean isSelectionClick(final MouseEvent e, boolean canBeQuick) {
 		if (e.getClickCount() == 1 || canBeQuick) {
 			if (!e.isPopupTrigger()) {
 				return e.getButton() == MouseEvent.BUTTON1 && !e.isControlDown() && !e.isAltDown() && !e.isMetaDown();
@@ -2526,6 +2539,10 @@ public class JBTabsImpl extends JComponent
 		}
 
 		return false;
+	}
+	  
+	public boolean isCloseClick(MouseEvent e) {
+		return UIUtil.isCloseClick(e, MouseEvent.MOUSE_PRESSED);
 	}
 
 

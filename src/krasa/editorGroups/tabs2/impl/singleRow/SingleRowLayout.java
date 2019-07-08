@@ -33,8 +33,8 @@ public class SingleRowLayout extends TabLayout {
 	public JPopupMenu myMorePopup;
 
 
-	public final GhostComponent myLeftGhost = new GhostComponent(RowDropPolicy.first, RowDropPolicy.first);
-	public final GhostComponent myRightGhost = new GhostComponent(RowDropPolicy.last, RowDropPolicy.first);
+	public final GhostComponent myLeftGhost;
+	public final GhostComponent myRightGhost;
 
 	private enum RowDropPolicy {
 		first, last
@@ -63,6 +63,9 @@ public class SingleRowLayout extends TabLayout {
 		myLeft = new SingleRowLayoutStrategy.Left(this);
 		myBottom = new SingleRowLayoutStrategy.Bottom(this);
 		myRight = new SingleRowLayoutStrategy.Right(this);
+		
+		myLeftGhost = new GhostComponent(tabs, RowDropPolicy.first, RowDropPolicy.first);
+		myRightGhost = new GhostComponent(tabs, RowDropPolicy.last, RowDropPolicy.first);
 	}
 
 	SingleRowLayoutStrategy getStrategy() {
@@ -336,11 +339,11 @@ public class SingleRowLayout extends TabLayout {
 	public class GhostComponent extends JLabel {
 		private TabInfo myInfo;
 
-		private GhostComponent(final RowDropPolicy before, final RowDropPolicy after) {
+		private GhostComponent(JBTabsImpl tabs, final RowDropPolicy before, final RowDropPolicy after) {
 			addMouseListener(new MouseAdapter() {
 				@Override
 				public void mousePressed(final MouseEvent e) {
-					if (JBTabsImpl.isSelectionClick(e, true) && myInfo != null) {
+					if (tabs.isSelectionClick(e, true) && myInfo != null) {
 						myRowDropPolicy = before;
 						myTabs.select(myInfo, true).doWhenDone(() -> myRowDropPolicy = after);
 					} else {
