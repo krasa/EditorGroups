@@ -78,6 +78,7 @@ public class FileResolver {
 				return super.add(sanitize(o));
 			}
 		};
+		config = ApplicationConfiguration.state();
 	}
 
 	protected FileResolver() {
