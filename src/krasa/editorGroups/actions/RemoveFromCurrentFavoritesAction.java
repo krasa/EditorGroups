@@ -21,6 +21,7 @@ import com.intellij.psi.util.PsiUtilCore;
 import com.intellij.util.ReflectionUtil;
 import com.intellij.util.TreeItem;
 import krasa.editorGroups.EditorGroupPanel;
+import krasa.editorGroups.Splitters;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.FavoritesGroup;
 import krasa.editorGroups.support.Notifications;
@@ -33,7 +34,6 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 
 	public static final String ID = "krasa.editorGroups.actions.RemoveFromCurrentFavorites";
 	private static final Logger LOG = Logger.getInstance(RemoveFromCurrentFavoritesAction.class);
-
 
 	@Override
 	public void actionPerformed(AnActionEvent e) {
@@ -60,6 +60,15 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 					fail(name, selected);
 				}
 
+
+				EditorGroupPanel editorGroupPanel = getEditorGroupPanel(e);
+				if (selected.contains(editorGroupPanel.getFile())) {
+					boolean next = editorGroupPanel.next(false, false, Splitters.NONE);
+					if (!next) {
+						editorGroupPanel.previous(false, false, Splitters.NONE);
+					}
+				}
+				
 				try {
 					Method rootChanged = ReflectionUtil.getDeclaredMethod(FavoritesManager.class, "rootsChanged");
 					if (rootChanged != null) { //TODO 2018

@@ -31,7 +31,10 @@ public class FavoritesGroup extends EditorGroup {
 
 	private static List<VirtualFile> add(List<TreeItem<Pair<AbstractUrl, String>>> validBookmark, Project project, ProjectFileIndex projectFileIndex) {
 		List<VirtualFile> files = new ArrayList<>();
-		for (TreeItem<Pair<AbstractUrl, String>> pairTreeItem : validBookmark) {
+		//fixes ConcurrentModificationException
+		ArrayList<TreeItem<Pair<AbstractUrl, String>>> treeItems = new ArrayList<>(validBookmark);
+
+		for (TreeItem<Pair<AbstractUrl, String>> pairTreeItem : treeItems) {
 			Pair<AbstractUrl, String> data = pairTreeItem.getData();
 			AbstractUrl first = data.first;
 			Object[] path = first.createPath(project);
