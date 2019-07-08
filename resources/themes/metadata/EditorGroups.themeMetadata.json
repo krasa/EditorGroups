@@ -1,0 +1,33 @@
+{
+  "name": "Editor Groups Tabs",
+  "fixed": false,
+  "ui": [
+    {
+      "key": "EditorGroupsTabs.background"
+    },
+    {
+      "key": "EditorGroupsTabs.borderColor"
+    },
+    {
+      "key": "EditorGroupsTabs.hoverColor"
+    },
+    {
+      "key": "EditorGroupsTabs.hoverBackground"
+    },
+    {
+      "key": "EditorGroupsTabs.inactiveMaskColor"
+    },
+    {
+      "key": "EditorGroupsTabs.inactiveUnderlineColor"
+    },
+    {
+      "key": "EditorGroupsTabs.underlineColor"
+    },
+    {
+      "key": "EditorGroupsTabs.underlineHeight"
+    },
+    {
+      "key": "EditorGroupsTabs.underlinedTabBackground"
+    }
+  ]
+}

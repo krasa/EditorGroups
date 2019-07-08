@@ -30,14 +30,15 @@ import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
-import krasa.editorGroups.tabs.JBTabs;
-import krasa.editorGroups.tabs.TabInfo;
-import krasa.editorGroups.tabs.impl.JBEditorTabs;
+import krasa.editorGroups.tabs2.JBTabs;
+import krasa.editorGroups.tabs2.TabInfo;
+import krasa.editorGroups.tabs2.my.MyJBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -67,7 +68,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private volatile EditorGroup displayedGroup;
 	private volatile EditorGroup toBeRendered;
 	private VirtualFile fileFromTextEditor;
-	private krasa.editorGroups.tabs.impl.JBEditorTabs tabs;
+	private MyJBEditorTabs tabs;
 	private FileEditorManagerImpl fileEditorManager;
 	public EditorGroupManager groupManager;
 	private ActionToolbar toolbar;
@@ -115,14 +116,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		addButtons();
 
 //		groupsPanel.setLayout(new HorizontalLayout(0));
-		tabs = new krasa.editorGroups.tabs.impl.JBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor) {
-
-			@Override
-			public boolean hasUnderlineSelection() {
-				return true;
-			}
-		};
-		tabs.setPredictedWidth(switchRequest != null ? switchRequest.getWidth() : 0);
+		tabs = new MyJBEditorTabs(project, ActionManager.getInstance(), IdeFocusManager.findInstance(), fileEditor, file);
 		Getter<ActionGroup> getter = new Getter<ActionGroup>() {
 			@Override
 			public ActionGroup get() {
@@ -173,9 +167,19 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		});
 		tabs.setPopupGroup(getter, "EditorGroupsTabPopup", false);
 		tabs.setSelectionChangeHandler(new JBTabs.SelectionChangeHandler() {
+
 			@NotNull
 			@Override
-			public ActionCallback execute(TabInfo info, boolean requestFocus, Integer modifiers, ActiveRunnable doChangeSelection) {
+			public ActionCallback execute(TabInfo info, boolean requestFocus, ActiveRunnable doChangeSelection) {
+				Integer modifiers = null;
+				AWTEvent trueCurrentEvent = IdeEventQueue.getInstance().getTrueCurrentEvent();
+				if (trueCurrentEvent instanceof MouseEvent) {
+					modifiers = ((MouseEvent) trueCurrentEvent).getModifiersEx();
+				} else if (trueCurrentEvent instanceof ActionEvent) {
+					modifiers = ((ActionEvent) trueCurrentEvent).getModifiers();
+				}
+
+
 				if (modifiers == null) {
 					return ActionCallback.DONE;
 				}
@@ -193,7 +197,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					if (modifiers == null) {
 						modifiers = 0;
 					}
-
 					boolean ctrl = BitUtil.isSet(modifiers, InputEvent.CTRL_DOWN_MASK);
 					boolean alt = BitUtil.isSet(modifiers, InputEvent.ALT_DOWN_MASK);
 					boolean shift = BitUtil.isSet(modifiers, InputEvent.SHIFT_DOWN_MASK);
@@ -204,8 +207,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				return ActionCallback.DONE;
 			}
 		});
+
 		setPreferredSize(new Dimension(0, 26));
-		tabs.setAlwaysPaintSelectedTab(false);
 		JComponent component = tabs.getComponent();
 		add(component, BorderLayout.CENTER);
 
@@ -250,7 +253,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.warn("Getting stub group failed" + indexNotReady);
 			}
 		}
-		
+
 		if (editorGroup == null) {
 			setVisible(false);
 			refresh(false, null);
@@ -305,40 +308,49 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private boolean reloadTabs(boolean paintNow) {
-		tabs.removeAllTabs();
-		currentIndex = NOT_INITIALIZED;
+		boolean visible;
+		try {
+			tabs.bulkUpdate = true;
 
-		List<Link> paths = displayedGroup.getLinks(project);
-		boolean visible = updateVisibility(displayedGroup);
+			tabs.removeAllTabs();
+			currentIndex = NOT_INITIALIZED;
 
-		Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
+			List<Link> paths = displayedGroup.getLinks(project);
+			visible = updateVisibility(displayedGroup);
 
-		createLinks(paths, path_name);
+			Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
+			createTabs(paths, path_name);
 
-		addCurrentFileTab(path_name);
+			addCurrentFileTab(path_name);
 
-		if (displayedGroup instanceof GroupsHolder) {
-			createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
-		}
+			if (displayedGroup instanceof GroupsHolder) {
+				createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
+			}
 
-		tabs.doLayout();
-		tabs.scroll(myScrollOffset);
 
-		if (tabs.getTabCount() > 0 && paintNow) { //premature optimization
-			tabs.validate();
-			RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
+//			if (tabs.getTabCount() > 0 && paintNow) { //premature optimization
+//				tabs.validate();
+//				RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
+//			}
+
+
+		} finally {
+			tabs.bulkUpdate = false;
+
+			tabs.doLayout();
+			tabs.scroll(myScrollOffset);
 		}
 		return visible;
 	}
 
-	private void createLinks(List<Link> links, Map<Link, String> path_name) {
+	private void createTabs(List<Link> links, Map<Link, String> path_name) {
 
 		for (int i1 = 0; i1 < links.size(); i1++) {
 			Link link = links.get(i1);
 
 			MyTabInfo tab = new MyTabInfo(link, path_name.get(link));
 
-			tabs.addTab(tab);
+			tabs.addTabSilently(tab, -1);
 //			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
 //				tab.setText("[" + displayedGroup.getTitle() + "]");
 //			}
@@ -361,7 +373,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			MyTabInfo info = new MyTabInfo(link, path_name.get(link));
 			customizeSelectedColor(info);
 			currentIndex = 0;
-			tabs.addTab(info, 0);
+			tabs.addTabSilently(info, 0);
 			tabs.setMySelectedInfo(info);
 		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY
 			&& !(displayedGroup instanceof EditorGroups)
@@ -394,6 +406,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		Link link;
 
 		public MyTabInfo(Link link, String name) {
+			super(new JLabel(""));
 			this.link = link;
 			Integer line = link.getLine();
 			if (line != null) {
@@ -417,6 +430,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup editorGroup;
 
 		public MyGroupTabInfo(EditorGroup editorGroup) {
+			super(new JLabel(""));
+			setVisible(false);
 			this.editorGroup = editorGroup;
 			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
 			setText("[" + title + "]");
@@ -425,18 +440,18 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	public void previous(boolean newTab, boolean newWindow, Splitters split) {
+	public boolean previous(boolean newTab, boolean newWindow, Splitters split) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
-			return;
+			return false;
 		}
 		if (displayedGroup.isInvalid()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - displayedGroup.isInvalid");
-			return;
+			return false;
 		}
 		if (!isVisible()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - !isVisible()");
-			return;
+			return false;
 		}
 
 		int iterations = 0;
@@ -449,7 +464,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			int index = currentIndex - iterations;
 
 			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex - iterations < 0) {
-				return;
+				return newTab;
 			}
 
 			if (index < 0) {
@@ -460,8 +475,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("previous: index=" + index + ", link=" + link);
 			}
 		}
-		openFile(link, newTab, newWindow, split);
+		;
 
+		return openFile(link, newTab, newWindow, split);
 	}
 
 	private Link getLink(List<TabInfo> tabs, int index) {
@@ -472,18 +488,18 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		return null;
 	}
 
-	public void next(boolean newTab, boolean newWindow, Splitters split) {
+	public boolean next(boolean newTab, boolean newWindow, Splitters split) {
 		if (currentIndex == NOT_INITIALIZED) { //group was not refreshed
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - currentIndex == -1");
-			return;
+			return false;
 		}
 		if (displayedGroup.isInvalid()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - displayedGroup.isInvalid");
-			return;
+			return false;
 		}
 		if (!isVisible()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - !isVisible()");
-			return;
+			return false;
 		}
 		int iterations = 0;
 		List<TabInfo> tabs = this.tabs.getTabs();
@@ -493,7 +509,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			iterations++;
 
 			if (!ApplicationConfiguration.state().isContinuousScrolling() && currentIndex + iterations >= tabs.size()) {
-				return;
+				return false;
 			}
 
 			int index = (currentIndex + iterations) % tabs.size();
@@ -504,38 +520,38 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		}
 
-		openFile(link, newTab, newWindow, split);
+		return openFile(link, newTab, newWindow, split);
 	}
 
-	private void openFile(@Nullable Link link, boolean newTab, boolean newWindow, Splitters split) {
+	private boolean openFile(@Nullable Link link, boolean newTab, boolean newWindow, Splitters split) {
 		if (disposed) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - already disposed");
-			return;
+			return false;
 		}
 
 		if (link == null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - link is null");
-			return;
+			return false;
 		}
 
 		if (link.getVirtualFile() == null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - file is null for " + link);
-			return;
+			return false;
 		}
 
 		if (file.equals(link.getVirtualFile()) && !newWindow && !split.isSplit() && link.getLine() == null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - same file");
-			return;
+			return false;
 		}
 
 
 		if (groupManager.isSwitching()) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - switching ");
-			return;
+			return false;
 		}
 		if (toBeRendered != null) {
 			if (LOG.isDebugEnabled()) LOG.debug("openFile fail - toBeRendered != null");
-			return;
+			return false;
 		}
 
 		EditorGroupManager.Result result = groupManager.open(this, link.getVirtualFile(), link.getLine(), newWindow, newTab, split);
@@ -544,6 +560,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (result != null && result.isScrolledOnly()) {
 			selectTab(link);
 		}
+		return true;
 	}
 
 	private void selectTabFallback() {
@@ -580,7 +597,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	public JBEditorTabs getTabs() {
+	public MyJBEditorTabs getTabs() {
 		return tabs;
 	}
 
@@ -611,6 +628,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				", requestedGroup=" + requestedGroup +
 				'}';
 		}
+
 	}
 
 	AtomicReference<RefreshRequest> atomicReference = new AtomicReference<>();
@@ -731,7 +749,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				myScrollOffset = tabs.getMyScrollOffset();   //this will have edge cases
 			}
 
-			AtomicReference<Exception> ex = new AtomicReference<>();
 
 			SwingUtilities.invokeLater(() -> {
 				if (disposed) {
@@ -740,15 +757,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				EditorGroup rendering = toBeRendered;
 				//tabs do not like being updated while not visible first - it really messes up scrolling
 				if (!isVisible() && rendering != null && updateVisibility(rendering)) {
-					SwingUtilities.invokeLater(() -> render(ex));
+					SwingUtilities.invokeLater(() -> render());
 				} else {
-					render(ex);
+					render();
 				}
 			});
-			Exception o = ex.get();
-			if (o != null) {
-				throw o;
-			}
 
 			atomicReference.compareAndSet(request, null);
 			if (LOG.isDebugEnabled())
@@ -771,12 +784,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private void render(AtomicReference<Exception> ex) {
+	private void render() {
 		try {
 			render2(true);
 		} catch (Exception e) {
-			if (LOG.isDebugEnabled()) LOG.debug(file.getName(), e);
-			ex.set(e);
+			LOG.error(file.getName(), e);
 		}
 	}
 

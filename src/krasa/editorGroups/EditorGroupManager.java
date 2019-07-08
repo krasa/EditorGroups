@@ -24,7 +24,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Notifications;
-import krasa.editorGroups.tabs.impl.JBEditorTabs;
+import krasa.editorGroups.tabs2.my.MyJBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -221,6 +221,22 @@ public class EditorGroupManager {
 	}
 
 
+	@Nullable
+	public SwitchRequest getSwitchingRequest(VirtualFile file) {
+		VirtualFile switchingFile;
+		if (switchRequest == null) {
+			switchingFile = null;
+		} else {
+			switchingFile = switchRequest.fileToOpen;
+		}
+
+		if (file.equals(switchingFile)) {
+			return switchRequest;
+		}
+		return null;
+	}
+
+
 	public boolean isSwitching() {
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("isSwitching switchRequest=" + switchRequest + ", switching=" + switching);
@@ -267,7 +283,7 @@ public class EditorGroupManager {
 
 	public Result open(EditorGroupPanel groupPanel, VirtualFile fileToOpen, Integer line, boolean newWindow, boolean newTab, Splitters split) {
 		EditorGroup displayedGroup = groupPanel.getDisplayedGroup();
-		JBEditorTabs tabs = groupPanel.getTabs();
+		MyJBEditorTabs tabs = groupPanel.getTabs();
 
 		EditorWindowHolder parentOfType = UIUtil.getParentOfType(EditorWindowHolder.class, groupPanel);
 		EditorWindow currentWindow = null;
@@ -365,7 +381,7 @@ public class EditorGroupManager {
 						pair = manager.openFileWithProviders(fileToOpen, true, true);
 					} else {
 						pair = manager.openFileWithProviders(fileToOpen, true, currentWindow);
-					} 
+					}
 					FileEditor[] fileEditors = pair.first;
 
 					if (fileEditors.length == 0) {  //directory or some fail

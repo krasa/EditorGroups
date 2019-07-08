@@ -61,6 +61,7 @@
         <completion.contributor language="EditorGroups"
                                 implementationClass="krasa.editorGroups.language.MyCompletionContributor"
                                 id="EditorGroups_MyCompletionContributor"/>
+        <themeMetadataProvider path="/themes/metadata/EditorGroups.themeMetadata.json"/>
     </extensions>
 
     <application-components>
