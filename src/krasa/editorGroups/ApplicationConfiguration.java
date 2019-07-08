@@ -30,6 +30,7 @@ public class ApplicationConfiguration {
 	private boolean rememberLastGroup = true;
 	private boolean groupSwitchGroupAction = false;
 	private boolean hidePanel = false;
+	private int groupSizeLimit = 100;
 
 	public static ApplicationConfiguration state() {
 		return ApplicationConfigurationComponent.getInstance().getState();
@@ -211,6 +212,24 @@ public class ApplicationConfiguration {
 
 	public void setSelectRegexGroup(final boolean selectRegexGroup) {
 		this.selectRegexGroup = selectRegexGroup;
+	}
+
+	@Transient
+	public String getGroupSizeLimit() {
+		return String.valueOf(groupSizeLimit);
+	}
+
+	@Transient
+	public void setGroupSizeLimit(final String groupSizeLimit) {
+		this.groupSizeLimit = Integer.parseInt(groupSizeLimit);
+	}
+
+	public int getGroupSizeLimitInt() {
+		return groupSizeLimit;
+	}
+
+	public void setGroupSizeLimitInt(final int groupSizeLimit) {
+		this.groupSizeLimit = groupSizeLimit;
 	}
 
 

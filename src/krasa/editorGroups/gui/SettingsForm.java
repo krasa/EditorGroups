@@ -31,6 +31,7 @@ public class SettingsForm {
 	private JCheckBox groupSwitchGroupAction;
 	private JPanel modelsPanel;
 	private JCheckBox selectRegexGroup;
+	private JTextField groupSizeLimit;
 	private TabsColors tabsColors;
 
 	private RegexTable regexTable;
@@ -120,6 +121,7 @@ public class SettingsForm {
 		rememberLastGroup.setSelected(data.isRememberLastGroup());
 		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
 		selectRegexGroup.setSelected(data.isSelectRegexGroup());
+		groupSizeLimit.setText(data.getGroupSizeLimit());
 	}
 
 	public void getData(ApplicationConfiguration data) {
@@ -135,6 +137,7 @@ public class SettingsForm {
 		data.setRememberLastGroup(rememberLastGroup.isSelected());
 		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
 		data.setSelectRegexGroup(selectRegexGroup.isSelected());
+		data.setGroupSizeLimit(groupSizeLimit.getText());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
@@ -150,6 +153,8 @@ public class SettingsForm {
 		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
 		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
 		if (selectRegexGroup.isSelected() != data.isSelectRegexGroup()) return true;
+		if (groupSizeLimit.getText() != null ? !groupSizeLimit.getText().equals(data.getGroupSizeLimit()) : data.getGroupSizeLimit() != null)
+			return true;
 		return false;
 	}
 }

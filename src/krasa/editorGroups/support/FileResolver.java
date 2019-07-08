@@ -52,6 +52,7 @@ public class FileResolver {
 	private final Project project;
 	private final boolean excludeEditorGroupsFiles;
 	private final Set<String> links;
+	private ApplicationConfiguration config;
 
 
 	@NotNull
@@ -88,6 +89,7 @@ public class FileResolver {
 				return super.add(sanitize(o));
 			}
 		};
+		config = ApplicationConfiguration.state();
 	}
 
 
@@ -136,7 +138,7 @@ public class FileResolver {
 							}
 						}
 						links.add(file.toAbsolutePath().toString());
-						if (links.size() > 100) {
+						if (links.size() > config.getGroupSizeLimitInt()) {
 							LOG.warn("Found too many matching files, aborting. size=" + links.size() + " " + regexGroup);
 							return FileVisitResult.TERMINATE;
 						}
@@ -206,6 +208,9 @@ public class FileResolver {
 					resolve(file);
 				}
 
+			} catch (TooManyFilesException e) {
+				//todo  notification?
+				LOG.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
 			} catch (ProcessCanceledException | IndexNotReadyException e) {
 				//TODO what to do?
 				LOG.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
@@ -352,6 +357,9 @@ public class FileResolver {
 	}
 
 	protected void add(File file, boolean definedManually) throws IOException {
+		if (links.size() > config.getGroupSizeLimitInt()) {
+			throw new TooManyFilesException();
+		}
 		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
 			Path path = Paths.get(file.toURI());
 			links.add(Utils.getCanonicalPath(file));
@@ -369,5 +377,8 @@ public class FileResolver {
 			folder = folder.replaceAll("^MODULE", moduleDirPath);
 		}
 		return folder;
+	}
+
+	private class TooManyFilesException extends RuntimeException {
 	}
 }
