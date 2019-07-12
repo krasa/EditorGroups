@@ -1,13 +1,19 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.projectRoots.impl.ProjectRootUtil;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiDirectory;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -120,4 +126,19 @@ public class RegexGroup extends AutoGroup {
 			'}';
 	}
 
+	public List<Path> getScopes(Project project) {
+		List<Path> paths = new ArrayList<>();
+		if (regexGroupModel.getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
+			PsiDirectory[] allContentRoots = ProjectRootUtil.getAllContentRoots(project);
+			for (PsiDirectory allContentRoot : allContentRoots) {
+				VirtualFile virtualFile = allContentRoot.getVirtualFile();
+				paths.add(Paths.get(virtualFile.getPath()));
+			}
+		} else {
+			paths.add(Paths.get(folderPath));
+		}
+
+
+		return paths;
+	}
 }

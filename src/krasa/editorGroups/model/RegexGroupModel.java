@@ -104,6 +104,7 @@ public class RegexGroupModel {
 		return new RegexGroupModel(regex, scope);
 	}
 
+
 	public static enum Scope {
 		CURRENT_FOLDER, INCLUDING_SUBFOLDERS, WHOLE_PROJECT
 	}
