@@ -54,11 +54,13 @@ public class EditorGroupManager {
 	private boolean warningShown;
 	private ExternalGroupProvider externalGroupProvider;
 	private AutoGroupProvider autogroupProvider;
+	private RegexGroupProvider regexGroupProvider;
 	private Key<?> initial_editor_index;
 	private volatile SwitchRequest switchRequest;
 	public volatile boolean switching = false;
 
-	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, IndexCache cache) {
+	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, RegexGroupProvider regexGroupProvider, IndexCache cache) {
+		this.regexGroupProvider = regexGroupProvider;
 		this.cache = cache;
 		this.panelRefresher = panelRefresher;
 		this.ideFocusManager = ideFocusManager;
@@ -77,7 +79,7 @@ public class EditorGroupManager {
 	 * Index throws exceptions, nothing we can do about it here, let the caller try it again later
 	 */
 	@NotNull
-	EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile, boolean stub) throws IndexNotReady {
+	public EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile, boolean stub) throws IndexNotReady {
 		if (LOG.isDebugEnabled())
 			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]");
 
@@ -102,7 +104,7 @@ public class EditorGroupManager {
 					result = cache.getLastEditorGroup(currentFilePath, false, true);
 				}
 				if (result.isInvalid()) {
-					result = AutoGroupProvider.getInstance(project).findFirstMatchingRegexGroup(currentFile);
+					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
 				}
 			}
 
@@ -126,7 +128,7 @@ public class EditorGroupManager {
 
 			if (result.isInvalid()) {
 				if (config.getState().isSelectRegexGroup()) {
-					result = AutoGroupProvider.getInstance(project).findFirstMatchingRegexGroup(currentFile);
+					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
 				}
 				if (result.isInvalid() && config.getState().isAutoSameName()) {
 					result = AutoGroup.SAME_NAME_INSTANCE;
@@ -145,7 +147,7 @@ public class EditorGroupManager {
 				} else if (!stub && result instanceof SameNameGroup) {
 					result = autogroupProvider.getSameNameGroup(currentFile);
 				} else if (!stub && result instanceof RegexGroup) {
-					result = autogroupProvider.getRegexGroup((RegexGroup) result, project, currentFile);
+					result = regexGroupProvider.getRegexGroup((RegexGroup) result, project, currentFile);
 				} else if (result instanceof FolderGroup) {
 					result = autogroupProvider.getFolderGroup(currentFile);
 				} else if (result instanceof FavoritesGroup) {
@@ -156,9 +158,9 @@ public class EditorGroupManager {
 
 
 				if (!stub && result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup && !requestedGroup.isStub())) {
-					EditorGroup slaveGroup = cache.getSlaveGroup(currentFilePath);
-					if (slaveGroup.isValid()) {
-						result = slaveGroup;
+					EditorGroup multiGroup = cache.getMultiGroup(currentFilePath);
+					if (multiGroup.isValid()) {
+						result = multiGroup;
 					} else if (config.getState().isAutoFolders() && !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
 						result = autogroupProvider.getFolderGroup(currentFile);
 					}
@@ -251,7 +253,7 @@ public class EditorGroupManager {
 	}
 
 	//TODO cache it?
-	public List<EditorGroupIndexValue> getAllGroups() throws IndexNotReadyException {
+	public List<EditorGroupIndexValue> getAllIndexedGroups() throws IndexNotReadyException {
 		long start = System.currentTimeMillis();
 		List<EditorGroupIndexValue> allGroups = cache.getAllGroups();
 		allGroups.sort(COMPARATOR);

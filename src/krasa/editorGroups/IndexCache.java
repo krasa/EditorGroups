@@ -193,7 +193,7 @@ public class IndexCache {
 						result = favoritesGroup;
 					}
 				} else if (includeFavorites && last.startsWith(RegexGroup.ID_PREFIX)) {
-					result = AutoGroupProvider.getInstance(project).findRegexGroup(currentFilePath, last.substring(RegexGroup.ID_PREFIX.length()));
+					result = RegexGroupProvider.getInstance(project).findRegexGroup_stub(currentFilePath, last.substring(RegexGroup.ID_PREFIX.length()));
 				} else if (includeFavorites && last.equals(BookmarkGroup.ID)) {
 					result = externalGroupProvider.getBookmarkGroup();
 				} else {
@@ -205,7 +205,7 @@ public class IndexCache {
 			}
 
 			if (result.isInvalid()) {
-				result = getSlaveGroup(currentFilePath);
+				result = getMultiGroup(currentFilePath);
 			}
 		}
 		if (LOG.isDebugEnabled()) {
@@ -229,7 +229,7 @@ public class IndexCache {
 		return result;
 	}
 
-	public EditorGroup getSlaveGroup(String currentFilePath) {
+	public EditorGroup getMultiGroup(String currentFilePath) {
 		EditorGroup result = EditorGroup.EMPTY;
 
 		List<EditorGroup> favouriteGroups = findGroups(currentFilePath);

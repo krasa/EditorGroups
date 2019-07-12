@@ -28,6 +28,9 @@ public class SettingsForm {
 	private JCheckBox excludeEGroups;
 	private JPanel tabColors;
 	private JCheckBox rememberLastGroup;
+	/**
+	 * Group 'Switch Editor Group' action's list by type and the current file
+	 */
 	private JCheckBox groupSwitchGroupAction;
 	private JPanel modelsPanel;
 	private JCheckBox selectRegexGroup;

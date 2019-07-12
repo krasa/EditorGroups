@@ -153,4 +153,8 @@ public abstract class EditorGroup {
 	public void setStub(boolean stub) {
 		this.stub = stub;
 	}
+
+	public boolean isSelected(EditorGroup groupLink) {
+		return this.equals(groupLink);
+	}
 }

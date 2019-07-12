@@ -97,4 +97,9 @@ public class Notifications {
 		LOG.warn(new RuntimeException(content));
 		show(notification);
 	}
+
+	public static void warning(String s) {
+		Notification notification = NOTIFICATION.createNotification(s, NotificationType.WARNING);
+		show(notification);
+	}
 }

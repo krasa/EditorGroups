@@ -4,40 +4,60 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public class RegexGroup extends AutoGroup {
 	public static final String ID_PREFIX = "RegexGroup: ";
-
+	@NotNull
 	private final RegexGroupModel regexGroupModel;
+	@Nullable
 	private final String folderPath;
+	@Nullable
 	private final String fileName;
 
-	public RegexGroup(RegexGroupModel regexGroupModel, String folderPath, List<Link> links, String fileName) {
+	public RegexGroup(RegexGroupModel regexGroupModel, @Nullable String folderPath, List<Link> links, @Nullable String fileName) {
 		super(links);
 		this.regexGroupModel = regexGroupModel.copy();
-		this.folderPath = FileUtil.toSystemIndependentName(folderPath);
+		this.folderPath = folderPath != null ? FileUtil.toSystemIndependentName(folderPath) : null;
+		if (folderPath != null && !new File(folderPath).isDirectory()) {
+			throw new IllegalArgumentException("not a folder: " + folderPath);
+		}
 		this.fileName = fileName;
 	}
 
+	public RegexGroup(RegexGroupModel model) {
+		this(model, null, Collections.emptyList(), null);
+		setStub(true);
+	}
+
+	public RegexGroup(RegexGroupModel model, String path, String fileName) {
+		this(model, path, Collections.emptyList(), fileName);
+		setStub(true);
+	}
+
+	@NotNull
 	public RegexGroupModel getRegexGroupModel() {
 		return regexGroupModel;
 	}
 
+	@Nullable
 	public String getFolderPath() {
 		return folderPath;
 	}
 
+	@Nullable
 	public String getFileName() {
 		return fileName;
 	}
 
 	@Override
 	public boolean isValid() {
-		return valid && new File(folderPath).isDirectory();
+		return valid;
 	}
 
 	@Override
@@ -48,6 +68,15 @@ public class RegexGroup extends AutoGroup {
 	@Override
 	public String getPresentableTitle(Project project, String presentableNameForUI, boolean showSize) {
 		return "Regex: " + regexGroupModel.getRegexPattern();
+	}
+
+	@Override
+	public boolean isSelected(EditorGroup groupLink) {
+		if (groupLink instanceof RegexGroup) {
+			return this.regexGroupModel.equals(((RegexGroup) groupLink).getRegexGroupModel());
+		} else {
+			return super.isSelected(groupLink);
+		}
 	}
 
 	@NotNull
@@ -90,4 +119,5 @@ public class RegexGroup extends AutoGroup {
 			", links=" + links.size() +
 			'}';
 	}
+
 }

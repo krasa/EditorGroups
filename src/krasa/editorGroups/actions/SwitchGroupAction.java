@@ -18,6 +18,7 @@ import com.intellij.ui.PopupHandler;
 import krasa.editorGroups.*;
 import krasa.editorGroups.icons.MyIcons;
 import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -77,6 +78,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			List<EditorGroup> editorGroups = Collections.emptyList();
 			DefaultActionGroup tempGroup = new DefaultActionGroup();
 			VirtualFile file = null;
+			List<RegexGroup> regexGroups = Collections.emptyList();
 
 
 			if (data != null) {
@@ -88,16 +90,17 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refreshHandler(panel)));
 					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getPath(), Collections.emptyList()), project, refreshHandler(panel)));
 					defaultActionGroup.add(createAction(displayedGroup, new EmptyGroup(), project, refreshHandler(panel)));
-					
+
 
 					editorGroups = fillCurrentFileGroups(project, tempGroup, panel, file);
-					fillRegexGroups(project, tempGroup, panel, file);
+					regexGroups = fillRegexGroups(project, tempGroup, panel, file);
 				}
 			}
 
 			addBookmarkGroup(project, defaultActionGroup, panel, displayedGroup, file);
-			fillOtherGroup(tempGroup, editorGroups, displayedGroup, project);
+			fillOtherIndexedGroups(tempGroup, editorGroups, displayedGroup, project);
 			fillFavorites(tempGroup, project, editorGroups, displayedGroup);
+			fillGlobalRegexGroups(tempGroup, project, editorGroups, displayedGroup, regexGroups);
 
 
 			if (ApplicationConfiguration.state().isGroupSwitchGroupAction()) {
@@ -157,22 +160,22 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		return groups;
 	}
 
-	private void fillRegexGroups(Project project, @NotNull DefaultActionGroup group, EditorGroupPanel panel, VirtualFile file) {
-		List<RegexGroup> regexGroups = AutoGroupProvider.getInstance(project).findMatchingRegexGroups(file);
+	private List<RegexGroup> fillRegexGroups(Project project, @NotNull DefaultActionGroup group, EditorGroupPanel panel, VirtualFile file) {
+		List<RegexGroup> regexGroups = RegexGroupProvider.getInstance(project).findMatchingRegexGroups_stub(file);
 
 		for (RegexGroup regexGroup : regexGroups) {
 			group.add(createAction(panel.getDisplayedGroup(), regexGroup, project, refreshHandler(panel)));
 		}
-
+		return regexGroups;
 	}
 
-	private void fillOtherGroup(DefaultActionGroup group, List<EditorGroup> currentGroups, EditorGroup displayedGroup, Project project) {
+	private void fillOtherIndexedGroups(DefaultActionGroup group, List<EditorGroup> currentGroups, EditorGroup displayedGroup, Project project) {
 		EditorGroupManager manager = EditorGroupManager.getInstance(project);
 
 		group.add(new Separator("Other groups"));
 
 		try {
-			List<EditorGroupIndexValue> allGroups = manager.getAllGroups();
+			List<EditorGroupIndexValue> allGroups = manager.getAllIndexedGroups();
 			for (EditorGroupIndexValue g : allGroups) {
 				if (!((Collection<EditorGroup>) currentGroups).contains(g)) {
 					group.add(createAction(displayedGroup, g, project, otherGroupHandler(project)));
@@ -196,19 +199,44 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 	private void fillFavorites(DefaultActionGroup defaultActionGroup, Project project, List<EditorGroup> editorGroups, EditorGroup displayedGroup) {
 		Collection<FavoritesGroup> favoritesGroups = ExternalGroupProvider.getInstance(project).getFavoritesGroups();
 
-		Set<String> alreadyDisplayedFavourites = new HashSet<>();
+		Set<String> alreadyDisplayed = new HashSet<>();
 		for (EditorGroup group : editorGroups) {
 			if (group instanceof FavoritesGroup) {
-				alreadyDisplayedFavourites.add(((FavoritesGroup) group).getName());
+				alreadyDisplayed.add(((FavoritesGroup) group).getName());
 			}
 		}
 
 		if (!favoritesGroups.isEmpty()) {
-			Separator favourites = new Separator("Favourites");
-			defaultActionGroup.add(favourites);
+			defaultActionGroup.add(new Separator("Favourites"));
 			for (FavoritesGroup favoritesGroup : favoritesGroups) {
-				if (!alreadyDisplayedFavourites.contains(favoritesGroup.getName())) {
+				if (!alreadyDisplayed.contains(favoritesGroup.getName())) {
 					defaultActionGroup.add(createAction(displayedGroup, favoritesGroup, project, otherGroupHandler(project)));
+				}
+			}
+		}
+	}
+
+	private void fillGlobalRegexGroups(DefaultActionGroup defaultActionGroup, Project project, List<EditorGroup> editorGroups, EditorGroup displayedGroup, List<RegexGroup> alreadyFilledRegexGroups) {
+		List<RegexGroup> regexGroups = RegexGroupProvider.getInstance(project).findProjectRegexGroups_stub();
+
+		Set<String> alreadyDisplayed = new HashSet<>();
+		for (RegexGroup group : alreadyFilledRegexGroups) {
+			if (group.getRegexGroupModel().getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
+				alreadyDisplayed.add(group.getRegexGroupModel().getRegex());
+			}
+		}
+
+		if (!regexGroups.isEmpty()) {
+			defaultActionGroup.add(new Separator("Regexps"));
+			for (RegexGroup group : regexGroups) {
+				if (!alreadyDisplayed.contains(group.getRegexGroupModel().getRegex())) {
+					defaultActionGroup.add(createAction(displayedGroup, group, project, new Handler() {
+						@Override
+						void run(EditorGroup groupLink) {
+							RegexGroup regexGroup = RegexGroupProvider.getInstance(project).getRegexGroup(group, project, null);
+							otherGroupHandler(project).run(regexGroup);
+						}
+					}));
 				}
 			}
 		}
@@ -239,6 +267,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					if (virtualFileByAbsolutePath != null) {
 						EditorGroupManager.getInstance(project).open(virtualFileByAbsolutePath, false, true, Splitters.NONE, editorGroup, null);
 					} else {
+						Notifications.warning("No matching file found");
 						if (LOG.isDebugEnabled())
 							LOG.debug("opening failed, no file and not even owner exist " + editorGroup);
 					}
@@ -251,7 +280,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 
 	@NotNull
 	private DumbAwareAction createAction(EditorGroup displayedGroup, EditorGroup groupLink, Project project, final Handler actionHandler) {
-		boolean isSelected = displayedGroup.equals(groupLink);
+		boolean isSelected = displayedGroup.isSelected(groupLink);
 		String title = groupLink.switchTitle(project);
 		String description = groupLink.getSwitchDescription();
 		if (isSelected) {

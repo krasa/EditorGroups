@@ -9,12 +9,14 @@ import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.index.MyFileNameIndexService;
-import krasa.editorGroups.model.*;
+import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.model.FolderGroup;
+import krasa.editorGroups.model.Link;
+import krasa.editorGroups.model.SameNameGroup;
 import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -34,64 +36,6 @@ public class AutoGroupProvider {
 		this.project = project;
 	}
 
-	public EditorGroup findFirstMatchingRegexGroup(VirtualFile file) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("findFirstMatchingRegexGroup: " + file);
-
-
-		long start = System.currentTimeMillis();
-		String fileName = file.getName();
-		RegexGroupModel matching = ApplicationConfiguration.state().getRegexGroupModels().findFirstMatching(fileName);
-		if (LOG.isDebugEnabled()) LOG.debug("findMatchingRegexGroups: " + (System.currentTimeMillis() - start) + "ms");
-
-		if (matching == null) {
-			return EditorGroup.EMPTY;
-		}
-
-		return new RegexGroup(matching, file.getParent().getPath(), Collections.emptyList(), fileName);
-	}
-
-	public List<RegexGroup> findMatchingRegexGroups(VirtualFile file) {
-		if (LOG.isDebugEnabled())
-			LOG.debug("findMatchingRegexGroups: " + file);
-
-
-		long start = System.currentTimeMillis();
-		String fileName = file.getName();
-		List<RegexGroupModel> matching = ApplicationConfiguration.state().getRegexGroupModels().findMatching(fileName);
-		if (LOG.isDebugEnabled()) LOG.debug("findMatchingRegexGroups: " + (System.currentTimeMillis() - start) + "ms");
-
-
-		return toRegexGroups(file, fileName, matching);
-	}
-
-	@NotNull
-	public List<RegexGroup> toRegexGroups(VirtualFile file, String fileName, List<RegexGroupModel> matching) {
-		List<RegexGroup> result = new ArrayList<>(matching.size());
-		for (RegexGroupModel regexGroupModel : matching) {
-			result.add(new RegexGroup(regexGroupModel, file.getParent().getPath(), Collections.emptyList(), fileName));
-		}
-		return result;
-	}
-
-	public RegexGroup getRegexGroup(RegexGroup result, Project project, VirtualFile currentFile) {
-		List<Link> links = new FileResolver(project).resolveRegexGroupLinks(result, currentFile);
-		if (links.isEmpty()) {
-			LOG.error("should contain the current file at least: " + result);
-		}
-		return new RegexGroup(result.getRegexGroupModel(), result.getFolderPath(), links, result.getFileName());
-	}
-
-	public EditorGroup findRegexGroup(String filePath, String substring) {
-		RegexGroupModels regexGroupModels = ApplicationConfiguration.state().getRegexGroupModels();
-		RegexGroupModel regexGroupModel = regexGroupModels.find(substring);
-		if (regexGroupModel == null) {
-			return EditorGroup.EMPTY;
-		}
-
-		File file = new File(filePath);
-		return new RegexGroup(regexGroupModel, Utils.getCanonicalPath(file.getParentFile()), Collections.emptyList(), file.getName());
-	}
 
 	public EditorGroup getFolderGroup(VirtualFile file) {
 		if (!file.isInLocalFileSystem()) {
@@ -100,7 +44,7 @@ public class AutoGroupProvider {
 
 		VirtualFile parent = file.getParent();
 		String folder = parent.getPath();
-		List<Link> links = FileResolver.resolveLinks(project, null, folder, Collections.singletonList("./"), null);
+		List<Link> links = FileResolver.resolveLinks(project, file.getPath(), folder, Collections.singletonList("./"), null);
 		return new FolderGroup(folder, links);
 	}
 

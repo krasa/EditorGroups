@@ -70,4 +70,14 @@ public class RegexGroupModels {
 		}
 		return null;
 	}
+
+	public List<RegexGroupModel> findProjectRegexGroups() {
+		List<RegexGroupModel> result = new ArrayList<>();
+		for (RegexGroupModel regexGroupModel : regexGroupModels) {
+			if (regexGroupModel.getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
+				result.add(regexGroupModel);
+			}
+		}
+		return result;
+	}
 }

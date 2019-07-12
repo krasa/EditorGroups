@@ -1,5 +1,6 @@
 package krasa.editorGroups.model;
 
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
@@ -8,6 +9,7 @@ import java.util.Collections;
 import java.util.List;
 
 public abstract class AutoGroup extends EditorGroup {
+	private static final Logger LOG = Logger.getInstance(AutoGroup.class);
 
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
@@ -51,6 +53,9 @@ public abstract class AutoGroup extends EditorGroup {
 
 	@Override
 	public List<Link> getLinks(Project project) {
+		if (isStub()) {
+			LOG.debug(new RuntimeException("trying to get links from a stub"));
+		}
 		return links;
 	}
 

@@ -20,8 +20,6 @@ import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.EditorGroupIndexValue;
 import krasa.editorGroups.model.Link;
-import krasa.editorGroups.model.RegexGroup;
-import krasa.editorGroups.model.RegexGroupModel;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFileFilter;
 import org.apache.commons.io.filefilter.PrefixFileFilter;
@@ -35,24 +33,25 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 
 import static org.apache.commons.lang3.StringUtils.substringBeforeLast;
 
 
 public class FileResolver {
-	protected static final Logger LOG = Logger.getInstance(FileResolver.class);
+	private static final Logger LOG = Logger.getInstance(FileResolver.class);
 
-	private final Project project;
-	private final boolean excludeEditorGroupsFiles;
-	private final Set<String> links;
-	private ApplicationConfiguration config;
+	protected final Logger log = Logger.getInstance(this.getClass());
+
+	protected final Project project;
+	protected final boolean excludeEditorGroupsFiles;
+	protected final Set<String> links;
+	protected ApplicationConfiguration config;
 
 
 	@NotNull
@@ -91,74 +90,6 @@ public class FileResolver {
 			}
 		};
 		config = ApplicationConfiguration.state();
-	}
-
-
-	public List<Link> resolveRegexGroupLinks(RegexGroup regexGroup, VirtualFile currentFile) {
-		try {
-			long start = System.currentTimeMillis();
-			String folderPath = regexGroup.getFolderPath();
-			if (regexGroup.getRegexGroupModel().getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
-				folderPath = project.getBasePath();
-			}
-			String fileName = regexGroup.getFileName();
-			RegexGroupModel regexGroupModel = regexGroup.getRegexGroupModel();
-			Matcher referenceMatcher = regexGroupModel.getRegexPattern().matcher(fileName);
-			boolean matches = referenceMatcher.matches();
-			if (!matches) {
-				throw new RuntimeException(fileName + " does not match " + regexGroup.getRegexGroupModel());
-			}
-			//always include it in case there are to many matches
-			links.add(currentFile.getPath());
-
-			String finalFolderPath = folderPath;
-			Files.walkFileTree(Paths.get(folderPath), new SimpleFileVisitor<Path>() {
-				@Override
-				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-					if (regexGroupModel.getScope() == RegexGroupModel.Scope.CURRENT_FOLDER) {
-						if (dir.equals(Paths.get(finalFolderPath))) {
-							return FileVisitResult.CONTINUE;
-						} else {
-							return FileVisitResult.SKIP_SUBTREE;
-						}
-					} else {
-						return super.preVisitDirectory(dir, attrs);
-					}
-				}
-
-				@Override
-				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-					String string = file.getFileName().toString();
-					Matcher matcher = regexGroupModel.getRegexPattern().matcher(string);
-					if (matcher.matches()) {
-						for (int j = 1; j <= matcher.groupCount(); j++) {
-							String refGroup = referenceMatcher.group(j);
-							String group = matcher.group(j);
-							if (!refGroup.equals(group)) {
-								return FileVisitResult.CONTINUE;
-							}
-						}
-						links.add(file.toAbsolutePath().toString());
-						if (links.size() > config.getGroupSizeLimitInt()) {
-							LOG.warn("Found too many matching files, aborting. size=" + links.size() + " " + regexGroup);
-							return FileVisitResult.TERMINATE;
-						}
-					}
-
-					return super.visitFile(file, attrs);
-				}
-			});
-			long duration = System.currentTimeMillis() - start;
-			if (duration > 500) {
-				LOG.warn("<resolveRegexGroup " + duration + "ms " + regexGroup + "; links=" + links);
-			} else if (LOG.isDebugEnabled()) {
-				LOG.debug("<resolveRegexGroup " + duration + "ms links=" + links);
-			}
-
-			return Link.from(links);
-		} catch (IOException e) {
-			throw new RuntimeException(e);
-		}
 	}
 
 
@@ -211,20 +142,21 @@ public class FileResolver {
 
 			} catch (TooManyFilesException e) {
 				//todo  notification?
-				LOG.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
+				log.warn("TooManyFilesException filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]");
+				log.debug(e);
 			} catch (ProcessCanceledException | IndexNotReadyException e) {
 				//TODO what to do?
-				LOG.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
+				log.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
 			} catch (Exception e) {
-				LOG.error("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", e);
+				log.error("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", e);
 			}
 			long delta = System.currentTimeMillis() - t0;
 			if (delta > 100) {
-				if (LOG.isDebugEnabled()) LOG.debug("resolveLink " + filePath + " " + delta + "ms");
+				if (log.isDebugEnabled()) log.debug("resolveLink " + filePath + " " + delta + "ms");
 			}
 		}
-		if (LOG.isDebugEnabled())
-			LOG.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
+		if (log.isDebugEnabled())
+			log.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
 
 		return Link.from(links);
 	}
@@ -232,8 +164,8 @@ public class FileResolver {
 	private String resolveRootFolder(@Nullable String ownerFilePath, String root, EditorGroupIndexValue group, VirtualFile ownerFile) throws IOException {
 		if (ownerFilePath != null && root.startsWith("..")) {
 			File file = new File(new File(ownerFilePath).getParentFile(), root);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("root " + file + "  exists=" + file.exists());
+			if (log.isDebugEnabled()) {
+				log.debug("root " + file + "  exists=" + file.exists());
 			}
 			root = Utils.getCanonicalPath(file);
 		}
@@ -379,6 +311,7 @@ public class FileResolver {
 		}
 		return folder;
 	}
+
 
 	private class TooManyFilesException extends RuntimeException {
 	}

@@ -3,6 +3,7 @@ package krasa.editorGroups.model;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
+import krasa.editorGroups.support.AlphaComparator;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -11,6 +12,7 @@ import javax.swing.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 public class Link {
@@ -37,6 +39,7 @@ public class Link {
 		for (String link : links) {
 			links1.add(new Link(link));
 		}
+		Collections.sort(links1, AlphaComparator.INSTANCE);
 		return links1;
 	}
 
