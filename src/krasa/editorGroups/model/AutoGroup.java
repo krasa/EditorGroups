@@ -2,10 +2,8 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.util.containers.ContainerUtilRt;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Collections;
 import java.util.List;
 
 public abstract class AutoGroup extends EditorGroup {
@@ -15,8 +13,6 @@ public abstract class AutoGroup extends EditorGroup {
 	public static final String DIRECTORY = "DIRECTORY";
 
 	public static final EmptyGroup HIDE_GROUP_INSTANCE = new EmptyGroup();
-	public static final FolderGroup DIRECTORY_INSTANCE = new FolderGroup("DIRECTORY_INSTANCE", Collections.emptyList());
-	public static final SameNameGroup SAME_NAME_INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList());
 
 
 	protected List<Link> links;

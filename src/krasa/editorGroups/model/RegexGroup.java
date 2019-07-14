@@ -2,7 +2,6 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.impl.ProjectRootUtil;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDirectory;
 import krasa.editorGroups.icons.MyIcons;
@@ -10,29 +9,27 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
-import java.io.File;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.Matcher;
 
 public class RegexGroup extends AutoGroup {
 	public static final String ID_PREFIX = "RegexGroup: ";
 	@NotNull
 	private final RegexGroupModel regexGroupModel;
 	@Nullable
-	private final String folderPath;
+	private final VirtualFile folder;
 	@Nullable
 	private final String fileName;
 
-	public RegexGroup(RegexGroupModel regexGroupModel, @Nullable String folderPath, List<Link> links, @Nullable String fileName) {
+	public RegexGroup(RegexGroupModel regexGroupModel, @Nullable VirtualFile folder, List<Link> links, @Nullable String fileName) {
 		super(links);
 		this.regexGroupModel = regexGroupModel.copy();
-		this.folderPath = folderPath != null ? FileUtil.toSystemIndependentName(folderPath) : null;
-		if (folderPath != null && !new File(folderPath).isDirectory()) {
-			throw new IllegalArgumentException("not a folder: " + folderPath);
-		}
+		this.folder = folder;
+//		if (folderPath != null && !new File(folderPath).isDirectory()) {
+//			throw new IllegalArgumentException("not a folder: " + folderPath);
+//		}
 		this.fileName = fileName;
 	}
 
@@ -41,8 +38,13 @@ public class RegexGroup extends AutoGroup {
 		setStub(true);
 	}
 
-	public RegexGroup(RegexGroupModel model, String path, String fileName) {
-		this(model, path, Collections.emptyList(), fileName);
+	public RegexGroup(RegexGroupModel model, VirtualFile folder) {
+		this(model, folder, Collections.emptyList(), null);
+		setStub(true);
+	}
+
+	public RegexGroup(RegexGroupModel model, VirtualFile folder, String fileName) {
+		this(model, folder, Collections.emptyList(), fileName);
 		setStub(true);
 	}
 
@@ -52,8 +54,16 @@ public class RegexGroup extends AutoGroup {
 	}
 
 	@Nullable
+	public VirtualFile getFolder() {
+		return folder;
+	}
+
+	@Nullable
 	public String getFolderPath() {
-		return folderPath;
+		if (folder != null) {
+			return folder.getPath();
+		}
+		return null;
 	}
 
 	@Nullable
@@ -106,13 +116,13 @@ public class RegexGroup extends AutoGroup {
 
 		if (regexGroupModel != null ? !regexGroupModel.equals(that.regexGroupModel) : that.regexGroupModel != null)
 			return false;
-		return folderPath != null ? folderPath.equals(that.folderPath) : that.folderPath == null;
+		return folder != null ? folder.equals(that.folder) : that.folder == null;
 	}
 
 	@Override
 	public int hashCode() {
 		int result = regexGroupModel != null ? regexGroupModel.hashCode() : 0;
-		result = 31 * result + (folderPath != null ? folderPath.hashCode() : 0);
+		result = 31 * result + (folder != null ? folder.hashCode() : 0);
 		return result;
 	}
 
@@ -121,24 +131,38 @@ public class RegexGroup extends AutoGroup {
 		return "RegexGroup{" +
 			"model='" + regexGroupModel + '\'' +
 			", fileName='" + fileName + '\'' +
-			", folderPath='" + folderPath + '\'' +
+			", folderPath='" + folder + '\'' +
 			", links=" + links.size() +
 			'}';
 	}
 
-	public List<Path> getScopes(Project project) {
-		List<Path> paths = new ArrayList<>();
+	public List<VirtualFile> getScopes(Project project) {
+		List<VirtualFile> paths = new ArrayList<>();
 		if (regexGroupModel.getScope() == RegexGroupModel.Scope.WHOLE_PROJECT) {
 			PsiDirectory[] allContentRoots = ProjectRootUtil.getAllContentRoots(project);
 			for (PsiDirectory allContentRoot : allContentRoots) {
 				VirtualFile virtualFile = allContentRoot.getVirtualFile();
-				paths.add(Paths.get(virtualFile.getPath()));
+				paths.add(virtualFile);
 			}
 		} else {
-			paths.add(Paths.get(folderPath));
+			paths.add(folder);
 		}
 
 
 		return paths;
+	}
+
+	@Nullable
+	public Matcher getReferenceMatcher() {
+		Matcher referenceMatcher = null;
+		String fileName = getFileName();
+		if (fileName != null) {
+			referenceMatcher = regexGroupModel.getRegexPattern().matcher(fileName);
+			boolean matches = referenceMatcher.matches();
+			if (!matches) {
+				throw new RuntimeException(fileName + " does not match " + getRegexGroupModel());
+			}
+		}
+		return referenceMatcher;
 	}
 }

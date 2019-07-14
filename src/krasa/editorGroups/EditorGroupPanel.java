@@ -6,6 +6,7 @@ import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
@@ -22,6 +23,7 @@ import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.ui.PopupHandler;
 import com.intellij.ui.components.JBPanel;
 import com.intellij.util.BitUtil;
+import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.ui.JBUI;
 import com.intellij.util.ui.UIUtil;
 import krasa.editorGroups.actions.PopupMenu;
@@ -47,12 +49,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public static final DataKey<FavoritesGroup> FAVORITE_GROUP = DataKey.create("krasa.FavoritesGroup");
 	private static final Logger LOG = Logger.getInstance(EditorGroupPanel.class);
-
+	private final ExecutorService myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("EditorGroups-#getGroup", 1);
+	                                                             
 
 	public static final Key<EditorGroupPanel> EDITOR_PANEL = Key.create("EDITOR_GROUPS_PANEL");
 	public static final Key<EditorGroup> EDITOR_GROUP = Key.create("EDITOR_GROUP");
@@ -315,11 +320,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			tabs.removeAllTabs();
 			currentIndex = NOT_INITIALIZED;
 
-			List<Link> paths = displayedGroup.getLinks(project);
+			List<Link> links = displayedGroup.getLinks(project);
 			visible = updateVisibility(displayedGroup);
 
-			Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(paths, file);
-			createTabs(paths, path_name);
+			Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(links, file);
+			createTabs(links, path_name);
 
 			addCurrentFileTab(path_name);
 
@@ -354,7 +359,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 //			if (EditorGroupsLanguage.isEditorGroupsLanguage(path) && StringUtils.isNotEmpty(displayedGroup.getTitle()) && displayedGroup.isOwner(path)) {
 //				tab.setText("[" + displayedGroup.getTitle() + "]");
 //			}
-			if (Objects.equals(link.getLine(), line) && link.isTheSameFile(fileFromTextEditor)) {
+			if (Objects.equals(link.getLine(), line) && link.fileEquals(fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
 				customizeSelectedColor(tab);
 				currentIndex = i1;
@@ -368,8 +373,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void addCurrentFileTab(Map<Link, String> path_name) {
 		if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
-			String path = file.getPath();
-			Link link = new Link(path);
+			Link link = Link.from(file);
 			MyTabInfo info = new MyTabInfo(link, path_name.get(link));
 			customizeSelectedColor(info);
 			currentIndex = 0;
@@ -569,7 +573,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			TabInfo t = tabs1.get(i);
 			if (t instanceof MyTabInfo) {
 				MyTabInfo tab = (MyTabInfo) t;
-				if (tab.link.isTheSameFile(fileFromTextEditor)) {
+				if (tab.link.fileEquals(fileFromTextEditor)) {
 					tabs.setMySelectedInfo(tab);
 					customizeSelectedColor(tab);
 					currentIndex = i;
@@ -687,7 +691,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 
 		});
-	}
+	}   
 
 	private volatile int failed = 0;
 
@@ -712,15 +716,31 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 		try {
-			EditorGroup group = ApplicationManager.getApplication().runReadAction(new ThrowableComputable<EditorGroup, Throwable>() {
-				@Override
-				public EditorGroup compute() throws Throwable {
+			EditorGroup group;
+//			group	= ApplicationManager.getApplication().runReadAction(new ThrowableComputable<EditorGroup, Throwable>() {
+//				@Override
+//				public EditorGroup compute() throws Throwable {
+//					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
+//					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
+//					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
+//				}
+//			});
+
+			try {
+				group = ReadAction.nonBlocking(() -> {
 					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
 					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
 					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
-				}
-			});
-
+				}).expireWith(fileEditor)
+					.submit(myTaskExecutor)
+//					.submit(PooledThreadExecutor.INSTANCE)
+					.get();
+			} catch (InterruptedException e) {
+				throw new IndexNotReady(e.getMessage(), e);
+			} catch (ExecutionException e) {
+				throw e.getCause();
+			}
+			                                                                                                                                                                                                                                                           
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
@@ -735,9 +755,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				} else {
 					//switched by bookmark shortcut -> need to select the right tab
 					Editor editor = ((TextEditorImpl) fileEditor).getEditor();
-					String filePath = file.getPath();
 					int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
-					selectTab(new Link(filePath, null, line));
+					selectTab(new VirtualFileLink(file, null, line));
 				}
 
 
@@ -850,6 +869,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	@Override
 	public void dispose() {
 		disposed = true;
+		myTaskExecutor.shutdownNow();
 		tabs.dispose();
 	}
 

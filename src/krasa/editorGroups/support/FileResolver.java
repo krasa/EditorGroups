@@ -6,8 +6,7 @@ import com.intellij.notification.NotificationListener;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleUtilCore;
-import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.project.IndexNotReadyException;
+import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.util.SystemInfo;
@@ -50,7 +49,7 @@ public class FileResolver {
 
 	protected final Project project;
 	protected final boolean excludeEditorGroupsFiles;
-	protected final Set<String> links;
+	private final Set<String> links;
 	protected ApplicationConfiguration config;
 
 
@@ -122,6 +121,7 @@ public class FileResolver {
 
 
 		for (String filePath : relatedPaths) {
+			ProgressManager.checkCanceled();
 			long t0 = System.currentTimeMillis();
 			try {
 				filePath = useMacros(ownerFile, filePath);
@@ -141,14 +141,9 @@ public class FileResolver {
 				}
 
 			} catch (TooManyFilesException e) {
-				//todo  notification?
+				e.showNotification();
 				log.warn("TooManyFilesException filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]");
 				log.debug(e);
-			} catch (ProcessCanceledException | IndexNotReadyException e) {
-				//TODO what to do?
-				log.warn("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", new RuntimeException(e));
-			} catch (Exception e) {
-				log.error("filePath='" + filePath + " rootFolder=" + rootFolder + ", group = [" + group + "]", e);
 			}
 			long delta = System.currentTimeMillis() - t0;
 			if (delta > 100) {
@@ -160,6 +155,7 @@ public class FileResolver {
 
 		return Link.from(links);
 	}
+
 
 	private String resolveRootFolder(@Nullable String ownerFilePath, String root, EditorGroupIndexValue group, VirtualFile ownerFile) throws IOException {
 		if (ownerFilePath != null && root.startsWith("..")) {
@@ -291,7 +287,7 @@ public class FileResolver {
 
 	protected void add(File file, boolean definedManually) throws IOException {
 		if (links.size() > config.getGroupSizeLimitInt()) {
-			throw new TooManyFilesException();
+			throw new TooManyFilesException(links.size());
 		}
 		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
 			Path path = Paths.get(file.toURI());
@@ -313,6 +309,4 @@ public class FileResolver {
 	}
 
 
-	private class TooManyFilesException extends RuntimeException {
-	}
 }

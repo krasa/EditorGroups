@@ -99,7 +99,7 @@ public class Notifications {
 	}
 
 	public static void warning(String s) {
-		Notification notification = NOTIFICATION.createNotification(s, NotificationType.WARNING);
+		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", s, NotificationType.WARNING, null);
 		show(notification);
 	}
 }

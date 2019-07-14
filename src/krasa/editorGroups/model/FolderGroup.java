@@ -1,26 +1,29 @@
 package krasa.editorGroups.model;
 
+import com.intellij.mock.MockVirtualFile;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
-import java.io.File;
+import java.util.Collections;
 import java.util.List;
 
 public class FolderGroup extends AutoGroup {
 
-	private final String folderPath;
+	public static final MockVirtualFile DIRECTORY_INSTANCE = new MockVirtualFile("DIRECTORY_INSTANCE");
+	public static final FolderGroup INSTANCE = new FolderGroup(DIRECTORY_INSTANCE, Collections.emptyList());
+	private final VirtualFile folder;
 
-	public FolderGroup(String folderPath, List<Link> links) {
+	public FolderGroup(VirtualFile folder, List<Link> links) {
 		super(links);
-		this.folderPath = FileUtil.toSystemIndependentName(folderPath);
+		this.folder = folder;
 	}
 
 	@Override
 	public boolean isValid() {
-		return valid && ("DIRECTORY_INSTANCE".equals(folderPath) || new File(folderPath).isDirectory());
+		return valid && (DIRECTORY_INSTANCE.equals(folder) || folder.isDirectory());
 	}
 
 	@Override

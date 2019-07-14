@@ -170,7 +170,7 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 		if (data1 != null) {
 			boolean contains = false;
 			for (VirtualFile virtualFile : data1) {
-				contains = favoritesGroup.containsLink(project, virtualFile.getPath());
+				contains = favoritesGroup.containsLink(project, virtualFile);
 				if (contains) {
 					break;
 				}

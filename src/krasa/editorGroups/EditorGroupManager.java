@@ -83,6 +83,10 @@ public class EditorGroupManager {
 		if (LOG.isDebugEnabled())
 			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]");
 
+		if (requestedGroup != null && requestedGroup != displayedGroup) {
+			boolean debuggingHelperLine = true;
+		}
+		
 		long start = System.currentTimeMillis();
 
 		EditorGroup result = EditorGroup.EMPTY;
@@ -101,7 +105,7 @@ public class EditorGroupManager {
 					result = cache.getOwningOrSingleGroup(currentFilePath);
 				}
 				if (result.isInvalid()) {
-					result = cache.getLastEditorGroup(currentFilePath, false, true);
+					result = cache.getLastEditorGroup(currentFile, currentFilePath, false, true);
 				}
 				if (result.isInvalid()) {
 					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
@@ -111,7 +115,7 @@ public class EditorGroupManager {
 			if (result.isInvalid()) {
 				cache.validate(requestedGroup);
 				if (requestedGroup.isValid()
-					&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFilePath) || requestedGroup.isOwner(currentFilePath))) {
+					&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFile) || requestedGroup.isOwner(currentFilePath))) {
 					result = requestedGroup;
 				}
 			}
@@ -122,7 +126,7 @@ public class EditorGroupManager {
 				}
 
 				if (result.isInvalid()) {
-					result = cache.getLastEditorGroup(currentFilePath, true, true);
+					result = cache.getLastEditorGroup(currentFile, currentFilePath, true, true);
 				}
 			}
 
@@ -131,9 +135,9 @@ public class EditorGroupManager {
 					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
 				}
 				if (result.isInvalid() && config.getState().isAutoSameName()) {
-					result = AutoGroup.SAME_NAME_INSTANCE;
+					result = SameNameGroup.INSTANCE;
 				} else if (result.isInvalid() && config.getState().isAutoFolders()) {
-					result = AutoGroup.DIRECTORY_INSTANCE;
+					result = FolderGroup.INSTANCE;
 				}
 			}
 
@@ -158,7 +162,7 @@ public class EditorGroupManager {
 
 
 				if (!stub && result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup && !requestedGroup.isStub())) {
-					EditorGroup multiGroup = cache.getMultiGroup(currentFilePath);
+					EditorGroup multiGroup = cache.getMultiGroup(currentFile);
 					if (multiGroup.isValid()) {
 						result = multiGroup;
 					} else if (config.getState().isAutoFolders() && !AutoGroup.SAME_FILE_NAME.equals(cache.getLast(currentFilePath))) {
@@ -176,8 +180,15 @@ public class EditorGroupManager {
 				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
 			}
 			cache.setLast(currentFilePath, result);
-		} catch (IndexNotReadyException | ProcessCanceledException e) {
+		} catch (ProcessCanceledException e) {
+			LOG.debug(e.toString());
+			throw e;
+		} catch (IndexNotReadyException e) {
+			LOG.debug(e.toString());
 			throw new IndexNotReady(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
+		} catch (Throwable e) {
+			LOG.debug(e.toString());
+			throw e;
 		}
 		return result;
 	}
@@ -247,7 +258,7 @@ public class EditorGroupManager {
 	}
 
 	public List<EditorGroup> getGroups(VirtualFile file) {
-		List<EditorGroup> groups = cache.findGroups(file.getPath());
+		List<EditorGroup> groups = cache.findGroups(file);
 		groups.sort(COMPARATOR);
 		return groups;
 	}
@@ -266,8 +277,7 @@ public class EditorGroupManager {
 	}
 
 	public Color getColor(VirtualFile file) {
-		String canonicalPath = file.getPath();
-		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
+		EditorGroup group = cache.getEditorGroupForColor(file);
 		if (group != null) {
 			return group.getBgColor();
 		}
@@ -275,8 +285,7 @@ public class EditorGroupManager {
 	}
 
 	public Color getFgColor(VirtualFile file) {
-		String canonicalPath = file.getPath();
-		EditorGroup group = cache.getEditorGroupForColor(canonicalPath);
+		EditorGroup group = cache.getEditorGroupForColor(file);
 		if (group != null) {
 			return group.getFgColor();
 		}

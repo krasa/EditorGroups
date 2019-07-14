@@ -6,11 +6,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.RegexFileResolver;
-import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +34,7 @@ public class RegexGroupProvider {
 			return EditorGroup.EMPTY;
 		}
 
-		return new RegexGroup(matching, file.getParent().getPath(), fileName);
+		return new RegexGroup(matching, file.getParent(), fileName);
 	}
 
 	public List<RegexGroup> findMatchingRegexGroups_stub(VirtualFile file) {
@@ -63,7 +61,7 @@ public class RegexGroupProvider {
 	public List<RegexGroup> toRegexGroup_stub(VirtualFile file, String fileName, List<RegexGroupModel> matching) {
 		List<RegexGroup> result = new ArrayList<>(matching.size());
 		for (RegexGroupModel regexGroupModel : matching) {
-			result.add(new RegexGroup(regexGroupModel, file.getParent().getPath(), Collections.emptyList(), fileName));
+			result.add(new RegexGroup(regexGroupModel, file.getParent(), Collections.emptyList(), fileName));
 		}
 		return result;
 	}
@@ -78,25 +76,20 @@ public class RegexGroupProvider {
 
 	public RegexGroup getRegexGroup(RegexGroup group, Project project, @Nullable VirtualFile currentFile) {
 		List<Link> links;
-		if (currentFile != null) {
-			links = new RegexFileResolver(project).resolveRegexGroupLinks(group, currentFile);
-			if (links.isEmpty()) {
-				LOG.error("should contain the current file at least: " + group);
-			}
-		} else {
-			links = new RegexFileResolver(project).resolveRegexGroupLinks(group);
+		links = new RegexFileResolver(project).resolveRegexGroupLinks(group, currentFile);
+		if (currentFile != null && links.isEmpty()) {
+			LOG.error("should contain the current file at least: " + group);
 		}
-		return new RegexGroup(group.getRegexGroupModel(), group.getFolderPath(), links, group.getFileName());
+		return new RegexGroup(group.getRegexGroupModel(), group.getFolder(), links, group.getFileName());
 	}
 
-	public EditorGroup findRegexGroup_stub(String filePath, String substring) {
+	public EditorGroup findRegexGroup_stub(VirtualFile file, String substring) {
 		RegexGroupModels regexGroupModels = ApplicationConfiguration.state().getRegexGroupModels();
 		RegexGroupModel regexGroupModel = regexGroupModels.find(substring);
 		if (regexGroupModel == null) {
 			return EditorGroup.EMPTY;
 		}
 
-		File file = new File(filePath);
-		return new RegexGroup(regexGroupModel, Utils.getCanonicalPath(file.getParentFile()), Collections.emptyList(), file.getName());
+		return new RegexGroup(regexGroupModel, file.getParent(), Collections.emptyList(), file.getName());
 	}
 }

@@ -22,7 +22,6 @@ import krasa.editorGroups.UniqueTabNameBuilder;
 import krasa.editorGroups.model.EditorGroup;
 import krasa.editorGroups.model.Link;
 import krasa.editorGroups.support.Notifications;
-import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -106,7 +105,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 
 					for (Map.Entry<Link, String> link : namesByPath.entrySet()) {
 						Link linkKey = link.getKey();
-						defaultActionGroup.add(newAction(project, panel, currentFile, linkKey.getPath(), link.getValue()));
+						defaultActionGroup.add(newAction(project, panel, currentFile, linkKey, link.getValue()));
 					}
 				}
 			}
@@ -116,9 +115,9 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 	}
 
 	@NotNull
-	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, String link, String text) {
+	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, Link link, String text) {
 		OpenFileAction action = new OpenFileAction(link, project, panel, text);
-		if (link.equals(currentFile)) {
+		if (link.getPath().equals(currentFile)) {
 			action.getTemplatePresentation().setEnabled(false);
 			action.getTemplatePresentation().setText(text + " - current", false);
 			action.getTemplatePresentation().setIcon(null);
@@ -128,28 +127,27 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 
 
 	private static class OpenFileAction extends DumbAwareAction {
-		private final String link;
+		private final Link link;
 		private final EditorGroupPanel panel;
-		private final VirtualFile virtualFileByAbsolutePath;
+		private final VirtualFile virtualFile;
 		private final Project project;
 
-		public OpenFileAction(String link, Project project, EditorGroupPanel panel, String text) {
-			super(text, link, Utils.getFileIcon(link));
+		public OpenFileAction(Link link, Project project, EditorGroupPanel panel, String text) {
+			super(text, link.getPath(), link.getFileIcon());
 			this.link = link;
 			this.panel = panel;
-			VirtualFile virtualFileByAbsolutePath = Utils.getVirtualFileByAbsolutePath(link);
-			this.virtualFileByAbsolutePath = virtualFileByAbsolutePath;
+			this.virtualFile = link.getVirtualFile();
 			this.project = project;
-			getTemplatePresentation().setEnabled(virtualFileByAbsolutePath != null && virtualFileByAbsolutePath.exists());
+			getTemplatePresentation().setEnabled(virtualFile != null && virtualFile.exists());
 		}
 
 		@Override
 		public void actionPerformed(AnActionEvent e) {
-			if (virtualFileByAbsolutePath != null) {
+			if (virtualFile != null) {
 				boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
 				boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				instance.open(panel, virtualFileByAbsolutePath, null, window, tab, Splitters.from(e));
+				instance.open(panel, virtualFile, null, window, tab, Splitters.from(e));
 			} else {
 				Notifications.warning("File not found " + link, null);
 			}

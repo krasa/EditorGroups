@@ -167,7 +167,7 @@ public class IndexCache {
 	}
 
 
-	public EditorGroup getLastEditorGroup(String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
+	public EditorGroup getLastEditorGroup(VirtualFile currentFile, String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
 		EditorGroup result = EditorGroup.EMPTY;
 		if (!configuration.getState().isRememberLastGroup()) {
 			LOG.debug("<getLastEditorGroup " + result + " (isRememberLastGroup=false)");
@@ -182,30 +182,30 @@ public class IndexCache {
 			if (LOG.isDebugEnabled()) LOG.debug("last = " + last);
 			if (last != null && configuration.getState().isRememberLastGroup()) {
 				if (includeAutogroups && config.isAutoSameName() && AutoGroup.SAME_FILE_NAME.equals(last)) {
-					result = AutoGroup.SAME_NAME_INSTANCE;
+					result = SameNameGroup.INSTANCE;
 				} else if (includeAutogroups && config.isAutoFolders() && AutoGroup.DIRECTORY.equals(last)) {
-					result = AutoGroup.DIRECTORY_INSTANCE;
+					result = FolderGroup.INSTANCE;
 				} else if (EmptyGroup.ID.equals(last)) {
 					result = AutoGroup.HIDE_GROUP_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.ID_PREFIX)) {
 					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.ID_PREFIX.length()));
-					if (favoritesGroup.containsLink(project, currentFilePath)) {
+					if (favoritesGroup.containsLink(project, currentFile)) {
 						result = favoritesGroup;
 					}
 				} else if (includeFavorites && last.startsWith(RegexGroup.ID_PREFIX)) {
-					result = RegexGroupProvider.getInstance(project).findRegexGroup_stub(currentFilePath, last.substring(RegexGroup.ID_PREFIX.length()));
+					result = RegexGroupProvider.getInstance(project).findRegexGroup_stub(currentFile, last.substring(RegexGroup.ID_PREFIX.length()));
 				} else if (includeFavorites && last.equals(BookmarkGroup.ID)) {
 					result = externalGroupProvider.getBookmarkGroup();
 				} else {
 					EditorGroup lastGroup = getById(last);
-					if (lastGroup.containsLink(project, currentFilePath) || lastGroup.isOwner(currentFilePath)) {
+					if (lastGroup.containsLink(project, currentFile) || lastGroup.isOwner(currentFilePath)) {
 						result = lastGroup;
 					}
 				}
 			}
 
 			if (result.isInvalid()) {
-				result = getMultiGroup(currentFilePath);
+				result = getMultiGroup(currentFile);
 			}
 		}
 		if (LOG.isDebugEnabled()) {
@@ -214,14 +214,14 @@ public class IndexCache {
 		return result;
 	}
 
-	public List<EditorGroup> findGroups(String canonicalPath) {
+	public List<EditorGroup> findGroups(VirtualFile currentFile) {
 		List<EditorGroup> result = new ArrayList<>();
-		EditorGroups editorGroups = groupsByLinks.get(canonicalPath);
+		EditorGroups editorGroups = groupsByLinks.get(currentFile);
 		if (editorGroups != null) {
 			editorGroups.validate(this);
 			result.addAll(editorGroups.getAll());
 		}
-		result.addAll(externalGroupProvider.findGroups(canonicalPath));
+		result.addAll(externalGroupProvider.findGroups(currentFile));
 
 		if (LOG.isDebugEnabled()) {
 			LOG.debug("<findGroups " + result);
@@ -229,10 +229,10 @@ public class IndexCache {
 		return result;
 	}
 
-	public EditorGroup getMultiGroup(String currentFilePath) {
+	public EditorGroup getMultiGroup(VirtualFile currentFile) {
 		EditorGroup result = EditorGroup.EMPTY;
 
-		List<EditorGroup> favouriteGroups = findGroups(currentFilePath);
+		List<EditorGroup> favouriteGroups = findGroups(currentFile);
 		if (favouriteGroups.size() == 1) {
 			result = favouriteGroups.get(0);
 		} else if (favouriteGroups.size() > 1) {
@@ -246,10 +246,11 @@ public class IndexCache {
 
 	/**
 	 * called very often!
+	 * @param currentFile
 	 */
-	public EditorGroup getEditorGroupForColor(String currentFilePath) {
+	public EditorGroup getEditorGroupForColor(VirtualFile currentFile) {
 		EditorGroup result = EditorGroup.EMPTY;
-		EditorGroups groups = groupsByLinks.get(currentFilePath);
+		EditorGroups groups = groupsByLinks.get(currentFile.getPath());
 
 		if (groups != null) {
 			String last = groups.getLast();
@@ -257,14 +258,14 @@ public class IndexCache {
 				EditorGroups editorGroups = groupsByLinks.get(last);
 				if (editorGroups != null) {
 					EditorGroup lastGroup = editorGroups.getById(last);
-					if (lastGroup.isValid() && lastGroup.containsLink(project, currentFilePath)) {
+					if (lastGroup.isValid() && lastGroup.containsLink(project, currentFile)) {
 						result = lastGroup;
 					}
 				}
 			}
 
 			if (result.isInvalid()) {
-				result = groups.ownerOrLast(currentFilePath);
+				result = groups.ownerOrLast(currentFile.getPath());
 			}
 		}
 		return result;

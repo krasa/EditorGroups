@@ -9,6 +9,7 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.util.Pair;
+import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.TreeItem;
 import krasa.editorGroups.model.BookmarkGroup;
 import krasa.editorGroups.model.EditorGroup;
@@ -64,12 +65,12 @@ public class ExternalGroupProvider {
 		return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
 	}
 
-	public List<EditorGroup> findGroups(String currentFilePath) {
+	public List<EditorGroup> findGroups(VirtualFile currentFile) {
 		List<EditorGroup> favoritesGroups = new ArrayList<>();
 		long start = System.currentTimeMillis();
 
 		for (FavoritesGroup group : getFavoritesGroups()) {
-			if (group.containsLink(project, currentFilePath)) {
+			if (group.containsLink(project, currentFile)) {
 				favoritesGroups.add(group);
 			}
 		}

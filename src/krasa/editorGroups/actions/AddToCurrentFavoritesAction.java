@@ -78,7 +78,7 @@ public class AddToCurrentFavoritesAction extends EditorGroupsAction {
 		if (data1 != null) {
 			boolean everyFileIsContained = true;
 			for (VirtualFile virtualFile : data1) {
-				everyFileIsContained = favoritesGroup.containsLink(project, virtualFile.getPath());
+				everyFileIsContained = favoritesGroup.containsLink(project, virtualFile);
 				if (!everyFileIsContained) {
 					break;
 				}

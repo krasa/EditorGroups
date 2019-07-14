@@ -1,5 +1,6 @@
 package krasa.editorGroups;
 
+import com.intellij.mock.MockVirtualFile;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -9,17 +10,13 @@ import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.index.MyFileNameIndexService;
-import krasa.editorGroups.model.EditorGroup;
-import krasa.editorGroups.model.FolderGroup;
-import krasa.editorGroups.model.Link;
-import krasa.editorGroups.model.SameNameGroup;
-import krasa.editorGroups.support.FileResolver;
+import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.RegexFileResolver;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 public class AutoGroupProvider {
@@ -38,14 +35,14 @@ public class AutoGroupProvider {
 
 
 	public EditorGroup getFolderGroup(VirtualFile file) {
-		if (!file.isInLocalFileSystem()) {
-			return EditorGroup.EMPTY;
-		}
+//		if (!file.isInLocalFileSystem()) {
+//			return EditorGroup.EMPTY;
+//		}
 
 		VirtualFile parent = file.getParent();
-		String folder = parent.getPath();
-		List<Link> links = FileResolver.resolveLinks(project, file.getPath(), folder, Collections.singletonList("./"), null);
-		return new FolderGroup(folder, links);
+		RegexGroup regexGroup = new RegexGroup(new RegexGroupModel(".*", RegexGroupModel.Scope.CURRENT_FOLDER), parent);
+		List<Link> links = new RegexFileResolver(project).resolveRegexGroupLinks(regexGroup, file);
+		return new FolderGroup(parent, links);
 	}
 
 
@@ -57,7 +54,7 @@ public class AutoGroupProvider {
 		long start = System.currentTimeMillis();
 
 		Collection<VirtualFile> virtualFilesByName = null;
-		List<String> paths;
+		List<VirtualFile> paths;
 		try {
 			virtualFilesByName = MyFileNameIndexService.getVirtualFilesByName(project, nameWithoutExtension, true, GlobalSearchScope.projectScope(project));
 
@@ -83,20 +80,20 @@ public class AutoGroupProvider {
 					LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
 					break;
 				}
-				paths.add(file.getPath());
+				paths.add(file);
 			}
 
-			if (!paths.contains(currentFile.getPath())) {
-				paths.add(0, currentFile.getPath());
+			if (!paths.contains(currentFile)) {
+				paths.add(0, currentFile);
 			}
-			Collections.sort(paths);
+			paths.sort(VirtualFileComparator.getInstance());
 		} catch (IndexNotReadyException | ProcessCanceledException e) {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(e);
 			}
 			paths = new ArrayList<>();
-			paths.add(currentFile.getPath());
-			paths.add("Indexing...");
+			paths.add(currentFile);
+			paths.add(new MockVirtualFile("Indexing..."));
 		}
 
 		long t0 = System.currentTimeMillis() - start;
@@ -106,7 +103,7 @@ public class AutoGroupProvider {
 		if (LOG.isDebugEnabled())
 			LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
-		return new SameNameGroup(nameWithoutExtension, Link.from(paths));
+		return new SameNameGroup(nameWithoutExtension, Link.fromVirtualFiles(paths));
 	}
 
 

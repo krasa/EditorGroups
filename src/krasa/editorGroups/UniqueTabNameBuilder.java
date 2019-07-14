@@ -8,6 +8,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
 import krasa.editorGroups.model.Link;
+import krasa.editorGroups.model.VirtualFileLink;
 
 import java.util.List;
 import java.util.Map;
@@ -34,12 +35,10 @@ public class UniqueTabNameBuilder {
 
 		if (currentFile != null) {
 			String currentFilePath = currentFile.getPath();
-			if (currentFilePath != null) {
-				boolean containsCurrentFile = path_name.keySet().stream().anyMatch(link1 -> link1.getPath().equals(currentFilePath));
-				if (!containsCurrentFile) {
-					Link link = new Link(currentFilePath);
-					put(path_name, name_path, paths_withDuplicateName, link);
-				}
+			boolean containsCurrentFile = path_name.keySet().stream().anyMatch(link1 -> link1.getPath().equals(currentFilePath));
+			if (!containsCurrentFile) {
+				Link link = new VirtualFileLink(currentFile);
+				put(path_name, name_path, paths_withDuplicateName, link);
 			}
 		}
 

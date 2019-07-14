@@ -81,10 +81,21 @@ public abstract class EditorGroup {
 		return null;
 	}
 
+	@Deprecated
 	public boolean containsLink(Project project, String currentFilePath) {
 		List<Link> links = getLinks(project);
 		for (Link link : links) {
 			if (link.getPath().equals(currentFilePath)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	public boolean containsLink(Project project, VirtualFile currentFile) {
+		List<Link> links = getLinks(project);
+		for (Link link : links) {
+			if (link.fileEquals(currentFile)) {
 				return true;
 			}
 		}

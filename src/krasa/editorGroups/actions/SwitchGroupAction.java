@@ -88,7 +88,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 					displayedGroup = panel.getDisplayedGroup();
 
 					defaultActionGroup.add(createAction(displayedGroup, new SameNameGroup(file.getNameWithoutExtension(), Collections.emptyList()), project, refreshHandler(panel)));
-					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent().getPath(), Collections.emptyList()), project, refreshHandler(panel)));
+					defaultActionGroup.add(createAction(displayedGroup, new FolderGroup(file.getParent(), Collections.emptyList()), project, refreshHandler(panel)));
 					defaultActionGroup.add(createAction(displayedGroup, new EmptyGroup(), project, refreshHandler(panel)));
 
 
@@ -133,7 +133,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 		DumbAwareAction action = createAction(displayedGroup, bookmarkGroup, project, new Handler() {
 			@Override
 			void run(EditorGroup groupLink) {
-				if (panel != null && file != null && bookmarkGroup.containsLink(project, file.getPath())) {
+				if (panel != null && file != null && bookmarkGroup.containsLink(project, file)) {
 					refreshHandler(panel).run(bookmarkGroup);
 				} else {
 					otherGroupHandler(project).run(bookmarkGroup);
