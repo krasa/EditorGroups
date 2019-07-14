@@ -126,7 +126,7 @@ public class JBTabsImpl extends JComponent
 	private boolean myRequestFocusOnLastFocusedComponent = false;
 	private boolean myListenerAdded;
 	final Set<TabInfo> myAttractions = new HashSet<>();
-	private final Animator myAnimator;
+//	private final Animator myAnimator;
 	private List<TabInfo> myAllTabs;
 	private IdeFocusManager myFocusManager;
 	private static final boolean myAdjustBorders = true;
@@ -139,9 +139,9 @@ public class JBTabsImpl extends JComponent
 
 	private boolean myTabLabelActionsAutoHide;
 
-	private final TabActionsAutoHideListener myTabActionsAutoHideListener = new TabActionsAutoHideListener();
-	private Disposable myTabActionsAutoHideListenerDisposable = Disposer.newDisposable();
-	private IdeGlassPane myGlassPane;
+//	private final TabActionsAutoHideListener myTabActionsAutoHideListener = new TabActionsAutoHideListener();
+//	private Disposable myTabActionsAutoHideListenerDisposable = Disposer.newDisposable();
+//	private IdeGlassPane myGlassPane;
 	@NonNls
 	private static final String LAYOUT_DONE = "Layout.done";
 	@NonNls
@@ -309,12 +309,12 @@ public class JBTabsImpl extends JComponent
 			}
 		});
 
-		myAnimator = new Animator("JBTabs Attractions", 2, 500, true) {
-			@Override
-			public void paintNow(final int frame, final int totalFrames, final int cycle) {
-				repaintAttractions();
-			}
-		};
+//		myAnimator = new Animator("JBTabs Attractions", 2, 500, true) {
+//			@Override
+//			public void paintNow(final int frame, final int totalFrames, final int cycle) {
+//				repaintAttractions();
+//			}
+//		};
 
 		setFocusTraversalPolicyProvider(true);
 		setFocusTraversalPolicy(new LayoutFocusTraversalPolicy() {
@@ -328,55 +328,55 @@ public class JBTabsImpl extends JComponent
 		add(mySingleRowLayout.myRightGhost);
 
 
-		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
-			@Override
-			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
-			 try{
-				if (myProject == null && project != null) {
-					myProject = project;
-				}
-
-				Disposer.register(child, myAnimator);
-				Disposer.register(child, new Disposable() {
-					@Override
-					public void dispose() {
-						removeTimerUpdate();
-					}
-				});
-
-				if (!myTestMode) {
-					IdeGlassPane gp = IdeGlassPaneUtil.find(child);
-					myTabActionsAutoHideListenerDisposable = Disposer.newDisposable("myTabActionsAutoHideListener");
-					Disposer.register(child, myTabActionsAutoHideListenerDisposable);
-					gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, myTabActionsAutoHideListenerDisposable);
-					myGlassPane = gp;
-
-					UIUtil.addAwtListener(new AWTEventListener() {
-						@Override
-						public void eventDispatched(final AWTEvent event) {
-							if (mySingleRowLayout.myMorePopup != null) return;
-							processFocusChange();
-						}
-					}, AWTEvent.FOCUS_EVENT_MASK, child);
-
-					myDragHelper = new krasa.editorGroups.tabs2.impl.DragHelper(child);
-					myDragHelper.start();
-				}
-
-				if (myProject != null && myFocusManager == getGlobalInstance()) {
-					myFocusManager = IdeFocusManager.getInstance(myProject);
-				}
-					
-			} catch (IncorrectOperationException e) {  //already disposed
-				LOG.warn("EditorGroups plugin: " + e);
-				myAnimator.dispose();
-				removeTimerUpdate();
-				if (myTabActionsAutoHideListenerDisposable != null) {
-					Disposer.dispose( myTabActionsAutoHideListenerDisposable);
-				}
-			}
-			}
-		};
+//		new LazyUiDisposable<JBTabsImpl>(parent, this, this) {
+//			@Override
+//			protected void initialize(@NotNull Disposable parent, @NotNull JBTabsImpl child, @Nullable Project project) {
+//			 try{
+//				if (myProject == null && project != null) {
+//					myProject = project;
+//				}
+//
+//				Disposer.register(child, myAnimator);
+//				Disposer.register(child, new Disposable() {
+//					@Override
+//					public void dispose() {
+//						removeTimerUpdate();
+//					}
+//				});
+//
+//				if (!myTestMode) {
+//					IdeGlassPane gp = IdeGlassPaneUtil.find(child);
+//					myTabActionsAutoHideListenerDisposable = Disposer.newDisposable("myTabActionsAutoHideListener");
+//					Disposer.register(child, myTabActionsAutoHideListenerDisposable);
+//					gp.addMouseMotionPreprocessor(myTabActionsAutoHideListener, myTabActionsAutoHideListenerDisposable);
+//					myGlassPane = gp;
+//
+//					UIUtil.addAwtListener(new AWTEventListener() {
+//						@Override
+//						public void eventDispatched(final AWTEvent event) {
+//							if (mySingleRowLayout.myMorePopup != null) return;
+//							processFocusChange();
+//						}
+//					}, AWTEvent.FOCUS_EVENT_MASK, child);
+//
+//					myDragHelper = new krasa.editorGroups.tabs2.impl.DragHelper(child);
+//					myDragHelper.start();
+//				}
+//
+//				if (myProject != null && myFocusManager == getGlobalInstance()) {
+//					myFocusManager = IdeFocusManager.getInstance(myProject);
+//				}
+//
+//			} catch (IncorrectOperationException e) {  //already disposed
+//				LOG.warn("EditorGroups plugin: " + e);
+//				myAnimator.dispose();
+//				removeTimerUpdate();
+//				if (myTabActionsAutoHideListenerDisposable != null) {
+//					Disposer.dispose( myTabActionsAutoHideListenerDisposable);
+//				}
+//			}
+//			}
+//		};
 		UIUtil.putClientProperty(
 			this, UIUtil.NOT_IN_HIERARCHY_COMPONENTS, new Iterable<JComponent>() {
 				@Override
@@ -572,11 +572,11 @@ public class JBTabsImpl extends JComponent
 
 		removeTimerUpdate();
 
-		if (ScreenUtil.isStandardAddRemoveNotify(this) && myGlassPane != null) {
-			Disposer.dispose(myTabActionsAutoHideListenerDisposable);
-			myTabActionsAutoHideListenerDisposable = Disposer.newDisposable();
-			myGlassPane = null;
-		}
+//		if (ScreenUtil.isStandardAddRemoveNotify(this) && myGlassPane != null) {
+//			Disposer.dispose(myTabActionsAutoHideListenerDisposable);
+//			myTabActionsAutoHideListenerDisposable = Disposer.newDisposable();
+//			myGlassPane = null;
+//		}
 	}
 
 	@Override
@@ -584,11 +584,11 @@ public class JBTabsImpl extends JComponent
 		super.processMouseEvent(e);
 	}
 
-	private void addTimerUpdate() {
-		if (!myListenerAdded) {
-			myActionManager.addTimerListener(500, this);
-			myListenerAdded = true;
-		}
+	protected void addTimerUpdate() {
+//		if (!myListenerAdded) {
+//			myActionManager.addTimerListener(500, this);
+//			myListenerAdded = true;
+//		}
 	}
 
 	private void removeTimerUpdate() {
@@ -1285,12 +1285,12 @@ public class JBTabsImpl extends JComponent
 			tabInfo.setBlinkCount(0);
 		}
 
-		if (start && !myAnimator.isRunning()) {
-			myAnimator.resume();
-		} else if (!start && myAttractions.isEmpty()) {
-			myAnimator.suspend();
-			repaintAttractions();
-		}
+//		if (start && !myAnimator.isRunning()) {
+//			myAnimator.resume();
+//		} else if (!start && myAttractions.isEmpty()) {
+//			myAnimator.suspend();
+//			repaintAttractions();
+//		}
 	}
 
 	private void updateText(final TabInfo tabInfo) {
@@ -1550,7 +1550,7 @@ public class JBTabsImpl extends JComponent
 
 			moveDraggedTabLabel();
 
-			myTabActionsAutoHideListener.processMouseOver();
+//			myTabActionsAutoHideListener.processMouseOver();
 		} finally {
 			myForcedRelayout = false;
 		}
