@@ -216,7 +216,7 @@ public class IndexCache {
 
 	public List<EditorGroup> findGroups(VirtualFile currentFile) {
 		List<EditorGroup> result = new ArrayList<>();
-		EditorGroups editorGroups = groupsByLinks.get(currentFile);
+		EditorGroups editorGroups = groupsByLinks.get(currentFile.getPath());
 		if (editorGroups != null) {
 			editorGroups.validate(this);
 			result.addAll(editorGroups.getAll());

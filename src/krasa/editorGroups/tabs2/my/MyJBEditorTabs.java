@@ -17,7 +17,6 @@ import krasa.editorGroups.tabs2.impl.TabLabel;
 import krasa.editorGroups.tabs2.impl.singleRow.ScrollableSingleRowLayout;
 import krasa.editorGroups.tabs2.impl.singleRow.SingleRowLayout;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -28,11 +27,10 @@ import java.awt.event.MouseListener;
 public class MyJBEditorTabs extends JBEditorTabs {
 	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(MyJBEditorTabs.class);
 
-	@Nullable
 	private final Project project;
 	private final VirtualFile file;
 
-	public MyJBEditorTabs(@Nullable Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent, VirtualFile file) {
+	public MyJBEditorTabs(Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent, VirtualFile file) {
 		super(project, actionManager, focusManager, parent);
 		this.project = project;
 		this.file = file;
@@ -145,6 +143,9 @@ public class MyJBEditorTabs extends JBEditorTabs {
 	 * fixes flicker when switching to an already opened tab, #scroll is too late, but is necessary anyway for some reason
 	 */
 	public void adjustScroll() {
+		if (project.isDisposed()) {
+			return;
+		}
 		SwitchRequest switchingRequest = EditorGroupManager.getInstance(project).getSwitchingRequest(file);
 		if (switchingRequest != null) {
 			int myScrollOffset = switchingRequest.myScrollOffset;
