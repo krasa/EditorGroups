@@ -1,4 +1,4 @@
-package krasa.editorGroups;
+package krasa.editorGroups.support;
 
 import com.intellij.ide.util.treeView.FileNameComparator;
 import com.intellij.openapi.vfs.VirtualFile;

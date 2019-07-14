@@ -11,8 +11,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.model.*;
+import krasa.editorGroups.support.Notifications;
 import krasa.editorGroups.support.RegexFileResolver;
 import krasa.editorGroups.support.Utils;
+import krasa.editorGroups.support.VirtualFileComparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -61,9 +63,9 @@ public class AutoGroupProvider {
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("getVirtualFilesByName=" + virtualFilesByName);
 			}
-
+			int groupSizeLimitInt = ApplicationConfiguration.state().getGroupSizeLimitInt();
 			int size = virtualFilesByName.size();
-			paths = new ArrayList<>(Math.max(size + 1, IndexCache.LIMIT_SAME_NAME));
+			paths = new ArrayList<>(Math.min(size + 1, groupSizeLimitInt+1));
 
 
 			for (VirtualFile file : virtualFilesByName) {
@@ -76,7 +78,8 @@ public class AutoGroupProvider {
 				if (file.isDirectory()) {
 					continue;
 				}
-				if (paths.size() == IndexCache.LIMIT_SAME_NAME) {
+				if (paths.size() == groupSizeLimitInt) {
+					Notifications.tooManyFiles(size);
 					LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
 					break;
 				}
@@ -97,7 +100,7 @@ public class AutoGroupProvider {
 		}
 
 		long t0 = System.currentTimeMillis() - start;
-		if (t0 > IndexCache.LINKS_LIMIT) {
+		if (t0 > 500) {
 			LOG.warn("getSameNameGroup took " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 		}
 		if (LOG.isDebugEnabled())

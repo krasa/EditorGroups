@@ -20,7 +20,7 @@ public class ApplicationConfiguration {
 	private boolean hideEmpty = true;
 	private boolean showSize;
 	private boolean continuousScrolling;
-	private boolean preferLatencyOverFlicker = false;
+	private boolean initializeSynchronously = false;
 	private boolean indexOnlyEditorGroupsFiles;
 	private boolean excludeEditorGroupsFiles;
 	private Integer tabBgColor;
@@ -30,7 +30,8 @@ public class ApplicationConfiguration {
 	private boolean rememberLastGroup = true;
 	private boolean groupSwitchGroupAction = false;
 	private boolean hidePanel = false;
-	private int groupSizeLimit = 100;
+	private int groupSizeLimit = 10000;
+	private int tabSizeLimit = 50;
 
 	public static ApplicationConfiguration state() {
 		return ApplicationConfigurationComponent.getInstance().getState();
@@ -109,12 +110,12 @@ public class ApplicationConfiguration {
 		this.continuousScrolling = continuousScrolling;
 	}
 
-	public boolean isPreferLatencyOverFlicker() {
-		return preferLatencyOverFlicker;
+	public boolean isInitializeSynchronously() {
+		return initializeSynchronously;
 	}
 
-	public void setPreferLatencyOverFlicker(final boolean preferLatencyOverFlicker) {
-		this.preferLatencyOverFlicker = preferLatencyOverFlicker;
+	public void setInitializeSynchronously(final boolean initializeSynchronously) {
+		this.initializeSynchronously = initializeSynchronously;
 	}
 
 	public boolean isIndexOnlyEditorGroupsFiles() {
@@ -230,6 +231,24 @@ public class ApplicationConfiguration {
 
 	public void setGroupSizeLimitInt(final int groupSizeLimit) {
 		this.groupSizeLimit = groupSizeLimit;
+	}
+
+	public int getTabSizeLimitInt() {
+		return tabSizeLimit;
+	}
+
+	public void setTabSizeLimitInt(final int tabSizeLimit) {
+		this.tabSizeLimit = tabSizeLimit;
+	}
+
+	@Transient
+	public String getTabSizeLimit() {
+		return String.valueOf(tabSizeLimit);
+	}
+
+	@Transient
+	public void setTabSizeLimit(final String tabSizeLimit) {
+		this.tabSizeLimit = Integer.parseInt(tabSizeLimit);
 	}
 
 

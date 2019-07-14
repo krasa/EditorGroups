@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import krasa.editorGroups.support.LinkComparator;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public abstract class AutoGroup extends EditorGroup {
 
 	public AutoGroup(List<Link> links) {
 		this.links = links;
+		links.sort(LinkComparator.INSTANCE);
 	}
 
 

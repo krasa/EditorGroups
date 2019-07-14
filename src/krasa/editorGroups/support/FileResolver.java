@@ -290,7 +290,6 @@ public class FileResolver {
 			throw new TooManyFilesException(links.size());
 		}
 		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
-			Path path = Paths.get(file.toURI());
 			links.add(Utils.getCanonicalPath(file));
 		}
 	}

@@ -5,10 +5,10 @@ import krasa.editorGroups.model.Link;
 
 import java.util.Comparator;
 
-public class AlphaComparator implements Comparator<Link> {
-	public static final AlphaComparator INSTANCE = new AlphaComparator();
+public class LinkComparator implements Comparator<Link> {
+	public static final LinkComparator INSTANCE = new LinkComparator();
 
-	protected AlphaComparator() {
+	protected LinkComparator() {
 	}
 
 	@Override

@@ -23,7 +23,7 @@ public class SettingsForm {
 	private JCheckBox hideEmpty;
 	private JCheckBox showSize;
 	private JCheckBox continuousScrolling;
-	private JCheckBox latencyOverFlicker;
+	private JCheckBox initializeSynchronously;
 	private JCheckBox indexOnlyEditorGroupsFileCheckBox;
 	private JCheckBox excludeEGroups;
 	private JPanel tabColors;
@@ -35,6 +35,7 @@ public class SettingsForm {
 	private JPanel modelsPanel;
 	private JCheckBox selectRegexGroup;
 	private JTextField groupSizeLimit;
+	private JTextField tabSizeLimit;
 	private TabsColors tabsColors;
 
 	private RegexTable regexTable;
@@ -118,13 +119,14 @@ public class SettingsForm {
 		autoSwitch.setSelected(data.isForceSwitch());
 		byFolder.setSelected(data.isAutoFolders());
 		continuousScrolling.setSelected(data.isContinuousScrolling());
-		latencyOverFlicker.setSelected(data.isPreferLatencyOverFlicker());
+		initializeSynchronously.setSelected(data.isInitializeSynchronously());
 		indexOnlyEditorGroupsFileCheckBox.setSelected(data.isIndexOnlyEditorGroupsFiles());
 		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
 		rememberLastGroup.setSelected(data.isRememberLastGroup());
 		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
 		selectRegexGroup.setSelected(data.isSelectRegexGroup());
 		groupSizeLimit.setText(data.getGroupSizeLimit());
+		tabSizeLimit.setText(data.getTabSizeLimit());
 	}
 
 	public void getData(ApplicationConfiguration data) {
@@ -134,13 +136,14 @@ public class SettingsForm {
 		data.setForceSwitch(autoSwitch.isSelected());
 		data.setAutoFolders(byFolder.isSelected());
 		data.setContinuousScrolling(continuousScrolling.isSelected());
-		data.setPreferLatencyOverFlicker(latencyOverFlicker.isSelected());
+		data.setInitializeSynchronously(initializeSynchronously.isSelected());
 		data.setIndexOnlyEditorGroupsFiles(indexOnlyEditorGroupsFileCheckBox.isSelected());
 		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
 		data.setRememberLastGroup(rememberLastGroup.isSelected());
 		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
 		data.setSelectRegexGroup(selectRegexGroup.isSelected());
 		data.setGroupSizeLimit(groupSizeLimit.getText());
+		data.setTabSizeLimit(tabSizeLimit.getText());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
@@ -150,13 +153,15 @@ public class SettingsForm {
 		if (autoSwitch.isSelected() != data.isForceSwitch()) return true;
 		if (byFolder.isSelected() != data.isAutoFolders()) return true;
 		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
-		if (latencyOverFlicker.isSelected() != data.isPreferLatencyOverFlicker()) return true;
+		if (initializeSynchronously.isSelected() != data.isInitializeSynchronously()) return true;
 		if (indexOnlyEditorGroupsFileCheckBox.isSelected() != data.isIndexOnlyEditorGroupsFiles()) return true;
 		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
 		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
 		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
 		if (selectRegexGroup.isSelected() != data.isSelectRegexGroup()) return true;
 		if (groupSizeLimit.getText() != null ? !groupSizeLimit.getText().equals(data.getGroupSizeLimit()) : data.getGroupSizeLimit() != null)
+			return true;
+		if (tabSizeLimit.getText() != null ? !tabSizeLimit.getText().equals(data.getTabSizeLimit()) : data.getTabSizeLimit() != null)
 			return true;
 		return false;
 	}

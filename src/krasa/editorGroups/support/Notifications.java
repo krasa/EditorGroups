@@ -102,4 +102,8 @@ public class Notifications {
 		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", s, NotificationType.WARNING, null);
 		show(notification);
 	}
+
+	public static void tooManyFiles(int size) {
+		warning("Found too many matching files, aborting. Size=" + size);
+	}
 }

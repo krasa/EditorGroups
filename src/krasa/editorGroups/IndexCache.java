@@ -19,8 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class IndexCache {
 	private static final Logger LOG = Logger.getInstance(IndexCache.class);
-	public static final int LINKS_LIMIT = 100;
-	public static final int LIMIT_SAME_NAME = LINKS_LIMIT;
+	public static final int MAX_HISTORY_SIZE = 1000;
 
 
 	public static IndexCache getInstance(@NotNull Project project) {
@@ -157,10 +156,6 @@ public class IndexCache {
 			return;
 		}
 		List<Link> links = FileResolver.resolveLinks(group, project);
-		if (links.size() > LINKS_LIMIT) {
-			LOG.warn("Too many links (" + links.size() + ") for group: " + group + ",\nResolved links:" + links);
-			links = new ArrayList<>(links.subList(0, LINKS_LIMIT));
-		}
 		group.setLinks(links);
 
 		addToCache(links, group);
@@ -339,7 +334,7 @@ public class IndexCache {
 			} else if (autoFolders && AutoGroup.DIRECTORY.equals(last)) {
 				continue;
 			}
-			if (state.lastGroup.size() > 1000) {  //TODO config
+			if (state.lastGroup.size() > MAX_HISTORY_SIZE) {  //TODO config
 				break;
 			}
 			state.lastGroup.add(new ProjectComponent.StringPair(entry.getKey(), last));

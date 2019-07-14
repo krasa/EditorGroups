@@ -1,177 +1,209 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="krasa.editorGroups.gui.SettingsForm">
-  <grid id="27dc6" binding="root" layout-manager="GridLayoutManager" row-count="19" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="root" layout-manager="GridLayoutManager" row-count="5" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="20" y="20" width="654" height="488"/>
+      <xy x="20" y="20" width="534" height="594"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <component id="3c1d0" class="javax.swing.JCheckBox" binding="byName">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Select 'By same file name' group (without extension), if no manually defined group exists"/>
-          <toolTipText value="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"/>
-        </properties>
-      </component>
-      <component id="b88ba" class="javax.swing.JCheckBox" binding="showSize">
-        <constraints>
-          <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Show group size at titles"/>
-        </properties>
-      </component>
-      <component id="4cc13" class="javax.swing.JCheckBox" binding="hideEmpty">
-        <constraints>
-          <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Hide the panel if no group exists or is empty"/>
-        </properties>
-      </component>
-      <component id="a3b86" class="javax.swing.JCheckBox" binding="autoSwitch">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Refresh button switches to a manually defined group - if exists for the current file"/>
-          <toolTipText value="From 'By same file name' and 'Current folder' groups"/>
-        </properties>
-      </component>
-      <component id="ec726" class="javax.swing.JCheckBox" binding="byFolder">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Select 'Current folder' group, if no manually defined group exists"/>
-          <toolTipText value="Automatic Editor Groups by the Current Folder, if no manually defined exists"/>
-        </properties>
-      </component>
-      <component id="3b71e" class="javax.swing.JCheckBox" binding="continuousScrolling">
-        <constraints>
-          <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Continuous scrolling"/>
-        </properties>
-      </component>
-      <component id="1fb24" class="javax.swing.JCheckBox" binding="latencyOverFlicker">
-        <constraints>
-          <grid row="11" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Prefer lags over flickering on editor opening by IDE, e.g from Project View"/>
-          <toolTipText value="Synchronously get an editor group on opening of a file"/>
-        </properties>
-      </component>
-      <component id="af275" class="javax.swing.JCheckBox" binding="indexOnlyEditorGroupsFileCheckBox">
-        <constraints>
-          <grid row="12" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Index only EditorGroups type files (*.egroups)"/>
-          <toolTipText value=""/>
-        </properties>
-      </component>
-      <component id="86bcb" class="javax.swing.JCheckBox" binding="excludeEGroups">
-        <constraints>
-          <grid row="13" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Exclude EditorGroups type files from the groups unless explicitely added"/>
-          <toolTipText value=""/>
-        </properties>
-      </component>
       <grid id="39956" binding="tabColors" custom-create="true" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="16" column="0" row-span="1" col-span="2" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-        <border type="none"/>
+        <border type="etched" title="Colors"/>
         <children/>
       </grid>
       <component id="25826" class="javax.swing.JSeparator">
         <constraints>
-          <grid row="15" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
-      <component id="2107e" class="javax.swing.JSeparator">
-        <constraints>
-          <grid row="10" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-      </component>
-      <component id="8782e" class="javax.swing.JCheckBox" binding="rememberLastGroup">
-        <constraints>
-          <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Remember last opened group for a file"/>
-          <toolTipText value=""/>
-        </properties>
-      </component>
-      <component id="45b8d" class="javax.swing.JCheckBox" binding="groupSwitchGroupAction">
-        <constraints>
-          <grid row="9" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Group 'Switch Editor Group' action's list by type and the current file"/>
-          <toolTipText value=""/>
-        </properties>
       </component>
       <grid id="3926f" binding="modelsPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
         <constraints>
-          <grid row="18" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-        <border type="none"/>
+        <border type="etched" title="Regex groups"/>
         <children/>
       </grid>
-      <component id="5e414" class="javax.swing.JLabel">
+      <grid id="48737" layout-manager="GridLayoutManager" row-count="4" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="17" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Regex groups:"/>
-        </properties>
-      </component>
-      <component id="5463a" class="javax.swing.JCheckBox" binding="selectRegexGroup">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Select first matching 'Regex group', if no manually defined group exists"/>
-          <toolTipText value="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"/>
-        </properties>
-      </component>
-      <component id="9b04" class="javax.swing.JSeparator">
-        <constraints>
-          <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
-      <component id="61240" class="javax.swing.JLabel">
+        <border type="etched" title="Performance"/>
+        <children>
+          <component id="1fb24" class="javax.swing.JCheckBox" binding="initializeSynchronously">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Initialize groups synchronously - less flicker, more UI lags"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+          <component id="af275" class="javax.swing.JCheckBox" binding="indexOnlyEditorGroupsFileCheckBox">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Index only EditorGroups type files (*.egroups)"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+          <component id="61240" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Group size limit:"/>
+            </properties>
+          </component>
+          <component id="7ed18" class="javax.swing.JTextField" binding="groupSizeLimit">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="150" height="-1"/>
+              </grid>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="27edd" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Tab size limit:"/>
+            </properties>
+          </component>
+          <component id="73d63" class="javax.swing.JTextField" binding="tabSizeLimit">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                <preferred-size width="30" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="e9272" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="(use 'Switch File' action to see all)"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="d20b8" layout-manager="GridLayoutManager" row-count="11" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text value="Group size limit:"/>
-        </properties>
-      </component>
-      <component id="7ed18" class="javax.swing.JTextField" binding="groupSizeLimit">
-        <constraints>
-          <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
-            <preferred-size width="150" height="-1"/>
-          </grid>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
-      </component>
+        <border type="etched" title="Behaviour"/>
+        <children>
+          <component id="3c1d0" class="javax.swing.JCheckBox" binding="byName">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Select 'By same file name' group, if no manually defined group exists"/>
+              <toolTipText value="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"/>
+            </properties>
+          </component>
+          <component id="a3b86" class="javax.swing.JCheckBox" binding="autoSwitch">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Refresh button switches to a manually defined group - if exists for the current file"/>
+              <toolTipText value="From 'By same file name' and 'Current folder' groups"/>
+            </properties>
+          </component>
+          <component id="ec726" class="javax.swing.JCheckBox" binding="byFolder">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Select 'Current folder' group, if no manually defined group exists"/>
+              <toolTipText value="Automatic Editor Groups by the Current Folder, if no manually defined exists"/>
+            </properties>
+          </component>
+          <component id="5463a" class="javax.swing.JCheckBox" binding="selectRegexGroup">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Select first matching 'Regex group', if no manually defined group exists"/>
+              <toolTipText value="Automatic Editor Groups by the Current File Name (without extension), if no manually defined exists"/>
+            </properties>
+          </component>
+          <component id="8782e" class="javax.swing.JCheckBox" binding="rememberLastGroup">
+            <constraints>
+              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Remember last opened group for a file"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+          <component id="4cc13" class="javax.swing.JCheckBox" binding="hideEmpty">
+            <constraints>
+              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Hide the panel if no group exists or is empty"/>
+            </properties>
+          </component>
+          <component id="7f929" class="javax.swing.JSeparator">
+            <constraints>
+              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+          </component>
+          <component id="b88ba" class="javax.swing.JCheckBox" binding="showSize">
+            <constraints>
+              <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Show group size at titles"/>
+            </properties>
+          </component>
+          <component id="3b71e" class="javax.swing.JCheckBox" binding="continuousScrolling">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Continuous scrolling"/>
+            </properties>
+          </component>
+          <component id="45b8d" class="javax.swing.JCheckBox" binding="groupSwitchGroupAction">
+            <constraints>
+              <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Group 'Switch Editor Group' action's list by type and the current file"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+          <component id="86bcb" class="javax.swing.JCheckBox" binding="excludeEGroups">
+            <constraints>
+              <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text value="Exclude *.egroup files from groups unless explicitely added"/>
+              <toolTipText value=""/>
+            </properties>
+          </component>
+        </children>
+      </grid>
     </children>
   </grid>
 </form>

@@ -57,7 +57,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public static final DataKey<FavoritesGroup> FAVORITE_GROUP = DataKey.create("krasa.FavoritesGroup");
 	private static final Logger LOG = Logger.getInstance(EditorGroupPanel.class);
 	private final ExecutorService myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("EditorGroups-#getGroup", 1);
-	                                                             
+
 
 	public static final Key<EditorGroupPanel> EDITOR_PANEL = Key.create("EDITOR_GROUPS_PANEL");
 	public static final Key<EditorGroup> EDITOR_GROUP = Key.create("EDITOR_GROUP");
@@ -229,7 +229,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		EditorGroup editorGroup = toBeRendered;
 
 		//minimize flicker for the price of latency
-		boolean preferLatencyOverFlicker = applicationConfiguration.isPreferLatencyOverFlicker();
+		boolean preferLatencyOverFlicker = applicationConfiguration.isInitializeSynchronously();
 		if (editorGroup == null && preferLatencyOverFlicker && !DumbService.isDumb(project)) {
 			long start = System.currentTimeMillis();
 			try {
@@ -349,8 +349,29 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void createTabs(List<Link> links, Map<Link, String> path_name) {
+		int start = 0;
+		int end = links.size();
+		int tabSizeLimitInt = ApplicationConfiguration.state().getTabSizeLimitInt();
 
-		for (int i1 = 0; i1 < links.size(); i1++) {
+		if (links.size() > tabSizeLimitInt) {
+			int currentFilePosition = -1;
+
+			for (int i = 0; i < links.size(); i++) {
+				Link link = links.get(i);
+				if (link.getVirtualFile().equals(fileFromTextEditor) && (line == null || Objects.equals(link.getLine(), line))) {
+					currentFilePosition = i;
+					break;
+				}
+			}
+			if (currentFilePosition > -1) {
+				start = Math.max(0, currentFilePosition - tabSizeLimitInt / 2);
+				end = Math.min(links.size(), start + tabSizeLimitInt);
+			}
+			LOG.debug("Too many tabs, skipping: " + (links.size() - tabSizeLimitInt));
+		}
+
+		int j = 0;
+		for (int i1 = start; i1 < end; i1++) {
 			Link link = links.get(i1);
 
 			MyTabInfo tab = new MyTabInfo(link, path_name.get(link));
@@ -362,8 +383,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (Objects.equals(link.getLine(), line) && link.fileEquals(fileFromTextEditor)) {
 				tabs.setMySelectedInfo(tab);
 				customizeSelectedColor(tab);
-				currentIndex = i1;
+				currentIndex = j;
 			}
+			j++;
 		}
 		if (currentIndex == NOT_INITIALIZED) {
 			selectTabFallback();
@@ -691,7 +713,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 
 		});
-	}   
+	}
 
 	private volatile int failed = 0;
 
@@ -740,7 +762,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			} catch (ExecutionException e) {
 				throw e.getCause();
 			}
-			                                                                                                                                                                                                                                                           
+
 			if (LOG.isDebugEnabled()) {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}

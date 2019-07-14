@@ -3,7 +3,7 @@ package krasa.editorGroups.model;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.vfs.VirtualFile;
-import krasa.editorGroups.support.AlphaComparator;
+import krasa.editorGroups.support.LinkComparator;
 import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +35,7 @@ public abstract class Link {
 		for (String link : links) {
 			links1.add(new PathLink(link));
 		}
-		links1.sort(AlphaComparator.INSTANCE);
+		links1.sort(LinkComparator.INSTANCE);
 		return links1;
 	}
 
@@ -45,7 +45,7 @@ public abstract class Link {
 		for (VirtualFile link : links) {
 			links1.add(new VirtualFileLink(link));
 		}
-		links1.sort(AlphaComparator.INSTANCE);
+		links1.sort(LinkComparator.INSTANCE);
 		return links1;
 	}
 
