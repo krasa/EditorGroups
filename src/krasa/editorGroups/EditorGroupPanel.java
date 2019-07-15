@@ -6,7 +6,6 @@ import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
-import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
@@ -15,6 +14,9 @@ import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
+import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.progress.ProgressManager;
+import com.intellij.openapi.progress.util.ProgressIndicatorUtils;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.*;
@@ -49,14 +51,15 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
+
 
 public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public static final DataKey<FavoritesGroup> FAVORITE_GROUP = DataKey.create("krasa.FavoritesGroup");
 	private static final Logger LOG = Logger.getInstance(EditorGroupPanel.class);
-	private final ExecutorService myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("EditorGroups-#getGroup", 1);
+	private final ExecutorService myTaskExecutor;
 
 
 	public static final Key<EditorGroupPanel> EDITOR_PANEL = Key.create("EDITOR_GROUPS_PANEL");
@@ -82,6 +85,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private UniqueTabNameBuilder uniqueNameBuilder;
 	private Integer line;
 	private boolean hideGlobally;
+	private DumbService dumbService;
 
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
@@ -221,6 +225,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		tabs.addMouseListener(getPopupHandler());
 
 
+		myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("krasa.editorGroups.EditorGroupPanel-" + file.getName(), 1);
+		dumbService = DumbService.getInstance(this.project);
 	}
 
 	public void postConstruct() {
@@ -687,37 +693,31 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 	private void refresh2() {
-		PanelRefresher.getInstance(project).refreshOnBackground(new Runnable() {
-			@Override
-			public void run() {
-				if (disposed) {
-					return;
-				}
-				boolean selected = isSelected();
-				if (LOG.isDebugEnabled()) {
-					LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
-				}
-				if (selected) {
-					RefreshRequest refreshRequest = atomicReference.get();
-					if (refreshRequest != null && (refreshRequest.requestedGroup == null || refreshRequest.requestedGroup instanceof EditorGroupIndexValue)) {
-						LOG.debug("waiting on smart mode");
-						DumbService.getInstance(project).waitForSmartMode();
-						if (disposed) {
-							return;
-						}
+		try {
+			myTaskExecutor.submit(new Runnable() {
+				@Override
+				public void run() {
+					if (disposed) {
+						return;
+					}
+					boolean selected = isSelected();
+					if (LOG.isDebugEnabled()) {
+						LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
+					}
+					if (selected) {
+						refresh3();
 					}
 
-					refresh3();
 				}
 
-			}
-
-		});
+			});
+		} catch (RejectedExecutionException e) {
+			LOG.debug(e);
+		}
 	}
 
-	private volatile int failed = 0;
-
 	private void refresh3() {
+		long start = System.currentTimeMillis();
 		if (disposed) {
 			return;
 		}
@@ -725,48 +725,18 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			LOG.error("do not execute it on EDT");
 		}
 
-		long start = System.currentTimeMillis();
-		RefreshRequest request = atomicReference.getAndSet(null);
-		if (request == null) {
-			if (LOG.isDebugEnabled()) LOG.debug("nothing to refresh " + fileEditor.getName());
-			return;
-		}
-		if (LOG.isDebugEnabled()) LOG.debug(">refresh3 " + request);
-
-		EditorGroup requestedGroup = request.requestedGroup;
-		boolean refresh = request.refresh;
-
-
 		try {
-			EditorGroup group;
-//			group	= ApplicationManager.getApplication().runReadAction(new ThrowableComputable<EditorGroup, Throwable>() {
-//				@Override
-//				public EditorGroup compute() throws Throwable {
-//					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
-//					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
-//					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
-//				}
-//			});
+			Ref<EditorGroup> editorGroupRef = new Ref<>();
 
-			try {
-				group = ReadAction.nonBlocking(() -> {
-					EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
-					lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
-					return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
-				}).expireWith(fileEditor)
-					.submit(myTaskExecutor)
-//					.submit(PooledThreadExecutor.INSTANCE)
-					.get();
-			} catch (InterruptedException e) {
-				throw new IndexNotReady(e.getMessage(), e);
-			} catch (ExecutionException e) {
-				throw e.getCause();
-			}
+			RefreshRequest request = getGroupInReadActionWithRetries(editorGroupRef);
+			if (request == null) return;
+
+			EditorGroup group = editorGroupRef.get();
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", refresh =" + refresh + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
+				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", request =" + request + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
-			boolean skipRefresh = !brokenScroll && !refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
+			boolean skipRefresh = !brokenScroll && !request.refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
 			boolean updateVisibility = hideGlobally != ApplicationConfiguration.state().isHidePanel();
 			if (updateVisibility) {
 				skipRefresh = false;
@@ -782,11 +752,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 
 
-				if (LOG.isDebugEnabled()) LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered);
+				if (LOG.isDebugEnabled())
+					LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered + ". Took " + (System.currentTimeMillis() - start) + "ms ");
 				return;
 			}
 			toBeRendered = group;
-			if (refresh) {
+			if (request.refresh) {
 				myScrollOffset = tabs.getMyScrollOffset();   //this will have edge cases
 			}
 
@@ -807,23 +778,71 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			atomicReference.compareAndSet(request, null);
 			if (LOG.isDebugEnabled())
 				LOG.debug("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
-		} catch (IndexNotReady e) {
-			if (LOG.isDebugEnabled()) {
-				LOG.debug("failed " + failed + " " + file.getName() + " isDumb=" + DumbService.getInstance(project).isDumb(), e);
-			}
-			if (++failed > 5) {
-				LOG.error("Failed too many times " + file.getName() + " isDumb=" + DumbService.getInstance(project).isDumb(), e);
-				return;
-			}
-			if (LOG.isDebugEnabled())
-				LOG.debug("refresh failed in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
-			if (atomicReference.compareAndSet(null, request)) {
-				refresh2();
-			}
 		} catch (Throwable e) {
 			LOG.error(file.getName(), e);
 		}
 	}
+
+	@Nullable
+	private RefreshRequest getGroupInReadActionWithRetries(Ref<EditorGroup> editorGroupRef) {
+		RefreshRequest request = null;
+		boolean success = false;
+		while (!success) {
+			RefreshRequest tempRequest = atomicReference.getAndSet(null);
+			if (tempRequest != null) {
+				request = tempRequest;
+			}
+
+			if (request == null) {
+				if (LOG.isDebugEnabled())
+					LOG.debug("getGroupInReadActionWithRetries - nothing to refresh " + fileEditor.getName());
+				return null;
+			}
+			if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + request);
+
+			ProgressIndicatorUtils.yieldToPendingWriteActions();
+			EditorGroup lastGroup = getLastGroup();
+			if (needSmartMode(request, lastGroup)) {
+				LOG.debug("waiting on smart mode");
+				dumbService.waitForSmartMode();
+			}
+
+			EditorGroup requestedGroup = request.requestedGroup;
+			boolean refresh = request.refresh;
+
+			success = ProgressManager.getInstance().runInReadActionWithWriteActionPriority(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						EditorGroup group = groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
+						editorGroupRef.set(group);
+					} catch (IndexNotReady e) {
+						if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString());
+						throw new ProcessCanceledException(e);
+					}
+				}
+			}, null);
+		}
+		return request;
+	}
+
+	private boolean needSmartMode(@Nullable RefreshRequest request, EditorGroup lastGroup) {
+		EditorGroup requestedGroup = null;
+		boolean refresh = false;
+		if (request != null) {
+			requestedGroup = request.requestedGroup;
+			refresh = request.refresh;
+		}
+
+		return (requestedGroup != null && EditorGroup.exists(requestedGroup) && requestedGroup.needSmartMode()) || (requestedGroup == null && EditorGroup.exists(lastGroup) && lastGroup.needSmartMode()) || requestedGroup == null;
+	}
+
+	private EditorGroup getLastGroup() {
+		EditorGroup lastGroup = toBeRendered == null ? displayedGroup : toBeRendered;
+		lastGroup = lastGroup == null ? EditorGroup.EMPTY : lastGroup;
+		return lastGroup;
+	}
+
 
 	private void render() {
 		try {
@@ -861,9 +880,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		file.putUserData(EDITOR_GROUP, displayedGroup); // for project view colors
 		fileEditorManager.updateFilePresentation(file);
 		toolbar.updateActionsImmediately();
-
-
-		failed = 0;
 
 		groupManager.enableSwitching();
 		if (LOG.isDebugEnabled())

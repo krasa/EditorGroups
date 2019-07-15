@@ -51,9 +51,6 @@ public abstract class AutoGroup extends EditorGroup {
 
 	@Override
 	public List<Link> getLinks(Project project) {
-		if (isStub()) {
-			LOG.debug(new RuntimeException("trying to get links from a stub"));
-		}
 		return links;
 	}
 

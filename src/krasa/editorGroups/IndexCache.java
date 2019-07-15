@@ -152,7 +152,7 @@ public class IndexCache {
 
 	public void initGroup(@NotNull EditorGroupIndexValue group) {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
-		if (group.getId().equals("NOT_EXISTS")) {
+		if (!EditorGroup.exists(group)) {
 			return;
 		}
 		List<Link> links = FileResolver.resolveLinks(group, project);

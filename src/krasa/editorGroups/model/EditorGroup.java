@@ -18,6 +18,10 @@ public abstract class EditorGroup {
 	public static final EditorGroup EMPTY = new EditorGroupIndexValue("NOT_EXISTS", "NOT_EXISTS", false).setLinks(Collections.emptyList());
 	private boolean stub;
 
+	public static boolean exists(@NotNull EditorGroup group) {
+		return !group.getId().equals("NOT_EXISTS");
+	}
+
 	@NotNull
 	public abstract String getId();
 
@@ -167,5 +171,9 @@ public abstract class EditorGroup {
 
 	public boolean isSelected(EditorGroup groupLink) {
 		return this.equals(groupLink);
+	}
+
+	public boolean needSmartMode() {
+		return false;
 	}
 }

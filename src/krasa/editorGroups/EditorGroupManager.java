@@ -180,10 +180,7 @@ public class EditorGroupManager {
 				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
 			}
 			cache.setLast(currentFilePath, result);
-		} catch (ProcessCanceledException e) {
-			LOG.debug(e.toString());
-			throw e;
-		} catch (IndexNotReadyException e) {
+		} catch (ProcessCanceledException | IndexNotReadyException e) {
 			LOG.debug(e.toString());
 			throw new IndexNotReady(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
 		} catch (Throwable e) {

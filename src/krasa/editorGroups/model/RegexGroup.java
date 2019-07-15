@@ -95,6 +95,11 @@ public class RegexGroup extends AutoGroup {
 		}
 	}
 
+	@Override
+	public boolean needSmartMode() {
+		return regexGroupModel.getScope() == RegexGroupModel.Scope.WHOLE_PROJECT;
+	}
+
 	@NotNull
 	@Override
 	public String getId() {

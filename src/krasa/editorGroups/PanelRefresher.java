@@ -5,11 +5,13 @@ import com.intellij.ide.bookmarks.BookmarksListener;
 import com.intellij.ide.favoritesTreeView.FavoritesListener;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
@@ -38,7 +40,7 @@ public class PanelRefresher {
 	public PanelRefresher(Project project) {
 		this.project = project;
 		cache = IndexCache.getInstance(project);
-		ourThreadExecutorsService = AppExecutorUtil.createBoundedApplicationPoolExecutor("EditorGroups-" + project.getName(), 1);
+		ourThreadExecutorsService = AppExecutorUtil.createBoundedApplicationPoolExecutor("krasa.editorGroups.PanelRefresher-" + project.getName(), 1);
 		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
 			@Override
 			public void enteredDumbMode() {
@@ -216,47 +218,39 @@ public class PanelRefresher {
 
 
 	public void initCache() {
-		ApplicationManager.getApplication().executeOnPooledThread(() -> {
-			DumbService.getInstance(project).waitForSmartMode();
-			ApplicationManager.getApplication().runReadAction(
-				() -> {
-					if (project.isDisposed()) {
-						return;
-					}
-					long start = System.currentTimeMillis();
-					FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
-					IndexCache cache = IndexCache.getInstance(project);
-					try {
-						fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, new Processor<String>() {
-							@Override
-							public boolean process(String s) {
-								List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-								for (EditorGroupIndexValue value : values) {
-									cache.initGroup(value);
-								}
-								return true;
-							}
-						}, project);
-					} catch (IndexNotReadyException e) {
-						if (LOG.isDebugEnabled())
-							LOG.debug("initCache failed on IndexNotReadyException, will be executed again");
-						initCache();
-						return;
-					}
-					cacheReady();
-					if (LOG.isDebugEnabled()) LOG.debug("initCache " + (System.currentTimeMillis() - start));
+		ReadAction.nonBlocking(() -> {
+				if (project.isDisposed()) {
+					return;
 				}
-			);
-		});
+				long start = System.currentTimeMillis();
+				FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
+				IndexCache cache = IndexCache.getInstance(project);
+				try {
+					fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, new Processor<String>() {
+						@Override
+						public boolean process(String s) {
+							List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
+							for (EditorGroupIndexValue value : values) {
+								cache.initGroup(value);
+							}
+							return true;
+						}
+					}, project);
+				} catch (ProcessCanceledException | IndexNotReadyException e) {
+					if (LOG.isDebugEnabled())
+						LOG.debug("initCache failed on IndexNotReadyException, will be executed again");
+					initCache();
+					return;
+				}
+				cacheReady();
+				if (LOG.isDebugEnabled()) LOG.debug("initCache done " + (System.currentTimeMillis() - start));
+			}
+		).inSmartMode(project).expireWith(project).submit(ourThreadExecutorsService).onError(LOG::error);
 	}
 
 	public void cacheReady() {
 		cacheReady.set(true);
 		onSmartMode();
-	}
-
-	public void refreshOnBackground(Runnable task) {
-		ourThreadExecutorsService.submit(task);
 	}
 
 

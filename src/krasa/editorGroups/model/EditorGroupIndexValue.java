@@ -172,6 +172,11 @@ public class EditorGroupIndexValue extends EditorGroup {
 		return fgColorInstance;
 	}
 
+	@Override
+	public boolean needSmartMode() {
+		return true;
+	}
+
 
 	public String getForegroundColor() {
 		return foregroundColor;
