@@ -120,7 +120,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			}
 
 			defaultActionGroup.add(new Separator());
-			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.TogglePanelVisibility"));
+//			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.TogglePanelVisibility"));
 			defaultActionGroup.add(ActionManager.getInstance().getAction("krasa.editorGroups.OpenConfiguration"));
 		} catch (IndexNotReadyException e) {
 			LOG.error("That should not happen", e);
