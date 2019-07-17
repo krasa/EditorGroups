@@ -29,7 +29,7 @@ public class ApplicationConfiguration {
 	private boolean tabFgColorEnabled;
 	private boolean rememberLastGroup = true;
 	private boolean groupSwitchGroupAction = false;
-	private boolean hidePanel = false;
+	private boolean showPanel = true;
 	private int groupSizeLimit = 10000;
 	private int tabSizeLimit = 50;
 
@@ -45,12 +45,12 @@ public class ApplicationConfiguration {
 		this.regexGroupModels = regexGroupModels;
 	}
 
-	public boolean isHidePanel() {
-		return hidePanel;
+	public boolean isShowPanel() {
+		return showPanel;
 	}
 
-	public void setHidePanel(boolean hidePanel) {
-		this.hidePanel = hidePanel;
+	public void setShowPanel(boolean showPanel) {
+		this.showPanel = showPanel;
 	}
 
 	public Tabs getTabs() {

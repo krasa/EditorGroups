@@ -51,7 +51,7 @@ public class RegexFileResolver {
 			}
 		} catch (TooManyFilesException e) {
 			e.showNotification();
-			LOG.warn("Found too many matching files, aborting. size=" + links.size() + " " + regexGroup);
+			LOG.warn("Found too many matching files, skipping. Size=" + links.size() + " " + regexGroup);
 			if (LOG.isDebugEnabled()) {
 				LOG.debug(String.valueOf(links));
 			}
@@ -91,7 +91,7 @@ public class RegexFileResolver {
 					if (matches(referenceMatcher, matcher)) {
 						links.add(child);
 						if (links.size() > config.getGroupSizeLimitInt()) {
-							throw new TooManyFilesException(links.size());
+							throw new TooManyFilesException();
 						}
 					}
 				}

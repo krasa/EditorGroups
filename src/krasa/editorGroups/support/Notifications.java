@@ -103,7 +103,7 @@ public class Notifications {
 		show(notification);
 	}
 
-	public static void tooManyFiles(int size) {
-		warning("Found too many matching files, aborting. Size=" + size);
+	public static void tooManyFiles() {
+		warning(TooManyFilesException.FOUND_TOO_MANY_MATCHING_FILES_SKIPPING);
 	}
 }

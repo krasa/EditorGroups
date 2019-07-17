@@ -14,13 +14,13 @@ public class ViewPanelToggleAction extends ToggleAction implements DumbAware {
 
 	@Override
 	public boolean isSelected(@NotNull AnActionEvent event) {
-		return !ApplicationConfiguration.state().isHidePanel();
+		return ApplicationConfiguration.state().isShowPanel();
 	}
 
 	@Override
 	public void setSelected(@NotNull AnActionEvent event, boolean state) {
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
-		applicationConfiguration.setHidePanel(!applicationConfiguration.isHidePanel());
+		applicationConfiguration.setShowPanel(!applicationConfiguration.isShowPanel());
 		PanelRefresher.getInstance(event.getProject()).refresh();
 	}
 }

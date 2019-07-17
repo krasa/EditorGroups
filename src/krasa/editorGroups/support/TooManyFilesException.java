@@ -1,14 +1,14 @@
 package krasa.editorGroups.support;
 
 public class TooManyFilesException extends RuntimeException {
-	private final int size;
 
-	public TooManyFilesException(int size) {
-		this.size = size;
+	public static final String FOUND_TOO_MANY_MATCHING_FILES_SKIPPING = "Found too many matching files, skipping.";
+
+	public TooManyFilesException() {
 	}
 
 	public void showNotification() {
-		Notifications.warning("Found too many matching files, aborting. Size=" + size);
+		Notifications.warning(FOUND_TOO_MANY_MATCHING_FILES_SKIPPING);
 	}
 
 }

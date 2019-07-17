@@ -10,7 +10,7 @@ public class TogglePanelVisibilityAction extends DumbAwareAction {
 	@Override
 	public void actionPerformed(AnActionEvent e) {
 		ApplicationConfiguration state = ApplicationConfiguration.state();
-		state.setHidePanel(!state.isHidePanel());
+		state.setShowPanel(state.isShowPanel());
 		PanelRefresher.getInstance(getEventProject(e)).refresh();
 	}
 
@@ -19,10 +19,10 @@ public class TogglePanelVisibilityAction extends DumbAwareAction {
 	public void update(@NotNull AnActionEvent e) {
 		super.update(e);
 		ApplicationConfiguration state = ApplicationConfiguration.state();
-		if (state.isHidePanel()) {
-			e.getPresentation().setText("Show Panel");
-		} else {
+		if (state.isShowPanel()) {
 			e.getPresentation().setText("Hide Panel");
+		} else {
+			e.getPresentation().setText("Show Panel");
 		}
 	}
 }

@@ -79,7 +79,7 @@ public class AutoGroupProvider {
 					continue;
 				}
 				if (paths.size() == groupSizeLimitInt) {
-					Notifications.tooManyFiles(size);
+					Notifications.tooManyFiles();
 					LOG.warn("#getSameNameGroup: too many results for " + nameWithoutExtension + " =" + size);
 					break;
 				}

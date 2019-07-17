@@ -239,7 +239,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (editorGroup == null && preferLatencyOverFlicker && !DumbService.isDumb(project)) {
 			long start = System.currentTimeMillis();
 			try {
-				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, applicationConfiguration.isHidePanel());
+				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, !applicationConfiguration.isShowPanel());
 				toBeRendered = editorGroup;
 			} catch (IndexNotReady e) {
 				LOG.debug(e);
@@ -737,7 +737,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", request =" + request + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
 			boolean skipRefresh = !brokenScroll && !request.refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
-			boolean updateVisibility = hideGlobally != ApplicationConfiguration.state().isHidePanel();
+			//noinspection DoubleNegation
+			boolean updateVisibility = hideGlobally != !ApplicationConfiguration.state().isShowPanel();
 			if (updateVisibility) {
 				skipRefresh = false;
 			}
@@ -814,7 +815,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				@Override
 				public void run() {
 					try {
-						EditorGroup group = groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, ApplicationConfiguration.state().isHidePanel());
+						EditorGroup group = groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, !ApplicationConfiguration.state().isShowPanel());
 						editorGroupRef.set(group);
 					} catch (IndexNotReady e) {
 						if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString());
@@ -890,8 +891,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	private boolean updateVisibility(@NotNull EditorGroup rendering) {
 		boolean visible;
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
-		hideGlobally = applicationConfiguration.isHidePanel();
-		if (applicationConfiguration.isHidePanel() || rendering instanceof EmptyGroup || rendering == EditorGroup.EMPTY) {
+		hideGlobally = !applicationConfiguration.isShowPanel();
+		if (!applicationConfiguration.isShowPanel() || rendering instanceof EmptyGroup || rendering == EditorGroup.EMPTY) {
 			visible = false;
 		} else if (applicationConfiguration.isHideEmpty() && !rendering.isStub()) {
 			boolean hide = rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty();

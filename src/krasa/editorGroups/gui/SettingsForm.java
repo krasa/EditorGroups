@@ -36,6 +36,7 @@ public class SettingsForm {
 	private JCheckBox selectRegexGroup;
 	private JTextField groupSizeLimit;
 	private JTextField tabSizeLimit;
+	private JCheckBox showPanel;
 	private TabsColors tabsColors;
 
 	private RegexTable regexTable;
@@ -113,56 +114,59 @@ public class SettingsForm {
 	}
 
 	public void setData(ApplicationConfiguration data) {
-		byName.setSelected(data.isAutoSameName());
-		showSize.setSelected(data.isShowSize());
-		hideEmpty.setSelected(data.isHideEmpty());
-		autoSwitch.setSelected(data.isForceSwitch());
-		byFolder.setSelected(data.isAutoFolders());
-		continuousScrolling.setSelected(data.isContinuousScrolling());
 		initializeSynchronously.setSelected(data.isInitializeSynchronously());
 		indexOnlyEditorGroupsFileCheckBox.setSelected(data.isIndexOnlyEditorGroupsFiles());
-		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
-		rememberLastGroup.setSelected(data.isRememberLastGroup());
-		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
-		selectRegexGroup.setSelected(data.isSelectRegexGroup());
 		groupSizeLimit.setText(data.getGroupSizeLimit());
 		tabSizeLimit.setText(data.getTabSizeLimit());
+		byName.setSelected(data.isAutoSameName());
+		autoSwitch.setSelected(data.isForceSwitch());
+		byFolder.setSelected(data.isAutoFolders());
+		selectRegexGroup.setSelected(data.isSelectRegexGroup());
+		rememberLastGroup.setSelected(data.isRememberLastGroup());
+		hideEmpty.setSelected(data.isHideEmpty());
+		showSize.setSelected(data.isShowSize());
+		continuousScrolling.setSelected(data.isContinuousScrolling());
+		groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
+		excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
+		showPanel.setSelected(data.isShowPanel());
 	}
 
 	public void getData(ApplicationConfiguration data) {
-		data.setAutoSameName(byName.isSelected());
-		data.setShowSize(showSize.isSelected());
-		data.setHideEmpty(hideEmpty.isSelected());
-		data.setForceSwitch(autoSwitch.isSelected());
-		data.setAutoFolders(byFolder.isSelected());
-		data.setContinuousScrolling(continuousScrolling.isSelected());
 		data.setInitializeSynchronously(initializeSynchronously.isSelected());
 		data.setIndexOnlyEditorGroupsFiles(indexOnlyEditorGroupsFileCheckBox.isSelected());
-		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
-		data.setRememberLastGroup(rememberLastGroup.isSelected());
-		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
-		data.setSelectRegexGroup(selectRegexGroup.isSelected());
 		data.setGroupSizeLimit(groupSizeLimit.getText());
 		data.setTabSizeLimit(tabSizeLimit.getText());
+		data.setAutoSameName(byName.isSelected());
+		data.setForceSwitch(autoSwitch.isSelected());
+		data.setAutoFolders(byFolder.isSelected());
+		data.setSelectRegexGroup(selectRegexGroup.isSelected());
+		data.setRememberLastGroup(rememberLastGroup.isSelected());
+		data.setHideEmpty(hideEmpty.isSelected());
+		data.setShowSize(showSize.isSelected());
+		data.setContinuousScrolling(continuousScrolling.isSelected());
+		data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
+		data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
+		data.setShowPanel(showPanel.isSelected());
 	}
 
 	public boolean isModified(ApplicationConfiguration data) {
-		if (byName.isSelected() != data.isAutoSameName()) return true;
-		if (showSize.isSelected() != data.isShowSize()) return true;
-		if (hideEmpty.isSelected() != data.isHideEmpty()) return true;
-		if (autoSwitch.isSelected() != data.isForceSwitch()) return true;
-		if (byFolder.isSelected() != data.isAutoFolders()) return true;
-		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
 		if (initializeSynchronously.isSelected() != data.isInitializeSynchronously()) return true;
 		if (indexOnlyEditorGroupsFileCheckBox.isSelected() != data.isIndexOnlyEditorGroupsFiles()) return true;
-		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
-		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
-		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
-		if (selectRegexGroup.isSelected() != data.isSelectRegexGroup()) return true;
 		if (groupSizeLimit.getText() != null ? !groupSizeLimit.getText().equals(data.getGroupSizeLimit()) : data.getGroupSizeLimit() != null)
 			return true;
 		if (tabSizeLimit.getText() != null ? !tabSizeLimit.getText().equals(data.getTabSizeLimit()) : data.getTabSizeLimit() != null)
 			return true;
+		if (byName.isSelected() != data.isAutoSameName()) return true;
+		if (autoSwitch.isSelected() != data.isForceSwitch()) return true;
+		if (byFolder.isSelected() != data.isAutoFolders()) return true;
+		if (selectRegexGroup.isSelected() != data.isSelectRegexGroup()) return true;
+		if (rememberLastGroup.isSelected() != data.isRememberLastGroup()) return true;
+		if (hideEmpty.isSelected() != data.isHideEmpty()) return true;
+		if (showSize.isSelected() != data.isShowSize()) return true;
+		if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
+		if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
+		if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
+		if (showPanel.isSelected() != data.isShowPanel()) return true;
 		return false;
 	}
 }

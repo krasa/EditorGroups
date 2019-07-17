@@ -32,8 +32,6 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FilenameFilter;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -287,7 +285,7 @@ public class FileResolver {
 
 	protected void add(File file, boolean definedManually) throws IOException {
 		if (links.size() > config.getGroupSizeLimitInt()) {
-			throw new TooManyFilesException(links.size());
+			throw new TooManyFilesException();
 		}
 		if (file.isFile() && !(!definedManually && excluded(file, excludeEditorGroupsFiles))) {
 			links.add(Utils.getCanonicalPath(file));
