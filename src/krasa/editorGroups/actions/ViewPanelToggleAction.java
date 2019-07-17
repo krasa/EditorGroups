@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class ViewPanelToggleAction extends ToggleAction implements DumbAware {
 	public ViewPanelToggleAction() {
-		super("Editor Group Panel");
+		super("Editor Groups Panel");
 	}
 
 	@Override

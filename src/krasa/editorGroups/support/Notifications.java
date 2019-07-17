@@ -31,7 +31,7 @@ public class Notifications {
 	public static void notifyBugs() {
 		String content = "Settings | ... | Editor Tabs | 'Open declaration source in the same tab' is enabled.<br/> It may cause problems when switching too fast.<br/><a href=\"#\">Click here to disable it<a/>.";
 
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
+		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
 				UISettings.getInstance().setReuseNotModifiedTabs(false);
@@ -43,7 +43,7 @@ public class Notifications {
 
 	public static void indexingWarn(Project project, VirtualFile file, String message) {
 		String content = message + " in " + href(file);
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
+		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
 				OpenFileAction.openFile(file, project);
@@ -93,7 +93,7 @@ public class Notifications {
 	}
 
 	public static void warning(String content, NotificationListener listener) {
-		Notification notification = NOTIFICATION.createNotification("EditorGroups plugin", content, NotificationType.WARNING, listener);
+		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, listener);
 		LOG.warn(new RuntimeException(content));
 		show(notification);
 	}

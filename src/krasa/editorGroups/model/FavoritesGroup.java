@@ -147,6 +147,11 @@ public class FavoritesGroup extends EditorGroup {
 	}
 
 	@Override
+	public boolean needSmartMode() {
+		return true;
+	}
+
+	@Override
 	public String toString() {
 		return "FavoritesGroup{" +
 			"files=" + files +
