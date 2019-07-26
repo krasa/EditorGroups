@@ -47,7 +47,9 @@ public class RegexFileResolver {
 		List<VirtualFile> folders = regexGroup.getScopes(project);
 		try {
 			for (VirtualFile dir : folders) {
-				processFolders2(regexGroup, regexGroupModel, referenceMatcher, groupMatcher, projectFileIndex, dir);
+				if (dir != null) {
+					processFolders2(regexGroup, regexGroupModel, referenceMatcher, groupMatcher, projectFileIndex, dir);
+				}
 			}
 		} catch (TooManyFilesException e) {
 			e.showNotification();
@@ -68,7 +70,7 @@ public class RegexFileResolver {
 		return Link.fromVirtualFiles(links);
 	}
 
-	private void processFolders2(@NotNull RegexGroup regexGroup, RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher groupMatcher, ProjectFileIndex projectFileIndex, VirtualFile folder) {
+	private void processFolders2(@NotNull RegexGroup regexGroup, RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher groupMatcher, ProjectFileIndex projectFileIndex, @NotNull VirtualFile folder) {
 		VfsUtilCore.visitChildrenRecursively(folder, new VirtualFileVisitor<Object>() {
 			@NotNull
 			@Override
