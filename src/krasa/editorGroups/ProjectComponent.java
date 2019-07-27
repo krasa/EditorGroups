@@ -38,7 +38,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			//IJ 2018.2
 			@Override
 			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
-				if (LOG.isDebugEnabled()) LOG.debug("fileOpenedSync [" + file + "]");
+				if (LOG.isDebugEnabled()) LOG.debug(">fileOpenedSync [" + file + "]");
 
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
@@ -49,12 +49,12 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					}
 					long start = System.currentTimeMillis();
 
-					createPanel(manager, file, switchRequest, fileEditor);
+					createPanel(manager, fileEditor.getFile(), switchRequest, fileEditor);
 
 
 					if (LOG.isDebugEnabled()) {
 						if (LOG.isDebugEnabled())
-							LOG.debug("sync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
+							LOG.debug("<fileOpenedSync EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
 					}
 				}
 			}
@@ -63,31 +63,6 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 				EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
 				manager.addTopComponent(fileEditor, panel.getRoot());
 				panel.postConstruct();
-			}
-
-			/**on EDT*/
-			@Override
-			public void fileOpened(@NotNull FileEditorManager manager, @NotNull VirtualFile file) {
-				if (LOG.isDebugEnabled()) LOG.debug("fileOpened [" + file + "]");
-				final FileEditor[] fileEditors = manager.getAllEditors(file);
-
-				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
-
-				for (final FileEditor fileEditor : fileEditors) {
-					if (fileEditor.getUserData(EditorGroupPanel.EDITOR_PANEL) != null) {
-						continue;
-					}
-					long start = System.currentTimeMillis();
-
-					createPanel(manager, file, switchRequest, fileEditor);
-
-					if (LOG.isDebugEnabled()) {
-						if (LOG.isDebugEnabled())
-							LOG.debug("async EditorGroupPanel created, file=" + file + " in " + (System.currentTimeMillis() - start) + "ms" + ", fileEditor=" + fileEditor);
-					}
-				}
-
 			}
 
 			@Override

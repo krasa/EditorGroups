@@ -81,7 +81,7 @@ public class EditorGroupManager {
 	@NotNull
 	public EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile, boolean stub) throws IndexNotReady {
 		if (LOG.isDebugEnabled())
-			LOG.debug(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]");
+			LOG.debug(">getGroup: fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]" + ", project = [" + project.getName() + "]");
 
 		if (requestedGroup != null && requestedGroup != displayedGroup) {
 			boolean debuggingHelperLine = true;
@@ -182,7 +182,7 @@ public class EditorGroupManager {
 			cache.setLast(currentFilePath, result);
 		} catch (ProcessCanceledException | IndexNotReadyException e) {
 			LOG.debug(e.toString());
-			throw new IndexNotReady(">getGroup project = [" + project + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
+			throw new IndexNotReady(">getGroup project = [" + project.getName() + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
 		} catch (Throwable e) {
 			LOG.debug(e.toString());
 			throw e;

@@ -22,19 +22,26 @@ public class RegexGroupProvider {
 
 	public EditorGroup findFirstMatchingRegexGroup_stub(VirtualFile file) {
 		if (LOG.isDebugEnabled())
-			LOG.debug("findFirstMatchingRegexGroup: " + file);
+			LOG.debug(">findFirstMatchingRegexGroup: " + file);
 
 
 		long start = System.currentTimeMillis();
 		String fileName = file.getName();
 		RegexGroupModel matching = ApplicationConfiguration.state().getRegexGroupModels().findFirstMatching(fileName);
-		if (LOG.isDebugEnabled()) LOG.debug("findMatchingRegexGroups: " + (System.currentTimeMillis() - start) + "ms");
 
+		EditorGroup result;
 		if (matching == null) {
-			return EditorGroup.EMPTY;
+			result = EditorGroup.EMPTY;
+		} else {
+			result = new RegexGroup(matching, file.getParent(), fileName);
 		}
 
-		return new RegexGroup(matching, file.getParent(), fileName);
+
+		if (LOG.isDebugEnabled())
+			LOG.debug("<findFirstMatchingRegexGroup: result=" + result + " in " + (System.currentTimeMillis() - start) + "ms");
+
+
+		return result;
 	}
 
 	public List<RegexGroup> findMatchingRegexGroups_stub(VirtualFile file) {

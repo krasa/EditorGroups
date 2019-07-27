@@ -5,6 +5,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 import java.util.Collections;
@@ -16,14 +17,14 @@ public class FolderGroup extends AutoGroup {
 	public static final FolderGroup INSTANCE = new FolderGroup(DIRECTORY_INSTANCE, Collections.emptyList());
 	private final VirtualFile folder;
 
-	public FolderGroup(VirtualFile folder, List<Link> links) {
+	public FolderGroup(@Nullable VirtualFile folder, List<Link> links) {
 		super(links);
 		this.folder = folder;
 	}
 
 	@Override
 	public boolean isValid() {
-		return valid && (DIRECTORY_INSTANCE.equals(folder) || folder.isDirectory());
+		return folder != null && valid && (DIRECTORY_INSTANCE.equals(folder) || folder.isDirectory());
 	}
 
 	@Override

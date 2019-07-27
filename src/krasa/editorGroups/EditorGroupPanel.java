@@ -6,6 +6,7 @@ import com.intellij.ide.ui.customization.CustomActionsSchema;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.application.ReadAction;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.ex.FocusChangeListener;
@@ -15,7 +16,6 @@ import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
-import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.progress.util.ProgressIndicatorUtils;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
@@ -39,6 +39,7 @@ import krasa.editorGroups.tabs2.TabInfo;
 import krasa.editorGroups.tabs2.my.MyJBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.ide.PooledThreadExecutor;
 
 import javax.swing.*;
 import java.awt.*;
@@ -51,6 +52,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -90,7 +93,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	public EditorGroupPanel(@NotNull FileEditor fileEditor, @NotNull Project project, @Nullable SwitchRequest switchRequest, VirtualFile file) {
 		super(new BorderLayout());
 		if (LOG.isDebugEnabled())
-			LOG.debug("EditorGroupPanel " + "fileEditor = [" + fileEditor + "], project = [" + project + "], switchingRequest = [" + switchRequest + "], file = [" + file + "]");
+			LOG.debug(">new EditorGroupPanel, " + "fileEditor = [" + fileEditor + "], project = [" + project.getName() + "], switchingRequest = [" + switchRequest + "], file = [" + file + "]");
 		this.fileEditor = fileEditor;
 		Disposer.register(fileEditor, this);
 		this.project = project;
@@ -259,13 +262,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				toBeRendered = editorGroup;
 				long delta = System.currentTimeMillis() - start;
 				if (LOG.isDebugEnabled())
-					LOG.debug("#getGroup:stub - on editor opening took " + delta + " ms for " + file + " " + editorGroup);
+					LOG.debug("#getGroup:stub - on editor opening took " + delta + " ms for " + file + ", group=" + editorGroup);
 			} catch (IndexNotReady indexNotReady) {
 				LOG.warn("Getting stub group failed" + indexNotReady);
 			}
 		}
 
 		if (editorGroup == null) {
+			LOG.debug("editorGroup == null > setVisible=" + false);
 			setVisible(false);
 			refresh(false, null);
 		} else {
@@ -337,7 +341,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			if (displayedGroup instanceof GroupsHolder) {
 				createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 			}
-
+			if (displayedGroup.isStub()) {
+				MyTabInfo tab = new MyTabInfo(new PathLink("Loading..."), "Loading...");
+				tabs.addTabSilently(tab, -1);
+			}
 
 //			if (tabs.getTabCount() > 0 && paintNow) { //premature optimization
 //				tabs.validate();
@@ -420,7 +427,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				} else {
 					LOG.warn(message);
 				}
-			} else {
+			} else if (!displayedGroup.isStub()) {
 				LOG.debug("current file is excluded from the group " + file + " " + displayedGroup + " " + displayedGroup.getLinks(project));
 			}
 		}
@@ -429,7 +436,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 	private void createGroupLinks(Collection<EditorGroup> groups) {
 		for (EditorGroup editorGroup : groups) {
-			tabs.addTab(new MyGroupTabInfo(editorGroup));
+			tabs.addTabSilently(new MyGroupTabInfo(editorGroup), -1);
 		}
 	}
 
@@ -463,7 +470,6 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		public MyGroupTabInfo(EditorGroup editorGroup) {
 			super(new JLabel(""));
-			setVisible(false);
 			this.editorGroup = editorGroup;
 			String title = editorGroup.tabTitle(EditorGroupPanel.this.project);
 			setText("[" + title + "]");
@@ -807,22 +813,34 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("waiting on smart mode");
 				dumbService.waitForSmartMode();
 			}
-
+			if (Disposer.isDisposed(fileEditor)) {
+				LOG.debug("fileEditor disposed");
+				return null;
+			}
 			EditorGroup requestedGroup = request.requestedGroup;
 			boolean refresh = request.refresh;
-
-			success = ProgressManager.getInstance().runInReadActionWithWriteActionPriority(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						EditorGroup group = groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, !ApplicationConfiguration.state().isShowPanel());
-						editorGroupRef.set(group);
-					} catch (IndexNotReady e) {
-						if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString());
-						throw new ProcessCanceledException(e);
+			try {
+				EditorGroup editorGroup = ReadAction.nonBlocking(new Callable<EditorGroup>() {
+					@Override
+					public EditorGroup call() throws Exception {
+						try {
+							return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, !ApplicationConfiguration.state().isShowPanel());
+						} catch (IndexNotReady e) {
+							if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString());
+							throw new ProcessCanceledException(e);
+						}
 					}
-				}
-			}, null);
+				}).expireWith(fileEditor).submit(PooledThreadExecutor.INSTANCE).get();
+				editorGroupRef.set(editorGroup);
+			} catch (ProcessCanceledException e) {
+				//ok try again
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			} catch (ExecutionException e) {
+				throw new RuntimeException(e);
+			}
+
+			success = editorGroupRef.get() != null;
 		}
 		return request;
 	}
@@ -900,6 +918,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		} else {
 			visible = true;
 		}
+		if (LOG.isDebugEnabled())
+			LOG.debug("updateVisibility=" + visible);
 		setVisible(visible);
 		return visible;
 	}

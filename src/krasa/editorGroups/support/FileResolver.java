@@ -54,7 +54,7 @@ public class FileResolver {
 	@NotNull
 	public static List<Link> resolveLinks(@NotNull EditorGroupIndexValue group, @NotNull Project project) {
 		if (LOG.isDebugEnabled()) {
-			LOG.debug(">resolveLinks [" + group + "], project = [" + project + "]");
+			LOG.debug(">resolveLinks [" + group + "], project = [" + project.getName() + "]");
 		}
 
 		return resolveLinks(project, group.getOwnerPath(), group.getRoot(), group.getRelatedPaths(), group);

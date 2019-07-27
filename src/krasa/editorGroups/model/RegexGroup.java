@@ -23,7 +23,7 @@ public class RegexGroup extends AutoGroup {
 	@Nullable
 	private final String fileName;
 
-	public RegexGroup(RegexGroupModel regexGroupModel, @Nullable VirtualFile folder, List<Link> links, @Nullable String fileName) {
+	public RegexGroup(@NotNull RegexGroupModel regexGroupModel, @Nullable VirtualFile folder, List<Link> links, @Nullable String fileName) {
 		super(links);
 		this.regexGroupModel = regexGroupModel.copy();
 		this.folder = folder;
@@ -33,17 +33,17 @@ public class RegexGroup extends AutoGroup {
 		this.fileName = fileName;
 	}
 
-	public RegexGroup(RegexGroupModel model) {
+	public RegexGroup(@NotNull RegexGroupModel model) {
 		this(model, null, Collections.emptyList(), null);
 		setStub(true);
 	}
 
-	public RegexGroup(RegexGroupModel model, VirtualFile folder) {
+	public RegexGroup(@NotNull RegexGroupModel model, VirtualFile folder) {
 		this(model, folder, Collections.emptyList(), null);
 		setStub(true);
 	}
 
-	public RegexGroup(RegexGroupModel model, VirtualFile folder, String fileName) {
+	public RegexGroup(@NotNull RegexGroupModel model, VirtualFile folder, String fileName) {
 		this(model, folder, Collections.emptyList(), fileName);
 		setStub(true);
 	}
