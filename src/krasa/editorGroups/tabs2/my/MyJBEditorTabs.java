@@ -9,6 +9,7 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupManager;
+import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.SwitchRequest;
 import krasa.editorGroups.tabs2.JBTabPainter;
 import krasa.editorGroups.tabs2.TabInfo;
@@ -17,6 +18,7 @@ import krasa.editorGroups.tabs2.impl.TabLabel;
 import krasa.editorGroups.tabs2.impl.singleRow.ScrollableSingleRowLayout;
 import krasa.editorGroups.tabs2.impl.singleRow.SingleRowLayout;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.awt.*;
 import java.awt.event.InputEvent;
@@ -81,6 +83,19 @@ public class MyJBEditorTabs extends JBEditorTabs {
 	@Override
 	protected void updateSideComponent(TabInfo tabInfo) {
 		//performance optimization
+	}
+
+	@Nullable
+	@Override
+	public TabInfo getSelectedInfo() {
+		TabInfo selectedInfo = super.getSelectedInfo();
+		if (selectedInfo instanceof EditorGroupPanel.MyTabInfo) {
+			boolean selectable = ((EditorGroupPanel.MyTabInfo) selectedInfo).selectable;
+			if (!selectable) {
+				return null;
+			}
+		}
+		return selectedInfo;
 	}
 
 	@Override

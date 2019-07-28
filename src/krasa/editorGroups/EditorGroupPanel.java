@@ -343,6 +343,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 			if (displayedGroup.isStub()) {
 				MyTabInfo tab = new MyTabInfo(new PathLink("Loading..."), "Loading...");
+				tab.selectable = false;
+				
 				tabs.addTabSilently(tab, -1);
 			}
 
@@ -441,9 +443,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	class MyTabInfo extends TabInfo {
+	public class MyTabInfo extends TabInfo {
 		Link link;
-
+		public boolean selectable = true;
+		
 		public MyTabInfo(Link link, String name) {
 			super(new JLabel(""));
 			this.link = link;
