@@ -180,7 +180,7 @@ public class IndexCache {
 					result = SameNameGroup.INSTANCE;
 				} else if (includeAutogroups && config.isAutoFolders() && AutoGroup.DIRECTORY.equals(last)) {
 					result = FolderGroup.INSTANCE;
-				} else if (EmptyGroup.ID.equals(last)) {
+				} else if (HidePanelGroup.ID.equals(last)) {
 					result = AutoGroup.HIDE_GROUP_INSTANCE;
 				} else if (includeFavorites && last.startsWith(FavoritesGroup.ID_PREFIX)) {
 					EditorGroup favoritesGroup = externalGroupProvider.getFavoritesGroup(last.substring(FavoritesGroup.ID_PREFIX.length()));

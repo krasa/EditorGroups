@@ -13,7 +13,7 @@ public abstract class AutoGroup extends EditorGroup {
 	public static final String SAME_FILE_NAME = "FILE_NAME";
 	public static final String DIRECTORY = "DIRECTORY";
 
-	public static final EmptyGroup HIDE_GROUP_INSTANCE = new EmptyGroup();
+	public static final HidePanelGroup HIDE_GROUP_INSTANCE = new HidePanelGroup();
 
 
 	protected List<Link> links;

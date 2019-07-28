@@ -419,7 +419,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		} else if (currentIndex < 0 && displayedGroup != EditorGroup.EMPTY
 			&& !(displayedGroup instanceof EditorGroups)
 			&& !(displayedGroup instanceof BookmarkGroup)
-			&& !(displayedGroup instanceof EmptyGroup)
+			&& !(displayedGroup instanceof HidePanelGroup)
 		) {
 
 			if (!displayedGroup.isStub() && !FileResolver.excluded(new File(file.getPath()), ApplicationConfiguration.state().isExcludeEditorGroupsFiles())) {
@@ -913,7 +913,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		boolean visible;
 		ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.state();
 		hideGlobally = !applicationConfiguration.isShowPanel();
-		if (!applicationConfiguration.isShowPanel() || rendering instanceof EmptyGroup || rendering == EditorGroup.EMPTY) {
+		if (!applicationConfiguration.isShowPanel() || rendering instanceof HidePanelGroup || rendering == EditorGroup.EMPTY) {
 			visible = false;
 		} else if (applicationConfiguration.isHideEmpty() && !rendering.isStub()) {
 			boolean hide = rendering instanceof AutoGroup && ((AutoGroup) rendering).isEmpty();

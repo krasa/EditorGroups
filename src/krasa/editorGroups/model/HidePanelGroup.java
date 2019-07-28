@@ -8,9 +8,9 @@ import javax.swing.*;
 import java.util.Collections;
 import java.util.List;
 
-public class EmptyGroup extends EditorGroup {
-	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(EmptyGroup.class);
-	public static final String ID = "EmptyGroup";
+public class HidePanelGroup extends EditorGroup {
+	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(HidePanelGroup.class);
+	public static final String ID = "HidePanelGroup";
 
 	@NotNull
 	@Override
@@ -26,7 +26,7 @@ public class EmptyGroup extends EditorGroup {
 
 	@Override
 	public String getTitle() {
-		return "Empty group";
+		return "Hide panel";
 	}
 
 	@Override
@@ -66,6 +66,6 @@ public class EmptyGroup extends EditorGroup {
 
 	@Override
 	public boolean equals(Object obj) {
-		return super.equals(obj) || obj instanceof EmptyGroup;
+		return super.equals(obj) || obj instanceof HidePanelGroup;
 	}
 }
