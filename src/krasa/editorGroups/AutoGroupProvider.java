@@ -49,9 +49,10 @@ public class AutoGroupProvider {
 
 
 	public EditorGroup getSameNameGroup(VirtualFile currentFile) {
-		if (!currentFile.isInLocalFileSystem()) {
-			return EditorGroup.EMPTY;
-		}
+//		if (!Utils.isInLocalFileSystem(currentFile)) {
+//			return EditorGroup.EMPTY;
+//		}
+
 		String nameWithoutExtension = currentFile.getNameWithoutExtension();
 		long start = System.currentTimeMillis();
 
@@ -65,7 +66,7 @@ public class AutoGroupProvider {
 			}
 			int groupSizeLimitInt = ApplicationConfiguration.state().getGroupSizeLimitInt();
 			int size = virtualFilesByName.size();
-			paths = new ArrayList<>(Math.min(size + 1, groupSizeLimitInt+1));
+			paths = new ArrayList<>(Math.min(size + 1, groupSizeLimitInt + 1));
 
 
 			for (VirtualFile file : virtualFilesByName) {

@@ -161,7 +161,7 @@ public class EditorGroupManager {
 				}
 
 
-				if (!stub && result instanceof SameNameGroup && result.size(project) <= 1 && !(requestedGroup instanceof SameNameGroup && !requestedGroup.isStub())) {
+				if (!stub && sameNameGroupIsEmpty(project, result, requestedGroup) && !(requestedGroup instanceof SameNameGroup && !requestedGroup.isStub())) {
 					EditorGroup multiGroup = cache.getMultiGroup(currentFile);
 					if (multiGroup.isValid()) {
 						result = multiGroup;
@@ -180,7 +180,10 @@ public class EditorGroupManager {
 				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
 			}
 			cache.setLast(currentFilePath, result);
-		} catch (ProcessCanceledException | IndexNotReadyException e) {
+		} catch (ProcessCanceledException e) {
+			LOG.debug(e.toString());
+			throw e;
+		} catch (IndexNotReadyException e) {
 			LOG.debug(e.toString());
 			throw new IndexNotReady(">getGroup project = [" + project.getName() + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
 		} catch (Throwable e) {
@@ -188,6 +191,10 @@ public class EditorGroupManager {
 			throw e;
 		}
 		return result;
+	}
+
+	private boolean sameNameGroupIsEmpty(Project project, EditorGroup result, EditorGroup requestedGroup) {
+		return (result instanceof SameNameGroup && result.size(project) <= 1) || (result == EditorGroup.EMPTY && requestedGroup instanceof SameNameGroup);
 	}
 
 	public void switching(SwitchRequest switchRequest) {

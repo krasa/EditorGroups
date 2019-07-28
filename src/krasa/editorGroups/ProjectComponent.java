@@ -12,6 +12,7 @@ import com.intellij.util.xmlb.annotations.Attribute;
 import com.intellij.util.xmlb.annotations.Tag;
 import com.intellij.util.xmlb.annotations.XCollection;
 import krasa.editorGroups.model.EditorGroup;
+import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -39,7 +40,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			@Override
 			public void fileOpenedSync(@NotNull FileEditorManager manager, @NotNull VirtualFile file, @NotNull Pair<FileEditor[], FileEditorProvider[]> editors) {
 				if (LOG.isDebugEnabled()) LOG.debug(">fileOpenedSync [" + file + "]");
-
+				file = Utils.unwrap(file);
 				EditorGroupManager instance = EditorGroupManager.getInstance(project);
 				SwitchRequest switchRequest = instance.getAndClearSwitchingRequest(file);
 
@@ -49,7 +50,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 					}
 					long start = System.currentTimeMillis();
 
-					createPanel(manager, fileEditor.getFile(), switchRequest, fileEditor);
+					createPanel(manager, file, switchRequest, fileEditor);
 
 
 					if (LOG.isDebugEnabled()) {

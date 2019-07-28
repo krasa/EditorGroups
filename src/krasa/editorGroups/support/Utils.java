@@ -1,6 +1,7 @@
 package krasa.editorGroups.support;
 
 import com.intellij.ide.ui.UISettings;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -9,9 +10,11 @@ import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
+import com.intellij.util.ReflectionUtil;
 import krasa.editorGroups.model.Link;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,6 +23,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -27,9 +31,14 @@ import java.util.Set;
 
 @SuppressWarnings({"UseJBColor"})
 public class Utils {
+	private static final Logger LOG = Logger.getInstance(Utils.class);
 
 	public static Map<String, Color> colorMap;
 	public static Set<String> colorSet;
+	/**
+	 * intellij-file-preview
+	 */
+	private static Method getSource;
 
 	/**
 	 * not good enough for UI forms sometimes
@@ -40,7 +49,8 @@ public class Utils {
 		if (file != null) {
 			return file;
 		}
-		return FileEditorManagerEx.getInstanceEx(project).getFile(textEditor);
+
+		return unwrap(FileEditorManagerEx.getInstanceEx(project).getFile(textEditor));
 	}
 
 	@Nullable
@@ -499,5 +509,26 @@ public class Utils {
 		} catch (IOException e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	public static boolean isInLocalFileSystem(VirtualFile currentFile) {
+		return currentFile.getFileSystem() instanceof LocalFileSystem;
+	}
+
+	public static VirtualFile unwrap(VirtualFile file) {
+		if (file == null) {
+			return null;
+		}
+		try {
+			if (file.getClass().getPackage().getName().startsWith("net.seesharpsoft")) {
+				if (getSource == null) {
+					getSource = ReflectionUtil.getMethod(file.getClass(), "getSource", new Class[0]);
+				}
+				file = (VirtualFile) getSource.invoke(file);
+			}
+		} catch (Throwable e) {
+			LOG.error(e);
+		}
+		return file;
 	}
 }
