@@ -63,6 +63,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 
 			private void createPanel(@NotNull FileEditorManager manager, @NotNull VirtualFile file, SwitchRequest switchRequest, FileEditor fileEditor) {
 				if (Disposer.isDisposed(fileEditor)) {
+					LOG.debug(">createPanel: fileEditor already disposed");
 					return;
 				}
 				EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
