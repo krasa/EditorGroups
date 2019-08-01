@@ -6,6 +6,7 @@ import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.xmlb.annotations.Attribute;
@@ -61,6 +62,9 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 			}
 
 			private void createPanel(@NotNull FileEditorManager manager, @NotNull VirtualFile file, SwitchRequest switchRequest, FileEditor fileEditor) {
+				if (Disposer.isDisposed(fileEditor)) {
+					return;
+				}
 				EditorGroupPanel panel = new EditorGroupPanel(fileEditor, project, switchRequest, file);
 				manager.addTopComponent(fileEditor, panel.getRoot());
 				panel.postConstruct();
