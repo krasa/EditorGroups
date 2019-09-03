@@ -1,6 +1,5 @@
 package krasa.editorGroups;
 
-import com.intellij.mock.MockVirtualFile;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.progress.ProcessCanceledException;
@@ -9,6 +8,7 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.project.ProjectCoreUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.testFramework.LightVirtualFile;
 import krasa.editorGroups.index.MyFileNameIndexService;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.Notifications;
@@ -97,7 +97,10 @@ public class AutoGroupProvider {
 			}
 			paths = new ArrayList<>();
 			paths.add(currentFile);
-			paths.add(new MockVirtualFile("Indexing..."));
+
+			LightVirtualFile vf = new LightVirtualFile("Indexing...");
+			vf.setValid(false);
+			paths.add(vf);
 		}
 
 		long t0 = System.currentTimeMillis() - start;

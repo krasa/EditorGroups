@@ -1,8 +1,8 @@
 package krasa.editorGroups.model;
 
-import com.intellij.mock.MockVirtualFile;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.testFramework.LightVirtualFile;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FolderGroup extends AutoGroup {
 
-	public static final MockVirtualFile DIRECTORY_INSTANCE = new MockVirtualFile("DIRECTORY_INSTANCE");
+	public static final LightVirtualFile DIRECTORY_INSTANCE = new LightVirtualFile("DIRECTORY_INSTANCE");
 	public static final FolderGroup INSTANCE = new FolderGroup(DIRECTORY_INSTANCE, Collections.emptyList());
 	private final VirtualFile folder;
 
