@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.29</version>
+    <version>0.30</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -14,7 +14,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-    NoClassDefFoundError fix
+    exception fixes
     ]]>
     </change-notes>
 
