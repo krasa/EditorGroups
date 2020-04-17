@@ -15,20 +15,15 @@ import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.IdeFocusManager;
 import com.intellij.openapi.wm.IdeGlassPane;
-import com.intellij.openapi.wm.IdeGlassPaneUtil;
 import com.intellij.ui.Gray;
-import com.intellij.ui.GuiUtils;
-import com.intellij.ui.ScreenUtil;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.switcher.QuickActionProvider;
 import com.intellij.util.Alarm;
 import com.intellij.util.Function;
-import com.intellij.util.IncorrectOperationException;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.ui.*;
-import com.intellij.util.ui.update.LazyUiDisposable;
 import krasa.editorGroups.tabs2.*;
 import krasa.editorGroups.tabs2.impl.singleRow.ScrollableSingleRowLayout;
 import krasa.editorGroups.tabs2.impl.singleRow.SingleRowLayout;
@@ -397,7 +392,7 @@ public class JBTabsImpl extends JComponent
 			entry.getKey().revalidate();
 		}
 		boolean oldHideTabsIfNeeded = mySingleRowLayout instanceof ScrollableSingleRowLayout;
-		boolean newHideTabsIfNeeded = UISettings.getInstance().getHideTabsIfNeeded();
+		boolean newHideTabsIfNeeded = uiSettings.getHideTabsIfNeeded();
 		if (oldHideTabsIfNeeded != newHideTabsIfNeeded) {
 			updateRowLayout();
 		}
@@ -562,11 +557,7 @@ public class JBTabsImpl extends JComponent
 
 	@Override
 	public void removeNotify() {
-		try {
-			super.removeNotify();
-		} catch (Exception e) {
-			GuiUtils.printDebugInfo(this);
-		}
+		super.removeNotify();
 
 		setFocused(false);
 
