@@ -136,12 +136,17 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 
 	@Nullable
 	private FavoritesGroup getFavoritesGroup(AnActionEvent e) {
+		Project eventProject = getEventProject(e);
+		if (eventProject == null) {
+			return null;
+		}
+
 		EditorGroupPanel editorGroupPanel = null;
 		FavoritesGroup data = EditorGroupPanel.FAVORITE_GROUP.getData(e.getDataContext());
 		if (data != null) {
 			return data;
 		}
-		FileEditorManagerEx instance = (FileEditorManagerEx) FileEditorManager.getInstance(getEventProject(e));
+		FileEditorManagerEx instance = (FileEditorManagerEx) FileEditorManager.getInstance(eventProject);
 		EditorWindow currentWindow = instance.getCurrentWindow();
 		if (currentWindow != null) {
 			EditorWithProviderComposite editor = currentWindow.getSelectedEditor(true);
