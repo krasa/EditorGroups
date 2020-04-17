@@ -835,9 +835,12 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					public EditorGroup call() throws Exception {
 						try {
 							return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, !ApplicationConfiguration.state().isShowPanel());
-						} catch (ProcessCanceledException | IndexNotReady e) {
+						} catch (ProcessCanceledException e) {
 							if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString(), e);
 							throw e;
+						} catch (IndexNotReady e) {
+							if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString(), e);
+							throw new ProcessCanceledException(e);
 						}
 					}
 				}).expireWith(fileEditor).submit(PooledThreadExecutor.INSTANCE).get();
