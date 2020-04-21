@@ -33,10 +33,10 @@ public class IndexCache {
 
 	private final ExternalGroupProvider externalGroupProvider;
 
-	public IndexCache(@NotNull Project project, @NotNull ExternalGroupProvider externalGroupProvider, @NotNull ApplicationConfigurationComponent configuration) {
+	public IndexCache(@NotNull Project project) {
 		this.project = project;
-		this.externalGroupProvider = externalGroupProvider;
-		this.configuration = configuration;
+		this.externalGroupProvider = ExternalGroupProvider.getInstance(project);
+		this.configuration = ApplicationConfigurationComponent.getInstance();
 	}
 
 	public EditorGroup getOwningOrSingleGroup(@NotNull String canonicalPath) {

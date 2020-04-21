@@ -59,14 +59,14 @@ public class EditorGroupManager {
 	private volatile SwitchRequest switchRequest;
 	public volatile boolean switching = false;
 
-	public EditorGroupManager(Project project, PanelRefresher panelRefresher, IdeFocusManager ideFocusManager, ExternalGroupProvider externalGroupProvider, AutoGroupProvider autogroupProvider, RegexGroupProvider regexGroupProvider, IndexCache cache) {
-		this.regexGroupProvider = regexGroupProvider;
-		this.cache = cache;
-		this.panelRefresher = panelRefresher;
-		this.ideFocusManager = ideFocusManager;
+	public EditorGroupManager(Project project) {
 		this.project = project;
-		this.externalGroupProvider = externalGroupProvider;
-		this.autogroupProvider = autogroupProvider;
+		this.regexGroupProvider = RegexGroupProvider.getInstance(project);
+		this.cache = IndexCache.getInstance(project);
+		this.panelRefresher = PanelRefresher.getInstance(project);
+		this.ideFocusManager = IdeFocusManager.findInstance();
+		this.externalGroupProvider = ExternalGroupProvider.getInstance(project);
+		this.autogroupProvider = AutoGroupProvider.getInstance(project);
 	}
 
 

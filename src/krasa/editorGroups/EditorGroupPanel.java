@@ -231,7 +231,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		tabs.addMouseListener(getPopupHandler());
 
 
-		myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("krasa.editorGroups.EditorGroupPanel-" + file.getName(), 1);
+		myTaskExecutor = AppExecutorUtil.createBoundedApplicationPoolExecutor("Krasa.editorGroups.EditorGroupPanel-" + file.getName(), 1);
 		dumbService = DumbService.getInstance(this.project);
 	}
 

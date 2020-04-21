@@ -31,10 +31,10 @@ public class ExternalGroupProvider {
 		return ServiceManager.getService(project, ExternalGroupProvider.class);
 	}
 
-	public ExternalGroupProvider(FavoritesManager favoritesManager, Project project, ProjectFileIndex fileIndex) {
-		this.favoritesManager = favoritesManager;
+	public ExternalGroupProvider(Project project) {
 		this.project = project;
-		this.fileIndex = fileIndex;
+		this.favoritesManager = FavoritesManager.getInstance(project);
+		this.fileIndex = ProjectFileIndex.getInstance(project);
 	}
 
 	public Collection<FavoritesGroup> getFavoritesGroups() {

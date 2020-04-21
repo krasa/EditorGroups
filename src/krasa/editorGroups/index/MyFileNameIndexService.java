@@ -37,10 +37,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public class MyFileNameIndexService {
-	private final FileBasedIndex myIndex;
 
-	public MyFileNameIndexService(@NotNull FileBasedIndex index) {
-		myIndex = index;
+	public MyFileNameIndexService() {
 	}
 
 	@NotNull
@@ -194,7 +192,7 @@ public class MyFileNameIndexService {
 
 	public Collection<VirtualFile> getVirtualFilesByName(Project project, String name, GlobalSearchScope scope, IdFilter filter) {
 		Set<VirtualFile> files = new THashSet<>();
-		myIndex.processValues(FilenameWithoutExtensionIndex.NAME, name, null, (file, value) -> {
+		FileBasedIndex.getInstance().processValues(FilenameWithoutExtensionIndex.NAME, name, null, (file, value) -> {
 			files.add(file);
 			return true;
 		}, scope, filter);
@@ -202,7 +200,7 @@ public class MyFileNameIndexService {
 	}
 
 	public void processAllFileNames(Processor<String> processor, GlobalSearchScope scope, IdFilter filter) {
-		myIndex.processAllKeys(FilenameWithoutExtensionIndex.NAME, processor, scope, filter);
+		FileBasedIndex.getInstance().processAllKeys(FilenameWithoutExtensionIndex.NAME, processor, scope, filter);
 	}
 
 }

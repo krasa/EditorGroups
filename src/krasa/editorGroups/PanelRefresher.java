@@ -40,7 +40,7 @@ public class PanelRefresher {
 	public PanelRefresher(Project project) {
 		this.project = project;
 		cache = IndexCache.getInstance(project);
-		ourThreadExecutorsService = AppExecutorUtil.createBoundedApplicationPoolExecutor("krasa.editorGroups.PanelRefresher-" + project.getName(), 1);
+		ourThreadExecutorsService = AppExecutorUtil.createBoundedApplicationPoolExecutor("Krasa.editorGroups.PanelRefresher-" + project.getName(), 1);
 		project.getMessageBus().connect().subscribe(DumbService.DUMB_MODE, new DumbService.DumbModeListener() {
 			@Override
 			public void enteredDumbMode() {
