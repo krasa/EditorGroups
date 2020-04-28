@@ -16,13 +16,14 @@ import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.util.Processor;
 import com.intellij.util.concurrency.AppExecutorUtil;
 import com.intellij.util.indexing.FileBasedIndex;
 import krasa.editorGroups.index.EditorGroupIndex;
 import krasa.editorGroups.model.*;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -226,16 +227,13 @@ public class PanelRefresher {
 				FileBasedIndex fileBasedIndex = FileBasedIndex.getInstance();
 				IndexCache cache = IndexCache.getInstance(project);
 				try {
-					fileBasedIndex.processAllKeys(EditorGroupIndex.NAME, new Processor<String>() {
-						@Override
-						public boolean process(String s) {
-							List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, s, GlobalSearchScope.allScope(project));
-							for (EditorGroupIndexValue value : values) {
-								cache.initGroup(value);
-							}
-							return true;
+					Collection<String> keys = fileBasedIndex.getAllKeys(EditorGroupIndex.NAME, project);
+					for (String key : keys) {
+						List<EditorGroupIndexValue> values = fileBasedIndex.getValues(EditorGroupIndex.NAME, key, GlobalSearchScope.allScope(project));
+						for (EditorGroupIndexValue value : values) {
+							cache.initGroup(value);
 						}
-					}, project);
+					}
 				} catch (ProcessCanceledException | IndexNotReadyException e) {
 					if (LOG.isDebugEnabled())
 						LOG.debug("initCache failed on IndexNotReadyException, will be executed again");
