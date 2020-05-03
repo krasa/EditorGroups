@@ -1,6 +1,7 @@
 package krasa.editorGroups.index;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.StringPattern;
@@ -112,6 +113,8 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 
 		try {
 			lastGroup = PanelRefresher.getInstance(inputData.getProject()).onIndexingDone(ownerPath, lastGroup);
+		} catch (ProcessCanceledException e) {
+			LOG.debug(e);
 		} catch (Exception e) {
 			LOG.error(e);
 		}
