@@ -116,15 +116,6 @@ public class IndexCache {
 	}
 
 
-	private void addToCache(List<Link> links, EditorGroupIndexValue group) {
-		add(group, group.getOwnerPath());
-
-		for (Link link : links) {
-			add(group, link.getPath());
-		}
-	}
-
-
 	private void add(@NotNull EditorGroupIndexValue group, String path) {
 		EditorGroups editorGroups = groupsByLinks.get(path);
 		if (editorGroups == null) {
@@ -150,15 +141,20 @@ public class IndexCache {
 		return group;
 	}
 
-	public void initGroup(@NotNull EditorGroupIndexValue group) {
+	public void initGroup(@NotNull EditorGroupIndexValue group) throws ProcessCanceledException {
 		if (LOG.isDebugEnabled()) LOG.debug("initGroup = [" + group + "]");
 		if (!EditorGroup.exists(group)) {
 			return;
 		}
-		List<Link> links = FileResolver.resolveLinks(group, project);
+
+		add(group, group.getOwnerPath());
+
+		List<Link> links = FileResolver.resolveLinks(group, project);         //TODO throws ProcessCanceledException , does it create inconsistency? 
 		group.setLinks(links);
 
-		addToCache(links, group);
+		for (Link link : links) {
+			add(group, link.getPath());
+		}
 	}
 
 
