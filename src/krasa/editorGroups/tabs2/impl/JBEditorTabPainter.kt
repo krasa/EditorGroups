@@ -3,6 +3,7 @@ package krasa.editorGroups.tabs2.impl
 
 import com.intellij.openapi.rd.fill2DRect
 import com.jetbrains.rd.swing.fillRect
+import krasa.editorGroups.tabs2.ApiChanged
 import krasa.editorGroups.tabs2.JBTabsPosition
 import krasa.editorGroups.tabs2.impl.themes.EditorTabTheme
 import java.awt.Color
@@ -11,26 +12,30 @@ import java.awt.Rectangle
 
 class JBEditorTabPainter : JBDefaultTabPainter(EditorTabTheme()) {
     override fun paintTab(position: JBTabsPosition, g: Graphics2D, rect: Rectangle, borderThickness: Int, tabColor: Color?, hovered: Boolean) {
-        when (position) {
-            JBTabsPosition.top -> rect.height -= borderThickness
-            JBTabsPosition.bottom -> rect.y += borderThickness
-            JBTabsPosition.left -> rect.width -= borderThickness
-            JBTabsPosition.right -> {
-                rect.x += borderThickness
-            }
-        }
-
-        tabColor?.let {
-            g.fill2DRect(rect, it)
-
-            if (theme is EditorTabTheme)
-                theme.inactiveColoredFileBackground?.let { inactive ->
-                    g.fill2DRect(rect, inactive)
+        try {
+            when (position) {
+                JBTabsPosition.top -> rect.height -= borderThickness
+                JBTabsPosition.bottom -> rect.y += borderThickness
+                JBTabsPosition.left -> rect.width -= borderThickness
+                JBTabsPosition.right -> {
+                    rect.x += borderThickness
                 }
-        }
+            }
 
-        if (hovered) {
-            g.fillRect(rect, theme.hoverBackground)
+            tabColor?.let {
+                g.fill2DRect(rect, it)
+
+                if (theme is EditorTabTheme)
+                    theme.inactiveColoredFileBackground?.let { inactive ->
+                        g.fill2DRect(rect, inactive)
+                    }
+            }
+
+            if (hovered) {
+                g.fillRect(rect, theme.hoverBackground)
+            }
+        } catch (e: Throwable) {
+            ApiChanged.report(e)
         }
     }
 

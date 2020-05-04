@@ -9,12 +9,10 @@ import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.ModalityState;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.rd.RdIdeaKt;
 import com.intellij.openapi.ui.*;
 import com.intellij.openapi.util.*;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.wm.IdeFocusManager;
-import com.intellij.openapi.wm.IdeGlassPane;
 import com.intellij.ui.Gray;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.scale.JBUIScale;
@@ -645,9 +643,6 @@ public class JBTabsImpl extends JComponent
 	}
 
 
-	/**
-	 * TODO use {@link RdIdeaKt#childAtMouse(IdeGlassPane, Container)}
-	 */
 	@Deprecated
 	class TabActionsAutoHideListener extends MouseMotionAdapter implements Weighted {
 
