@@ -5,7 +5,6 @@ import com.intellij.openapi.progress.ProcessCanceledException;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.patterns.StringPattern;
-import com.intellij.psi.search.IndexPattern;
 import com.intellij.util.indexing.DataIndexer;
 import com.intellij.util.indexing.FileContent;
 import krasa.editorGroups.ApplicationConfiguration;
@@ -28,19 +27,19 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexValue, FileContent> {
 	private static final Logger LOG = Logger.getInstance(EditorGroupIndexer.class);
-	public static final IndexPattern MAIN_PATTERN = new IndexPattern("@(idea|group)\\.\\w+.*", false);
+	private MyIndexPattern MAIN_PATTERN = new MyIndexPattern("@(idea|group)\\.\\w+.*", false);
 
 	public static final int INDEX_PATTERN_GROUP = 2;
 	@SuppressWarnings("unchecked")
 	/** @see LanguagePatternHolder#keywords */
-	final Pair<IndexPattern, Consumer>[] indexPatterns = new Pair[]{
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.root\\s(.*)", false), new RootConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.color\\s(.*)", false), new ColorConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.related\\s(.*)", false), new RelatedFilesConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("^@(idea|group)\\.id\\s(.*)", false), new IdConsumer()),
-		new Pair<IndexPattern, Consumer>(new IndexPattern("(^@(idea|group)\\.disable.*)", false), new DisableConsumer())
+	final Pair<MyIndexPattern, Consumer>[] indexPatterns = new Pair[]{
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.root\\s(.*)", false), new RootConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.title\\s(.*)", false), new TitleConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.color\\s(.*)", false), new ColorConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.fgcolor\\s(.*)", false), new FgColorConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.related\\s(.*)", false), new RelatedFilesConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("^@(idea|group)\\.id\\s(.*)", false), new IdConsumer()),
+		new Pair<MyIndexPattern, Consumer>(new MyIndexPattern("(^@(idea|group)\\.disable.*)", false), new DisableConsumer())
 	};
 
 	@Override
@@ -128,7 +127,7 @@ public class EditorGroupIndexer implements DataIndexer<String, EditorGroupIndexV
 	}
 
 	public EditorGroupIndexValue processPatterns(@NotNull FileContent inputData, File folder, EditorGroupIndexValue value, CharSequence trim) {
-		for (Pair<IndexPattern, Consumer> indexPattern : indexPatterns) {
+		for (Pair<MyIndexPattern, Consumer> indexPattern : indexPatterns) {
 			Pattern pattern = indexPattern.first.getOptimizedIndexingPattern();
 			Consumer consumer = indexPattern.second;
 			if (pattern != null) {
