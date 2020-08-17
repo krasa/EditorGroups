@@ -7,7 +7,7 @@ image::example.gif[]
 - manually defined in `*.egroups` file (with language support) or in any other file 
 ** does not support refactoring yet
 - by the current file name (without extension) anywhere in the project
-- by regex (supporting regex groups, defined in settings) - https://github.com/krasa/EditorGroups/issues/5[#5]
+- by regex (supporting regex groups, defined in Settings) - https://github.com/krasa/EditorGroups/issues/5[#5] https://github.com/krasa/EditorGroups/issues/21[#21]
 - by folder
 - bookmarks
             
