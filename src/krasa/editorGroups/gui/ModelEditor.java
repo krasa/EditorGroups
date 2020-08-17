@@ -2,6 +2,7 @@ package krasa.editorGroups.gui;
 
 import com.intellij.application.options.colors.ColorAndFontOptions;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.editor.EditorFactory;
@@ -27,6 +28,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class ModelEditor extends DialogWrapper {
+	private static final Logger LOG = Logger.getInstance(ModelEditor.class);
 	private JTextField regex;
 	private JComboBox<RegexGroupModel.Scope> scopeCombo;
 	private JPanel root;
@@ -133,7 +135,7 @@ public class ModelEditor extends DialogWrapper {
 		ApplicationManager.getApplication().runWriteAction(new Runnable() {
 			@Override
 			public void run() {
-				String replace = sb.toString().replace("\\r\\n", "\\n");
+				String replace = sb.toString().replace("\r\n", "\n");
 				myEditor.getDocument().setText(replace);
 				testResult.validate();
 				testResult.repaint();
