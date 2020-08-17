@@ -23,6 +23,7 @@ import java.util.List;
 
 public class AutoGroupProvider {
 	private static final Logger LOG = Logger.getInstance(AutoGroupProvider.class);
+	public static final String INDEXING = "Indexing...";
 
 	public static AutoGroupProvider getInstance(@NotNull Project project) {
 		return ServiceManager.getService(project, AutoGroupProvider.class);
@@ -98,7 +99,7 @@ public class AutoGroupProvider {
 			paths = new ArrayList<>();
 			paths.add(currentFile);
 
-			LightVirtualFile vf = new LightVirtualFile("Indexing...");
+			LightVirtualFile vf = new LightVirtualFile(INDEXING);
 			vf.setValid(false);
 			paths.add(vf);
 		}

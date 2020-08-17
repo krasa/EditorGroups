@@ -15,6 +15,7 @@ import com.intellij.openapi.fileEditor.impl.EditorWindowHolder;
 import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.fileEditor.impl.text.TextEditorImpl;
 import com.intellij.openapi.progress.ProcessCanceledException;
+import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.IndexNotReadyException;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
@@ -86,7 +87,7 @@ public class EditorGroupManager {
 		if (requestedGroup != null && requestedGroup != displayedGroup) {
 			boolean debuggingHelperLine = true;
 		}
-		
+
 		long start = System.currentTimeMillis();
 
 		EditorGroup result = EditorGroup.EMPTY;
@@ -115,7 +116,7 @@ public class EditorGroupManager {
 			if (result.isInvalid()) {
 				cache.validate(requestedGroup);
 				if (requestedGroup.isValid()
-					&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFile) || requestedGroup.isOwner(currentFilePath))) {
+						&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFile) || requestedGroup.isOwner(currentFilePath))) {
 					result = requestedGroup;
 				}
 			}
@@ -141,7 +142,7 @@ public class EditorGroupManager {
 				}
 			}
 
-			if (refresh || (result instanceof AutoGroup && result.size(project) == 0)) {
+			if (refresh || isEmptyAutogroup(project, result) || isIndexingAutoGroup(project, result)) {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("refreshing result");
 				}
@@ -191,6 +192,18 @@ public class EditorGroupManager {
 			throw e;
 		}
 		return result;
+	}
+
+	private boolean isIndexingAutoGroup(Project project, EditorGroup result) {
+		if (result instanceof AutoGroup && !DumbService.isDumb(project)) {
+			AutoGroup s = (AutoGroup) result;
+			if (s.hasIndexing()) return true;
+		}
+		return false;
+	}
+
+	private boolean isEmptyAutogroup(Project project, EditorGroup result) {
+		return result instanceof AutoGroup && result.size(project) == 0;
 	}
 
 	private boolean sameNameGroupIsEmpty(Project project, EditorGroup result, EditorGroup requestedGroup) {
