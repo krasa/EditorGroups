@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.35</version>
+    <version>0.36</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -14,7 +14,7 @@
     ]]></description>
 
     <change-notes><![CDATA[
-   deadlock fix
+   deadlock fix; regex group improvements <a href="https://github.com/krasa/EditorGroups/issues/21">https://github.com/krasa/EditorGroups/issues/21</a>
     ]]>
     </change-notes>
 
