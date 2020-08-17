@@ -73,6 +73,10 @@ image::example.gif[]
 === Other
 - `@group.disable` (disables indexing of the current file)
 
+
+=== Regex groups
+image::example.gif[]
+
 ---
 
 image::https://www.yourkit.com/images/yklogo.png[]

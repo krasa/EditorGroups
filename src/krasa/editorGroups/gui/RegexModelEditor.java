@@ -56,7 +56,8 @@ public class RegexModelEditor extends DialogWrapper {
 						"- if it matches, then all other files within the scope are matched against the same regex\n" +
 						"- for each matching file, the content of each regex group is compared against the current file\n" +
 						"- the comparison can be disabled for each group\n" +
-						"- example: '(.*)(Service|Repository|Dao).*' (disable group 2)");
+						"- example: '(.*)(Service|Repository|Controller).*' (disable group 2)\n" +
+						"- example: '(.*)\\..*'");
 
 //		FileChooserDescriptor singleFileDescriptor = new FileChooserDescriptor(true, false, false, false, false, false);
 //		Project currentContextProject = ProjectUtils.getCurrentContextProject();
