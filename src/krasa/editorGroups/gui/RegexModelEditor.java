@@ -54,7 +54,7 @@ public class RegexModelEditor extends DialogWrapper {
 		help.setText(
 				"- the current file name is matched against the regex\n" +
 						"- if it matches, then all other files within the scope are matched against the same regex\n" +
-						"- for each matching file the content of regex groups are compared against the current file\n" +
+						"- for each matching file, the content of each regex group is compared against the current file\n" +
 						"- the comparison can be disabled for each group\n" +
 						"- example: '(.*)(Service|Repository|Dao).*' (disable group 2)");
 
