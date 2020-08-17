@@ -75,7 +75,7 @@ image::example.gif[]
 
 
 === Regex groups
-image::example.gif[]
+image::regexSettings.png[]
 
 ---
 
