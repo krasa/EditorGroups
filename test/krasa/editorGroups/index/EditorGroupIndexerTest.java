@@ -1,7 +1,6 @@
 package krasa.editorGroups.index;
 
 import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.psi.search.IndexPattern;
 import org.junit.Test;
 
 import java.util.regex.Matcher;
@@ -17,7 +16,7 @@ public class EditorGroupIndexerTest {
 			"@group.color red-26+40\n" +
 			"\n";
 
-		IndexPattern indexPattern = new IndexPattern("@group\\.(excluded|title|color|related)\\s.*", false);
+		MyIndexPattern indexPattern = new MyIndexPattern("@group\\.(excluded|title|color|related)\\s.*", false);
 		Matcher matcher = indexPattern.getOptimizedIndexingPattern().matcher(input);
 		while (matcher.find()) {
 			if (matcher.start() != matcher.end()) {
