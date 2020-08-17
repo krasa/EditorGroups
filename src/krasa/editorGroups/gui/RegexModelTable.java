@@ -16,15 +16,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class RegexTable extends JBTable {
-	private static final Logger LOG = Logger.getInstance(RegexTable.class);
+public class RegexModelTable extends JBTable {
+	private static final Logger LOG = Logger.getInstance(RegexModelTable.class);
 	private final MyTableModel myTableModel = new MyTableModel();
 	private static final int REGEX_COLUMN = 0;
 	private static final int SCOPE_COLUMN = 1;
 
 	private final List<RegexGroupModel> myRegexGroupModels = new ArrayList<>();
 
-	public RegexTable() {
+	public RegexModelTable() {
 		setModel(myTableModel);
 		TableColumn column = getColumnModel().getColumn(REGEX_COLUMN);
 		column.setCellRenderer(new DefaultTableCellRenderer() {
@@ -41,16 +41,16 @@ public class RegexTable extends JBTable {
 		setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 	}
 
-	public RegexGroupModel.Scope getAliasValueAt(int row) {
+	public RegexGroupModel.Scope getRegexModelValueAt(int row) {
 		return (RegexGroupModel.Scope) getValueAt(row, SCOPE_COLUMN);
 	}
 
-	public void addAlias() {
-		final ModelEditor macroEditor = new ModelEditor("Add RegexGroup", "", RegexGroupModel.Scope.CURRENT_FOLDER);
-		if (macroEditor.showAndGet()) {
-			final String name = macroEditor.getRegex();
-			myRegexGroupModels.add(new RegexGroupModel(name, macroEditor.getScopeCombo()));
-			final int index = indexOfAliasWithName(name);
+	public void addRegexModel() {
+		final RegexModelEditor regexModelEditor = new RegexModelEditor("Add RegexGroup", "", "", RegexGroupModel.Scope.CURRENT_FOLDER);
+		if (regexModelEditor.showAndGet()) {
+			final String name = regexModelEditor.getRegex();
+			myRegexGroupModels.add(new RegexGroupModel(name, regexModelEditor.getScopeCombo(), regexModelEditor.getNotComparingGroups()));
+			final int index = indexOfRegexModelWithName(name);
 			LOG.assertTrue(index >= 0);
 			myTableModel.fireTableDataChanged();
 			setRowSelectionInterval(index, index);
@@ -80,7 +80,7 @@ public class RegexTable extends JBTable {
 	}
 
 
-	public void removeSelectedAliases() {
+	public void removeSelectedRegexModels() {
 		final int[] selectedRows = getSelectedRows();
 		if (selectedRows.length == 0) return;
 		Arrays.sort(selectedRows);
@@ -106,12 +106,12 @@ public class RegexTable extends JBTable {
 
 
 	public void reset(ApplicationConfiguration settings) {
-		obtainAliases(myRegexGroupModels, settings);
+		obtainRegexModels(myRegexGroupModels, settings);
 		myTableModel.fireTableDataChanged();
 	}
 
 
-	private int indexOfAliasWithName(String name) {
+	private int indexOfRegexModelWithName(String name) {
 		for (int i = 0; i < myRegexGroupModels.size(); i++) {
 			final RegexGroupModel pair = myRegexGroupModels.get(i);
 			if (name.equals(pair.getRegex())) {
@@ -121,23 +121,24 @@ public class RegexTable extends JBTable {
 		return -1;
 	}
 
-	private void obtainAliases(@NotNull List<RegexGroupModel> aliases, ApplicationConfiguration settings) {
-		aliases.clear();
+	private void obtainRegexModels(@NotNull List<RegexGroupModel> regexModels, ApplicationConfiguration settings) {
+		regexModels.clear();
 		List<RegexGroupModel> regexGroupModels = settings.getRegexGroupModels().getRegexGroupModels();
 		for (RegexGroupModel regexGroupModel : regexGroupModels) {
-			aliases.add(regexGroupModel.copy());
+			regexModels.add(regexGroupModel.copy());
 		}
 	}
 
-	public boolean editAlias() {
+	public boolean editRegexModel() {
 		if (getSelectedRowCount() != 1) {
 			return false;
 		}
 		final int selectedRow = getSelectedRow();
 		final RegexGroupModel regexGroupModel = myRegexGroupModels.get(selectedRow);
-		final ModelEditor editor = new ModelEditor("Edit RegexGroup", regexGroupModel.getRegex(), regexGroupModel.getScope());
+		final RegexModelEditor editor = new RegexModelEditor("Edit RegexGroup", regexGroupModel.getRegex(), regexGroupModel.getNotComparingGroups(), regexGroupModel.getScope());
 		if (editor.showAndGet()) {
 			regexGroupModel.setRegex(editor.getRegex());
+			regexGroupModel.setNotComparingGroups(editor.getNotComparingGroups());
 			regexGroupModel.setScope(editor.getScopeCombo());
 			myTableModel.fireTableDataChanged();
 		}
@@ -145,9 +146,9 @@ public class RegexTable extends JBTable {
 	}
 
 	public boolean isModified(ApplicationConfiguration settings) {
-		final ArrayList<RegexGroupModel> aliases = new ArrayList<>();
-		obtainAliases(aliases, settings);
-		return !aliases.equals(myRegexGroupModels);
+		final ArrayList<RegexGroupModel> regexGroupModels = new ArrayList<>();
+		obtainRegexModels(regexGroupModels, settings);
+		return !regexGroupModels.equals(myRegexGroupModels);
 	}
 
 

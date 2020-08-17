@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
+import krasa.editorGroups.AutoGroupProvider;
 import krasa.editorGroups.support.LinkComparator;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,6 +80,15 @@ public abstract class AutoGroup extends EditorGroup {
 
 	public boolean isEmpty() {
 		return links.size() == 0;
+	}
+
+	public boolean hasIndexing() {
+		for (Link link : links) {
+			if (AutoGroupProvider.INDEXING.equals(link.getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	;
