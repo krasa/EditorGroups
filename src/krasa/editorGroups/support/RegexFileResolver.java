@@ -90,7 +90,7 @@ public class RegexFileResolver {
 					}
 				} else {
 					Matcher matcher = groupMatcher.reset(child.getName());
-					if (matches(referenceMatcher, matcher)) {
+					if (matches(regexGroupModel, referenceMatcher, matcher)) {
 						links.add(child);
 						if (links.size() > config.getGroupSizeLimitInt()) {
 							throw new TooManyFilesException();
@@ -104,16 +104,18 @@ public class RegexFileResolver {
 
 	}
 
-	private boolean matches(@Nullable Matcher referenceMatcher, Matcher matcher) {
+	private boolean matches(RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher matcher) {
 		if (!matcher.matches()) {
 			return false;
 		}
 		if (referenceMatcher != null) {
 			for (int j = 1; j <= matcher.groupCount(); j++) {
-				String refGroup = referenceMatcher.group(j);
-				String group = matcher.group(j);
-				if (!refGroup.equals(group)) {
-					return false;
+				if (regexGroupModel.isComparingGroup(j)) {
+					String refGroup = referenceMatcher.group(j);
+					String group = matcher.group(j);
+					if (!refGroup.equals(group)) {
+						return false;
+					}
 				}
 			}
 		}

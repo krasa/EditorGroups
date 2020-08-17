@@ -39,63 +39,63 @@ public class SettingsForm {
 	private JCheckBox showPanel;
 	private TabsColors tabsColors;
 
-	private RegexTable regexTable;
+	private RegexModelTable regexModelTable;
 
 	public JPanel getRoot() {
 		return root;
 	}
 
 	public SettingsForm() {
-		regexTable = new RegexTable();
+		regexModelTable = new RegexModelTable();
 		modelsPanel.add(
-			ToolbarDecorator.createDecorator(regexTable)
-				.setAddAction(new AnActionButtonRunnable() {
+				ToolbarDecorator.createDecorator(regexModelTable)
+						.setAddAction(new AnActionButtonRunnable() {
+							@Override
+							public void run(AnActionButton button) {
+								regexModelTable.addRegexModel();
+							}
+						}).setRemoveAction(new AnActionButtonRunnable() {
 					@Override
 					public void run(AnActionButton button) {
-						regexTable.addAlias();
+						regexModelTable.removeSelectedRegexModels();
 					}
-				}).setRemoveAction(new AnActionButtonRunnable() {
-				@Override
-				public void run(AnActionButton button) {
-					regexTable.removeSelectedAliases();
-				}
 			}).setEditAction(new AnActionButtonRunnable() {
 				@Override
 				public void run(AnActionButton button) {
-					regexTable.editAlias();
+					regexModelTable.editRegexModel();
 				}
 			}).setMoveUpAction(new AnActionButtonRunnable() {
 				@Override
 				public void run(AnActionButton anActionButton) {
-					regexTable.moveUp();
+					regexModelTable.moveUp();
 				}
 			}).setMoveDownAction(new AnActionButtonRunnable() {
 				@Override
 				public void run(AnActionButton anActionButton) {
-					regexTable.moveDown();
+					regexModelTable.moveDown();
 				}
 			}).createPanel(), BorderLayout.CENTER);
 
 		new DoubleClickListener() {
 			@Override
 			protected boolean onDoubleClick(MouseEvent e) {
-				return regexTable.editAlias();
+				return regexModelTable.editRegexModel();
 			}
-		}.installOn(regexTable);
+		}.installOn(regexModelTable);
 
 
 	}
 
 	public boolean isSettingsModified(ApplicationConfiguration data) {
 		if (tabsColors.isModified(data, data.getTabs())) return true;
-		if (regexTable.isModified(data)) return true;
+		if (regexModelTable.isModified(data)) return true;
 		return isModified(data);
 	}
 
 	public void importFrom(ApplicationConfiguration data) {
 		setData(data);
 		tabsColors.setData(data, data.getTabs());
-		regexTable.reset(data);
+		regexModelTable.reset(data);
 	}
 
 	public void apply() {
@@ -103,7 +103,7 @@ public class SettingsForm {
 		ApplicationConfiguration data = ApplicationConfiguration.state();
 
 		getData(data);
-		regexTable.commit(data);
+		regexModelTable.commit(data);
 		tabsColors.getData(data, data.getTabs());
 	}
 

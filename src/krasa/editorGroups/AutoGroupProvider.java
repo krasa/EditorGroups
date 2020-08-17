@@ -43,7 +43,7 @@ public class AutoGroupProvider {
 //		}
 
 		VirtualFile parent = file.getParent();
-		RegexGroup regexGroup = new RegexGroup(new RegexGroupModel(".*", RegexGroupModel.Scope.CURRENT_FOLDER), parent);
+		RegexGroup regexGroup = new RegexGroup(new RegexGroupModel(".*", RegexGroupModel.Scope.CURRENT_FOLDER, ""), parent);
 		List<Link> links = new RegexFileResolver(project).resolveRegexGroupLinks(regexGroup, file);
 		return new FolderGroup(parent, links);
 	}

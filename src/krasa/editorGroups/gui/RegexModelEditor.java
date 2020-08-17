@@ -27,8 +27,8 @@ import java.awt.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class ModelEditor extends DialogWrapper {
-	private static final Logger LOG = Logger.getInstance(ModelEditor.class);
+public class RegexModelEditor extends DialogWrapper {
+	private static final Logger LOG = Logger.getInstance(RegexModelEditor.class);
 	private JTextField regex;
 	private JComboBox<RegexGroupModel.Scope> scopeCombo;
 	private JPanel root;
@@ -36,6 +36,8 @@ public class ModelEditor extends DialogWrapper {
 	//	private FileTextField fileName;
 	private JPanel testResult;
 	private JPanel fileNamePanel;
+	private JEditorPane help;
+	private JTextField notComparingGroups;
 	private EditorImpl myEditor;
 	//	private TextFieldWithBrowseButton textFieldWithBrowseButton;
 	private JBTextField fileNameField;
@@ -47,8 +49,15 @@ public class ModelEditor extends DialogWrapper {
 		testResult.setPreferredSize(new Dimension(400, 200));
 	}
 
-	public ModelEditor(String title, String regex, RegexGroupModel.Scope scope) {
+	public RegexModelEditor(String title, String regex, String snotComparingGroupsText, RegexGroupModel.Scope scope) {
 		super(true);
+		help.setText(
+				"- the current file name is matched against the regex\n" +
+						"- if it matches, then all other files within the scope are matched against the same regex\n" +
+						"- for each matching file the content of regex groups are compared against the current file\n" +
+						"- the comparison can be disabled for each group\n" +
+						"- example: '(.*)(Service|Repository|Dao).*' (disable group 2)");
+
 //		FileChooserDescriptor singleFileDescriptor = new FileChooserDescriptor(true, false, false, false, false, false);
 //		Project currentContextProject = ProjectUtils.getCurrentContextProject();
 //		if (currentContextProject != null) {
@@ -105,6 +114,7 @@ public class ModelEditor extends DialogWrapper {
 		});
 
 		this.regex.setText(regex);
+		this.notComparingGroups.setText(snotComparingGroupsText);
 		this.scopeCombo.setSelectedItem(scope);
 		init();
 		updateControls();
@@ -221,6 +231,10 @@ public class ModelEditor extends DialogWrapper {
 
 	public String getRegex() {
 		return regex.getText().trim();
+	}
+
+	public String getNotComparingGroups() {
+		return notComparingGroups.getText().trim();
 	}
 
 	public RegexGroupModel.Scope getScopeCombo() {
