@@ -17,7 +17,6 @@ import com.intellij.ui.Gray;
 import com.intellij.ui.awt.RelativePoint;
 import com.intellij.ui.scale.JBUIScale;
 import com.intellij.ui.switcher.QuickActionProvider;
-import com.intellij.util.Alarm;
 import com.intellij.util.Function;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
@@ -262,45 +261,45 @@ public class JBTabsImpl extends JComponent
 				revalidateAndRepaint(false);
 			}
 		});
-		AWTEventListener listener = new AWTEventListener() {
-			final Alarm afterScroll = new Alarm(JBTabsImpl.this);
-
-			@Override
-			public void eventDispatched(AWTEvent event) {
-				if (mySingleRowLayout.myLastSingRowLayout == null) return;
-
-				MouseEvent me = (MouseEvent) event;
-				Point point = me.getPoint();
-				SwingUtilities.convertPointToScreen(point, me.getComponent());
-				Rectangle rect = JBTabsImpl.this.getVisibleRect();
-				rect = rect.intersection(mySingleRowLayout.myLastSingRowLayout.tabRectangle);
-				Point p = rect.getLocation();
-				SwingUtilities.convertPointToScreen(p, JBTabsImpl.this);
-				rect.setLocation(p);
-				boolean inside = rect.contains(point);
-				if (inside != myMouseInsideTabsArea) {
-					myMouseInsideTabsArea = inside;
-					afterScroll.cancelAllRequests();
-					if (!inside) {
-						afterScroll.addRequest(() -> {
-							if (!myMouseInsideTabsArea) {
-								doLayoutTwice();
-							}
-						}, 500);
-					}
-				}
-			}
-		};
-		Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.MOUSE_MOTION_EVENT_MASK);
-		Disposer.register(this, new Disposable() {
-			@Override
-			public void dispose() {
-				Toolkit toolkit = Toolkit.getDefaultToolkit();
-				if (toolkit != null) {
-					toolkit.removeAWTEventListener(listener);
-				}
-			}
-		});
+//		AWTEventListener listener = new AWTEventListener() {
+//			final Alarm afterScroll = new Alarm(JBTabsImpl.this);
+//
+//			@Override
+//			public void eventDispatched(AWTEvent event) {
+//				if (mySingleRowLayout.myLastSingRowLayout == null) return;
+//
+//				MouseEvent me = (MouseEvent) event;
+//				Point point = me.getPoint();
+//				SwingUtilities.convertPointToScreen(point, me.getComponent());
+//				Rectangle rect = JBTabsImpl.this.getVisibleRect();
+//				rect = rect.intersection(mySingleRowLayout.myLastSingRowLayout.tabRectangle);
+//				Point p = rect.getLocation();
+//				SwingUtilities.convertPointToScreen(p, JBTabsImpl.this);
+//				rect.setLocation(p);
+//				boolean inside = rect.contains(point);
+//				if (inside != myMouseInsideTabsArea) {
+//					myMouseInsideTabsArea = inside;
+//					afterScroll.cancelAllRequests();
+//					if (!inside) {
+//						afterScroll.addRequest(() -> {
+//							if (!myMouseInsideTabsArea) {
+//								doLayoutTwice();
+//							}
+//						}, 500);
+//					}
+//				}
+//			}
+//		};
+//		Toolkit.getDefaultToolkit().addAWTEventListener(listener, AWTEvent.MOUSE_MOTION_EVENT_MASK);
+//		Disposer.register(this, new Disposable() {
+//			@Override
+//			public void dispose() {
+//				Toolkit toolkit = Toolkit.getDefaultToolkit();
+//				if (toolkit != null) {
+//					toolkit.removeAWTEventListener(listener);
+//				}
+//			}
+//		});
 
 //		myAnimator = new Animator("JBTabs Attractions", 2, 500, true) {
 //			@Override
