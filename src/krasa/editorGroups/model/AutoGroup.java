@@ -69,15 +69,6 @@ public abstract class AutoGroup extends EditorGroup {
 	}
 
 
-	@Override
-	public boolean equalsVisually(Project project, EditorGroup group) {
-		if (!super.equalsVisually(project, group)) {
-			return false;
-		}
-
-		return true;
-	}
-
 	public boolean isEmpty() {
 		return links.size() == 0;
 	}

@@ -106,17 +106,17 @@ public abstract class EditorGroup {
 		return false;
 	}
 
-	public boolean equalsVisually(Project project, EditorGroup group) {
+	public boolean equalsVisually(Project project, EditorGroup group, List<Link> links, boolean stub) {
 		if (group == null) {
 			return false;
 		}
-		if (this == group) {
-			return true;
+		if (this.isStub() != stub) {
+			return false;
 		}
 		if (!this.equals(group)) {
 			return false;
 		}
-		if (!this.getLinks(project).equals(group.getLinks(project))) {
+		if (!this.getLinks(project).equals(links)) {
 			return false;
 		}
 		return true;

@@ -23,7 +23,6 @@ import krasa.editorGroups.model.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -82,7 +81,7 @@ public class PanelRefresher {
 				iteratePanels((panel, displayedGroup) -> {
 					if (displayedGroup instanceof BookmarkGroup) {
 						LOG.debug("BookmarksListener refreshing " + panel.getFile().getName());
-						panel.refresh(true, displayedGroup);
+						panel._refresh(true, displayedGroup);
 					}
 				});
 			}
@@ -100,7 +99,7 @@ public class PanelRefresher {
 					iteratePanels((panel, displayedGroup) -> {
 						if (displayedGroup instanceof FavoritesGroup) {
 							LOG.debug("FavoritesListener refreshing " + panel.getFile().getName());
-							panel.refresh(true, displayedGroup);
+							panel._refresh(true, displayedGroup);
 						}
 					});
 				}
@@ -164,7 +163,7 @@ public class PanelRefresher {
 							LOG.debug("onSmartMode: refreshing panel for " + panel.getFile());
 						}
 
-						panel.refresh(false, null);
+						panel._refresh(false, null);
 					}
 				}
 				if (LOG.isDebugEnabled())
@@ -180,7 +179,7 @@ public class PanelRefresher {
 			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
 				if (panel.getDisplayedGroup().isOwner(owner)) {
-					panel.refresh(false, null);
+					panel._refresh(false, null);
 
 				}
 			}
@@ -192,7 +191,7 @@ public class PanelRefresher {
 		for (FileEditor selectedEditor : manager.getAllEditors()) {
 			EditorGroupPanel panel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			if (panel != null) {
-				panel.refresh(true, null);
+				panel._refresh(true, null);
 			}
 		}
 	}

@@ -52,7 +52,8 @@ public class FolderGroup extends AutoGroup {
 	@Override
 	public String toString() {
 		return "FolderGroup{" +
-			"links=" + links.size() +
-			'}';
+				"links=" + links.size() +
+				", stub='" + isStub() + '\'' +
+				'}';
 	}
 }

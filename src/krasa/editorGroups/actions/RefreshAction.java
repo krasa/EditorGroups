@@ -24,7 +24,7 @@ public class RefreshAction extends EditorGroupsAction implements CustomComponent
 
 		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
 		if (panel != null) {
-			panel.refresh(true, null);
+			panel._refresh(true, null);
 		}
 
 

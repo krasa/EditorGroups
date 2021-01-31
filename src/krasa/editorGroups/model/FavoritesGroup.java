@@ -141,10 +141,6 @@ public class FavoritesGroup extends EditorGroup {
 		return (obj instanceof FavoritesGroup) && Objects.equals(((FavoritesGroup) obj).getId(), this.getId());
 	}
 
-	@Override
-	public boolean equalsVisually(Project project, EditorGroup group) {
-		return super.equalsVisually(project, group) && files.equals(((FavoritesGroup) group).files);
-	}
 
 	@Override
 	public boolean needSmartMode() {

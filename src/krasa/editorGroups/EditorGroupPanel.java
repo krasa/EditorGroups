@@ -50,10 +50,8 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -200,7 +198,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				}
 
 				if (info instanceof MyGroupTabInfo) {
-					refresh(false, ((MyGroupTabInfo) info).editorGroup);
+					_refresh(false, ((MyGroupTabInfo) info).editorGroup);
 				} else {
 					MyTabInfo myTabInfo = (MyTabInfo) info;
 					VirtualFile fileByPath = myTabInfo.link.getVirtualFile();
@@ -274,15 +272,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (editorGroup == null) {
 			LOG.debug("editorGroup == null > setVisible=" + false);
 			setVisible(false);
-			refresh(false, null);
+			_refresh(false, null);
 		} else {
 			boolean visible;
 			visible = updateVisibility(editorGroup);
 			getLayout().layoutContainer(this.getParent()); //  forgot what this does :( 
-			render2(false);
+			_render2(false);
 
 			if (visible && editorGroup.isStub()) {
-				refresh(false, null);
+				LOG.debug("#postConstruct: stub - calling #_refresh");
+				_refresh(false, null);
 			}
 		}
 	}
@@ -292,7 +291,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			@Override
 			public void run() {
 				try {
-					render2(true);
+					_render2(true);
 				} catch (Exception e) {
 					displayedGroup = EditorGroup.EMPTY;
 					LOG.error(e);
@@ -345,9 +344,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				createGroupLinks(((GroupsHolder) displayedGroup).getGroups());
 			}
 			if (displayedGroup.isStub()) {
+				LOG.debug("#reloadTabs: stub - Adding Loading...");
 				MyTabInfo tab = new MyTabInfo(new PathLink("Loading..."), "Loading...");
 				tab.selectable = false;
-				
 				tabs.addTabSilently(tab, -1);
 			}
 
@@ -668,9 +667,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		public String toString() {
 			return "RefreshRequest{" +
-				"refresh=" + refresh +
-				", requestedGroup=" + requestedGroup +
-				'}';
+					"_refresh=" + refresh +
+					", requestedGroup=" + requestedGroup +
+					'}';
 		}
 
 	}
@@ -680,17 +679,17 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	/**
 	 * call from any thread
 	 */
-	public void refresh(boolean refresh, EditorGroup newGroup) {
-		if (!refresh && newGroup == null) { //unnecessary or initial refresh
+	public void _refresh(boolean refresh, EditorGroup newGroup) {
+		if (!refresh && newGroup == null) { //unnecessary or initial _refresh
 			atomicReference.compareAndSet(null, new RefreshRequest(refresh, newGroup));
 		} else {
 			atomicReference.set(new RefreshRequest(refresh, newGroup));
 		}
-		refresh2(refresh || newGroup != null);
+		_refresh2(refresh || newGroup != null);
 	}
 
 	private void focusGained() {
-		refresh(false, null);
+		_refresh(false, null);
 		groupManager.enableSwitching();
 	}
 
@@ -700,13 +699,16 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (switchingGroup == displayedGroup) {
 			tabs.scroll(myScrollOffset);
 		}
-		refresh(refresh, switchingGroup);
+		_refresh(refresh, switchingGroup);
 		groupManager.enableSwitching();
 	}
 
 	volatile boolean interrupt;
 
-	private void refresh2(boolean interrupt) {
+	private void _refresh2(boolean interrupt) {
+		if (LOG.isDebugEnabled()) {
+			LOG.debug("> _refresh2 interrupt=" + interrupt, new Exception("just for logging"));
+		}
 		try {
 			this.interrupt = true;
 			myTaskExecutor.submit(new Runnable() {
@@ -717,10 +719,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					}
 					boolean selected = isSelected();
 					if (LOG.isDebugEnabled()) {
-						LOG.debug("refresh2 selected=" + selected + " for " + file.getName());
+						LOG.debug("_refresh2 selected=" + selected + " for " + file.getName());
 					}
 					if (selected) {
-						refresh3();
+						_refresh3();
 					}
 
 				}
@@ -731,7 +733,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		}
 	}
 
-	private void refresh3() {
+	private void _refresh3() {
 		long start = System.currentTimeMillis();
 		if (disposed) {
 			return;
@@ -743,15 +745,19 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		try {
 			Ref<EditorGroup> editorGroupRef = new Ref<>();
 
+			List<Link> displayedLinks = displayedGroup != null ? new ArrayList<>(displayedGroup.getLinks(project)) : Collections.emptyList();
+			//noinspection SimplifiableConditionalExpression
+			boolean stub = displayedGroup != null ? displayedGroup.isStub() : true;
+
 			RefreshRequest request = getGroupInReadActionWithRetries(editorGroupRef);
 			if (request == null) return;
 
 			EditorGroup group = editorGroupRef.get();
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("refresh3 before if: brokenScroll =" + brokenScroll + ", request =" + request + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
+				LOG.debug("_refresh3 before if: brokenScroll =" + brokenScroll + ", request =" + request + ", group =" + group + ", displayedGroup =" + displayedGroup + ", toBeRendered =" + toBeRendered);
 			}
-			boolean skipRefresh = !brokenScroll && !request.refresh && (group == displayedGroup || group == toBeRendered || group.equalsVisually(project, displayedGroup));
+			boolean skipRefresh = !brokenScroll && !request.refresh && (group == toBeRendered || group.equalsVisually(project, displayedGroup, displayedLinks, stub));
 			//noinspection DoubleNegation
 			boolean updateVisibility = hideGlobally != !ApplicationConfiguration.state().isShowPanel();
 			if (updateVisibility) {
@@ -769,7 +775,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 
 				if (LOG.isDebugEnabled())
-					LOG.debug("no change, skipping refresh, toBeRendered=" + toBeRendered + ". Took " + (System.currentTimeMillis() - start) + "ms ");
+					LOG.debug("no change, skipping _refresh, toBeRendered=" + toBeRendered + ". Took " + (System.currentTimeMillis() - start) + "ms ");
 				return;
 			}
 			toBeRendered = group;
@@ -778,25 +784,40 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			}
 
 
-			SwingUtilities.invokeLater(() -> {
-				if (disposed) {
-					return;
-				}
-				EditorGroup rendering = toBeRendered;
-				//tabs do not like being updated while not visible first - it really messes up scrolling
-				if (!isVisible() && rendering != null && updateVisibility(rendering)) {
-					SwingUtilities.invokeLater(() -> render());
-				} else {
-					render();
-				}
-			});
+			_render();
 
 			atomicReference.compareAndSet(request, null);
 			if (LOG.isDebugEnabled())
-				LOG.debug("<refreshSmart in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
+				LOG.debug("<_refresh3 in " + (System.currentTimeMillis() - start) + "ms " + file.getName());
 		} catch (Throwable e) {
 			LOG.error(file.getName(), e);
 		}
+	}
+
+	private void _render() {
+		LOG.debug("invokeLater _render");
+		SwingUtilities.invokeLater(() -> {
+			if (disposed) {
+				return;
+			}
+			EditorGroup rendering = toBeRendered;
+			//tabs do not like being updated while not visible first - it really messes up scrolling
+			if (!isVisible() && rendering != null && updateVisibility(rendering)) {
+				SwingUtilities.invokeLater(() -> {
+					try {
+						_render2(true);
+					} catch (Exception e) {
+						LOG.error(file.getName(), e);
+					}
+				});
+			} else {
+				try {
+					_render2(true);
+				} catch (Exception e) {
+					LOG.error(file.getName(), e);
+				}
+			}
+		});
 	}
 
 	@Nullable
@@ -812,7 +833,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 			if (request == null) {
 				if (LOG.isDebugEnabled())
-					LOG.debug("getGroupInReadActionWithRetries - nothing to refresh " + fileEditor.getName());
+					LOG.debug("getGroupInReadActionWithRetries - nothing to _refresh " + fileEditor.getName());
 				return null;
 			}
 			if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + request);
@@ -848,6 +869,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 			} catch (ExecutionException e) {
 				Throwable cause = e.getCause();
 				if (cause instanceof ProcessCanceledException) {
+					waitForSmartMode();
 					//ok try again
 				} else if (cause instanceof IndexNotReady) {
 					waitForSmartMode();
@@ -892,7 +914,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 		return (requestedGroup != null && EditorGroup.exists(requestedGroup) && requestedGroup.needSmartMode()) ||
 			(requestedGroup == null && EditorGroup.exists(lastGroup) && lastGroup.needSmartMode()) ||
-			requestedGroup == null;
+				requestedGroup == null;
 	}
 
 	private EditorGroup getLastGroup() {
@@ -902,22 +924,15 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 	}
 
 
-	private void render() {
-		try {
-			render2(true);
-		} catch (Exception e) {
-			LOG.error(file.getName(), e);
-		}
-	}
-
-	private void render2(boolean paintNow) {
+	private void _render2(boolean paintNow) {
+		LOG.debug("_render2 paintNow=" + paintNow);
 		if (disposed) {
 			return;
 		}
 		EditorGroup rendering = toBeRendered;
 		if (rendering == null) {
 			if (LOG.isDebugEnabled())
-				LOG.debug("skipping render toBeRendered=" + rendering + " file=" + file.getName());
+				LOG.debug("skipping _render2 toBeRendered=" + rendering + " file=" + file.getName());
 			return;
 		}
 
@@ -977,7 +992,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 				LOG.debug("onIndexingDone " + "ownerPath = [" + ownerPath + "], group = [" + group + "]");
 			//concurrency is a bitch, do not alter data
 //			displayedGroup.invalid();                    0o
-			refresh(false, null);
+			_refresh(false, null);
 		}
 	}
 

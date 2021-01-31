@@ -146,7 +146,7 @@ public class EditorGroupManager {
 				if (LOG.isDebugEnabled()) {
 					LOG.debug("refreshing result");
 				}
-				//refresh
+				//_refresh
 				if (!stub && result == requestedGroup && result instanceof EditorGroupIndexValue) { // force loads new one from index
 					cache.initGroup((EditorGroupIndexValue) result);
 				} else if (!stub && result instanceof SameNameGroup) {
@@ -178,7 +178,7 @@ public class EditorGroupManager {
 			result.setStub(stub);
 
 			if (LOG.isDebugEnabled()) {
-				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + "' " + result);
+				LOG.debug("< getGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + " stub='" + result.isStub() + "' " + result);
 			}
 			cache.setLast(currentFilePath, result);
 		} catch (ProcessCanceledException e) {

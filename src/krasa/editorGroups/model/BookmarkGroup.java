@@ -84,11 +84,6 @@ public class BookmarkGroup extends EditorGroup {
 	}
 
 	@Override
-	public boolean equalsVisually(Project project, EditorGroup group) {
-		return super.equalsVisually(project, group) && links.equals(((BookmarkGroup) group).links);
-	}
-
-	@Override
 	public String toString() {
 		return "BookmarksGroup{" +
 			"links=" + links + '}';

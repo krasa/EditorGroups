@@ -87,7 +87,7 @@ public class ProjectComponent implements com.intellij.openapi.components.Project
 							int scrollOffset = switchRequest.myScrollOffset;
 							panel.refreshOnSelectionChanged(false, switchingGroup, scrollOffset);
 						} else {
-							panel.refresh(false, null);
+							panel._refresh(false, null);
 						}
 					}
 				}

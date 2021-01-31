@@ -134,11 +134,12 @@ public class RegexGroup extends AutoGroup {
 	@Override
 	public String toString() {
 		return "RegexGroup{" +
-			"model='" + regexGroupModel + '\'' +
-			", fileName='" + fileName + '\'' +
-			", folderPath='" + folder + '\'' +
-			", links=" + links.size() +
-			'}';
+				"model='" + regexGroupModel + '\'' +
+				", fileName='" + fileName + '\'' +
+				", folderPath='" + folder + '\'' +
+				", links=" + links.size() +
+				", stub='" + isStub() + '\'' +
+				'}';
 	}
 
 	public List<VirtualFile> getScopes(Project project) {

@@ -248,7 +248,7 @@ public class SwitchGroupAction extends QuickSwitchSchemeAction implements DumbAw
 			@Override
 			void run(EditorGroup editorGroup) {
 				LOG.debug("switching group");
-				panel.refresh(false, editorGroup);
+				panel._refresh(false, editorGroup);
 			}
 		};
 	}
