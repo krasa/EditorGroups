@@ -75,12 +75,94 @@ public class EditorGroupManager {
 		return ServiceManager.getService(project, EditorGroupManager.class);
 	}
 
+	public EditorGroup getStubGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, @NotNull VirtualFile currentFile) throws IndexNotReady {
+		boolean stub = true;
+		boolean refresh = false;
+		if (LOG.isDebugEnabled())
+			LOG.debug(">getStubGroup: fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]" + ", project = [" + project.getName() + "]");
+
+		long start = System.currentTimeMillis();
+
+		EditorGroup result = EditorGroup.EMPTY;
+		try {
+			if (requestedGroup == null) {
+				requestedGroup = displayedGroup;
+			}
+
+
+			String currentFilePath = currentFile.getPath();
+
+
+			if (result.isInvalid()) {
+				cache.validate(requestedGroup);
+				if (requestedGroup.isValid()
+						&& (requestedGroup instanceof AutoGroup || requestedGroup.containsLink(project, currentFile) || requestedGroup.isOwner(currentFilePath))) {
+					result = requestedGroup;
+				}
+			}
+
+			if (result.isInvalid()) {
+				result = cache.getOwningOrSingleGroup(currentFilePath);
+			}
+
+			if (result.isInvalid()) {
+				result = cache.getLastEditorGroup(currentFile, currentFilePath, true, true, stub);
+			}
+
+			if (result.isInvalid()) {
+				if (config.getState().isSelectRegexGroup()) {
+					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
+				}
+				if (result.isInvalid() && config.getState().isAutoSameName()) {
+					result = SameNameGroup.INSTANCE;
+				} else if (result.isInvalid() && config.getState().isAutoFolders()) {
+					result = FolderGroup.INSTANCE;
+				}
+			}
+
+			if (isEmptyAutogroup(project, result) || isIndexingAutoGroup(project, result)) {
+				if (LOG.isDebugEnabled()) {
+					LOG.debug("refreshing result");
+				}
+				//_refresh
+				if (result instanceof FolderGroup) {
+					result = autogroupProvider.getFolderGroup(currentFile);
+				} else if (result instanceof FavoritesGroup) {
+					result = externalGroupProvider.getFavoritesGroup(result.getTitle());
+				} else if (result instanceof BookmarkGroup) {
+					result = externalGroupProvider.getBookmarkGroup();
+				}
+
+
+			}
+
+			//		if (result instanceof AutoGroup) {
+			//			result = cache.updateGroups((AutoGroup) result, currentFilePath);
+			//		}
+			result.setStub(stub);
+
+			if (LOG.isDebugEnabled()) {
+				LOG.debug("< getStubGroup " + (System.currentTimeMillis() - start) + "ms, EDT=" + SwingUtilities.isEventDispatchThread() + ", file=" + currentFile.getName() + " title='" + result.getTitle() + " stub='" + result.isStub() + "' " + result);
+			}
+			cache.setLast(currentFilePath, result);
+		} catch (ProcessCanceledException e) {
+			LOG.debug(e.toString());
+			throw e;
+		} catch (IndexNotReadyException e) {
+			LOG.debug(e.toString());
+			throw new IndexNotReady(">getStubGroup project = [" + project.getName() + "], fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "]", e);
+		} catch (Throwable e) {
+			LOG.debug(e.toString());
+			throw e;
+		}
+		return result;
+	}
 
 	/**
 	 * Index throws exceptions, nothing we can do about it here, let the caller try it again later
 	 */
 	@NotNull
-	public EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, boolean refresh, @NotNull VirtualFile currentFile, boolean stub) throws IndexNotReady {
+	public EditorGroup getGroup(Project project, FileEditor fileEditor, @NotNull EditorGroup displayedGroup, @Nullable EditorGroup requestedGroup, @NotNull VirtualFile currentFile, boolean refresh, boolean stub) throws IndexNotReady {
 		if (LOG.isDebugEnabled())
 			LOG.debug(">getGroup: fileEditor = [" + fileEditor + "], displayedGroup = [" + displayedGroup + "], requestedGroup = [" + requestedGroup + "], force = [" + refresh + "], stub = [" + stub + "]" + ", project = [" + project.getName() + "]");
 
@@ -106,7 +188,7 @@ public class EditorGroupManager {
 					result = cache.getOwningOrSingleGroup(currentFilePath);
 				}
 				if (result.isInvalid()) {
-					result = cache.getLastEditorGroup(currentFile, currentFilePath, false, true);
+					result = cache.getLastEditorGroup(currentFile, currentFilePath, false, true, stub);
 				}
 				if (result.isInvalid()) {
 					result = RegexGroupProvider.getInstance(project).findFirstMatchingRegexGroup_stub(currentFile);
@@ -127,7 +209,7 @@ public class EditorGroupManager {
 				}
 
 				if (result.isInvalid()) {
-					result = cache.getLastEditorGroup(currentFile, currentFilePath, true, true);
+					result = cache.getLastEditorGroup(currentFile, currentFilePath, true, true, stub);
 				}
 			}
 

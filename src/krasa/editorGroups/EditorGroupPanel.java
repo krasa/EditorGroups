@@ -243,7 +243,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (editorGroup == null && preferLatencyOverFlicker && !DumbService.isDumb(project)) {
 			long start = System.currentTimeMillis();
 			try {
-				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, !applicationConfiguration.isShowPanel());
+				editorGroup = groupManager.getStubGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, file);
 				toBeRendered = editorGroup;
 			} catch (ProcessCanceledException | IndexNotReady e) {
 				LOG.debug(e);
@@ -259,7 +259,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		if (editorGroup == null && !preferLatencyOverFlicker) {
 			try {
 				long start = System.currentTimeMillis();
-				editorGroup = groupManager.getGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, false, file, true);
+				editorGroup = groupManager.getStubGroup(project, fileEditor, EditorGroup.EMPTY, editorGroup, file);
 				toBeRendered = editorGroup;
 				long delta = System.currentTimeMillis() - start;
 				if (LOG.isDebugEnabled())
@@ -276,7 +276,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 		} else {
 			boolean visible;
 			visible = updateVisibility(editorGroup);
-			getLayout().layoutContainer(this.getParent()); //  forgot what this does :( 
+
+			Container parent = this.getParent();
+			if (parent != null) {  //NPE for Code With Me
+				getLayout().layoutContainer(parent); //  forgot what this does :( 
+			}
 			_render2(false);
 
 			if (visible && editorGroup.isStub()) {
@@ -855,7 +859,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 					@Override
 					public EditorGroup call() throws Exception {
 						try {
-							return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, refresh, file, !ApplicationConfiguration.state().isShowPanel());
+							return groupManager.getGroup(project, fileEditor, lastGroup, requestedGroup, file, refresh, !ApplicationConfiguration.state().isShowPanel());
 						} catch (ProcessCanceledException e) {
 							if (LOG.isDebugEnabled()) LOG.debug("getGroupInReadActionWithRetries - " + e.toString(), e);
 							throw e;

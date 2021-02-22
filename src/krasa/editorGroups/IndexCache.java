@@ -158,7 +158,7 @@ public class IndexCache {
 	}
 
 
-	public EditorGroup getLastEditorGroup(VirtualFile currentFile, String currentFilePath, boolean includeAutogroups, boolean includeFavorites) {
+	public EditorGroup getLastEditorGroup(VirtualFile currentFile, String currentFilePath, boolean includeAutogroups, boolean includeFavorites, boolean stub) {
 		EditorGroup result = EditorGroup.EMPTY;
 		if (!configuration.getState().isRememberLastGroup()) {
 			LOG.debug("<getLastEditorGroup " + result + " (isRememberLastGroup=false)");
@@ -187,12 +187,15 @@ public class IndexCache {
 					result = RegexGroupProvider.getInstance(project).findRegexGroup_stub(currentFile, last.substring(RegexGroup.ID_PREFIX.length()));
 				} else if (includeFavorites && last.equals(BookmarkGroup.ID)) {
 					result = externalGroupProvider.getBookmarkGroup();
+				} else if (stub) {
+					result = new StubGroup();
 				} else {
 					EditorGroup lastGroup = getById(last);
 					if (lastGroup.containsLink(project, currentFile) || lastGroup.isOwner(currentFilePath)) {
 						result = lastGroup;
 					}
 				}
+
 			}
 
 			if (result.isInvalid()) {
@@ -237,6 +240,7 @@ public class IndexCache {
 
 	/**
 	 * called very often!
+	 *
 	 * @param currentFile
 	 */
 	public EditorGroup getEditorGroupForColor(VirtualFile currentFile) {
