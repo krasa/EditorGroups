@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.38</version>
+    <version>0.39</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -14,13 +14,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
-   Fixes for IJ 2021
+   NPE fix for IJ 2021.2
     ]]>
     </change-notes>
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="211.000"/>
+    <idea-version since-build="212.000"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->

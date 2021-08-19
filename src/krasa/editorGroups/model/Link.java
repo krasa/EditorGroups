@@ -63,7 +63,7 @@ public abstract class Link {
 	public Icon getFileIcon() {
 		return icon != null ? icon : Utils.getFileIcon(getPath());
 	}
-
+@Nullable
 	public VirtualFile getVirtualFile() {
 		return Utils.getVirtualFileByAbsolutePath(getPath());
 	}
@@ -71,10 +71,16 @@ public abstract class Link {
 	@NotNull
 	public String getName() {
 		UISettings uiSettings = UISettings.getInstanceOrNull();
+		VirtualFile virtualFile = getVirtualFile();
+		if (virtualFile == null) {
+			LOG.warn("VirtualFile is null for " + getPath());
+			return getPath();
+		}
+
 		if (uiSettings != null && uiSettings.getHideKnownExtensionInTabs()) {
-			return getVirtualFile().getNameWithoutExtension();
+			return virtualFile.getNameWithoutExtension();
 		} else {
-			return getVirtualFile().getName();
+			return virtualFile.getName();
 		}
 	}
 

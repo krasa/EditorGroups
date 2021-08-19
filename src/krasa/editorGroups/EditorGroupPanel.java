@@ -379,7 +379,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
 			for (int i = 0; i < links.size(); i++) {
 				Link link = links.get(i);
-				if (link.getVirtualFile().equals(fileFromTextEditor) && (line == null || Objects.equals(link.getLine(), line))) {
+				VirtualFile virtualFile = link.getVirtualFile();
+				if (virtualFile != null && virtualFile.equals(fileFromTextEditor) && (line == null || Objects.equals(link.getLine(), line))) {
 					currentFilePosition = i;
 					break;
 				}
