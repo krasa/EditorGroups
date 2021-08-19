@@ -38,7 +38,7 @@ import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
 
-public class TabInfo implements Queryable, PlaceProvider<String> {
+public class TabInfo implements Queryable, PlaceProvider {
 
 	public static final String ACTION_GROUP = "actionGroup";
 	public static final String ICON = "icon";
@@ -390,7 +390,7 @@ public class TabInfo implements Queryable, PlaceProvider<String> {
 	}
 
 	@Override
-	public void putInfo(@NotNull Map<String, String> info) {
+	public void putInfo(@NotNull Map<? super String, ? super String> info) {
 		if (myQueryable != null) {
 			myQueryable.putInfo(info);
 		}

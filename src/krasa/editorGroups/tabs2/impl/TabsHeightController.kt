@@ -24,7 +24,7 @@ class TabsHeightController {
 
         init {
             heightMap.advise(ld) {
-                val value = heightMap.maxBy { it.value }?.value
+                val value = heightMap.maxByOrNull { it.value }?.value
                 value?.let {
                     toolWindowHeightProperty.set(if (it > 0) it else TabsUtil.getTabsHeight(JBUI.CurrentTheme.ToolWindow.tabVerticalPadding()))
                 }
