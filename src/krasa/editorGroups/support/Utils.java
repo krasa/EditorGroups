@@ -9,6 +9,7 @@ import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
+import com.intellij.openapi.util.io.OSAgnosticPathUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -24,6 +25,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -101,15 +103,17 @@ public class Utils {
 	@Nullable
 	public static VirtualFile getFileByPath(@NotNull String path, @Nullable VirtualFile currentFile) {
 		VirtualFile file = null;
-		if (FileUtil.isUnixAbsolutePath(path) || FileUtil.isWindowsAbsolutePath(path)) {
-			file = VirtualFileManagerEx.getInstance().findFileByUrl("file://" + path);
-		} else if (path.startsWith("file://")) {
-			file = VirtualFileManagerEx.getInstance().findFileByUrl(path);
+		if (OSAgnosticPathUtil.isAbsolute(path)) {
+			file = VirtualFileManagerEx.getInstance().findFileByNioPath(Paths.get(path));
 		} else if (currentFile != null) {
 			VirtualFile parent = currentFile.getParent();
 			if (parent != null) {
 				file = parent.findFileByRelativePath(path);
 			}
+		} else if (path.startsWith("file://")) {
+			file = VirtualFileManagerEx.getInstance().findFileByUrl(path);
+		} else {
+			file = VirtualFileManagerEx.getInstance().findFileByNioPath(Paths.get(path));
 		}
 
 		return file;
