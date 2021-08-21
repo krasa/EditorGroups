@@ -118,7 +118,7 @@ public class Utils {
 			file = LocalFileSystem.getInstance().findFileByPath(path);
 		}
 
-		if (file == null && currentFile != null) {
+		if (file == null && currentFile == null) {
 			LOG.info("#refreshAndFindFileByPath for " + path);
 			file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
 		}
