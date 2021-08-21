@@ -25,7 +25,6 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -104,16 +103,24 @@ public class Utils {
 	public static VirtualFile getFileByPath(@NotNull String path, @Nullable VirtualFile currentFile) {
 		VirtualFile file = null;
 		if (OSAgnosticPathUtil.isAbsolute(path)) {
-			file = VirtualFileManagerEx.getInstance().findFileByNioPath(Paths.get(path));
+			file = LocalFileSystem.getInstance().findFileByPath(path);
 		} else if (currentFile != null) {
 			VirtualFile parent = currentFile.getParent();
 			if (parent != null) {
 				file = parent.findFileByRelativePath(path);
 			}
+			if (file == null) {
+				LOG.warn("file is null for child:" + path + " from parent: " + currentFile.getPath());
+			}
 		} else if (path.startsWith("file://")) {
 			file = VirtualFileManagerEx.getInstance().findFileByUrl(path);
 		} else {
-			file = VirtualFileManagerEx.getInstance().findFileByNioPath(Paths.get(path));
+			file = LocalFileSystem.getInstance().findFileByPath(path);
+		}
+
+		if (file == null && currentFile != null) {
+			LOG.info("#refreshAndFindFileByPath for " + path);
+			file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
 		}
 
 		return file;
