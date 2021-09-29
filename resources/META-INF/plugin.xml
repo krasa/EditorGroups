@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.43</version>
+    <version>0.44</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -27,6 +27,7 @@ Fix for IJ 2021.3
     <depends>com.intellij.modules.lang</depends>
 
     <extensions defaultExtensionNs="com.intellij">
+        <notificationGroup id="Editor Groups" displayType="BALLOON"/>
         <editorNotificationProvider implementation="krasa.editorGroups.support.MyEditorNotificationsProvider"/>
         <!-- Add your extensions here -->
         <projectService serviceImplementation="krasa.editorGroups.EditorGroupManager"/>

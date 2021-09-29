@@ -9,7 +9,6 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.fileTypes.FileNameMatcher;
-import com.intellij.openapi.fileTypes.FileNameMatcherEx;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.module.Module;
@@ -174,7 +173,7 @@ public class MyFilePathCompletionContributor extends CompletionContributor {
 
 			for (final FileType fileType : suitableFileTypes) {
 				for (final FileNameMatcher matcher : FileTypeManager.getInstance().getAssociations(fileType)) {
-					if (FileNameMatcherEx.acceptsCharSequence(matcher, fileName)) return true;
+					if (matcher.acceptsCharSequence(fileName)) return true;
 				}
 			}
 		}

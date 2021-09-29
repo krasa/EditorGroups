@@ -18,12 +18,9 @@ public class Notifications {
 
 	private static final Logger LOG = Logger.getInstance(Notifications.class);
 
-	public static final NotificationGroup NOTIFICATION = new NotificationGroup("Editor Groups", NotificationDisplayType.BALLOON, true);
-
 	public static void notifyMissingFile(EditorGroup group, String path) {
 		String content = "Path='" + path + "'; Owner='" + group.getId() + "'";
-		Notification notification = NOTIFICATION.createNotification("File does not exist", content, NotificationType.WARNING,
-			null);
+		Notification notification = getNotificationGroup().createNotification("File does not exist", content, NotificationType.WARNING);
 		show(notification);
 	}
 
@@ -31,7 +28,7 @@ public class Notifications {
 	public static void notifyBugs() {
 		String content = "Settings | ... | Editor Tabs | 'Open declaration source in the same tab' is enabled.<br/> It may cause problems when switching too fast.<br/><a href=\"#\">Click here to disable it<a/>.";
 
-		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
+		Notification notification = getNotificationGroup().createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
 				UISettings.getInstance().setReuseNotModifiedTabs(false);
@@ -43,7 +40,7 @@ public class Notifications {
 
 	public static void indexingWarn(Project project, VirtualFile file, String message) {
 		String content = message + " in " + href(file);
-		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
+		Notification notification = getNotificationGroup().createNotification("Editor Groups plugin", content, NotificationType.WARNING, new NotificationListener.Adapter() {
 			@Override
 			protected void hyperlinkActivated(@NotNull Notification notification, @NotNull HyperlinkEvent e) {
 				OpenFileAction.openFile(file, project);
@@ -93,13 +90,17 @@ public class Notifications {
 	}
 
 	public static void warning(String content, NotificationListener listener) {
-		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", content, NotificationType.WARNING, listener);
+		Notification notification = getNotificationGroup().createNotification("Editor Groups plugin", content, NotificationType.WARNING, listener);
 		LOG.warn(new RuntimeException(content));
 		show(notification);
 	}
 
+	private static NotificationGroup getNotificationGroup() {
+		return NotificationGroupManager.getInstance().getNotificationGroup("Editor Groups");
+	}
+
 	public static void warning(String s) {
-		Notification notification = NOTIFICATION.createNotification("Editor Groups plugin", s, NotificationType.WARNING, null);
+		Notification notification = getNotificationGroup().createNotification("Editor Groups plugin", s, NotificationType.WARNING);
 		show(notification);
 	}
 

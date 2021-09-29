@@ -1,16 +1,16 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.project.Project;
-import com.intellij.util.containers.ContainerUtilRt;
 import krasa.editorGroups.icons.MyIcons;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
+import java.util.Collections;
 import java.util.List;
 
 public class SameNameGroup extends AutoGroup {
 
-	public static final SameNameGroup INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", ContainerUtilRt.emptyList());
+	public static final SameNameGroup INSTANCE = new SameNameGroup("SAME_NAME_INSTANCE", Collections.emptyList());
 	private final String fileNameWithoutExtension;
 
 	public SameNameGroup(String fileNameWithoutExtension, List<Link> links) {

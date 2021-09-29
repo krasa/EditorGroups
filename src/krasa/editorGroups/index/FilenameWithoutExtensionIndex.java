@@ -75,11 +75,11 @@ public class FilenameWithoutExtensionIndex extends ScalarIndexExtension<String> 
 
 	@Override
 	public int getVersion() {
-		return 0 + (FileBasedIndex.ourEnableTracingOfKeyHashToVirtualFileMapping ? 1 : 0);
+		return 1;
 	}
 
 	@Override
 	public boolean traceKeyHashToVirtualFileMapping() {
-		return FileBasedIndex.ourEnableTracingOfKeyHashToVirtualFileMapping;
+		return true;
 	}
 }
