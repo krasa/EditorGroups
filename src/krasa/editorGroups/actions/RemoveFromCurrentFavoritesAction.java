@@ -10,8 +10,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.fileEditor.ex.FileEditorManagerEx;
+import com.intellij.openapi.fileEditor.impl.EditorComposite;
 import com.intellij.openapi.fileEditor.impl.EditorWindow;
-import com.intellij.openapi.fileEditor.impl.EditorWithProviderComposite;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Pair;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -149,9 +149,9 @@ public class RemoveFromCurrentFavoritesAction extends EditorGroupsAction {
 		FileEditorManagerEx instance = (FileEditorManagerEx) FileEditorManager.getInstance(eventProject);
 		EditorWindow currentWindow = instance.getCurrentWindow();
 		if (currentWindow != null) {
-			EditorWithProviderComposite editor = currentWindow.getSelectedEditor(true);
+			EditorComposite editor = currentWindow.getSelectedEditor(true);
 			if (editor != null) {
-				FileEditor selectedEditor = editor.getSelectedEditorWithProvider().first;
+				FileEditor selectedEditor = editor.getSelectedWithProvider().getFileEditor();
 				editorGroupPanel = selectedEditor.getUserData(EditorGroupPanel.EDITOR_PANEL);
 			}
 
