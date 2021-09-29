@@ -236,9 +236,9 @@ class DragHelper extends MouseDragHelper {
 			p = SwingUtilities.convertPoint(event.getComponent(), p, myTabs);
 			if (myTabs.getVisibleRect().contains(p) && myPressedOnScreenPoint.distance(new RelativePoint(event).getScreenPoint()) > 15) {
 				final int answer = Messages.showOkCancelDialog(myTabs,
-					IdeBundle.message("alphabetical.mode.is.on.warning"),
-					IdeBundle.message("title.warning"),
-					Messages.getQuestionIcon());
+						"Alphabetical order for tabs is ON. Switch it OFF?",
+						IdeBundle.message("title.warning"),
+						Messages.getQuestionIcon());
 				if (answer == Messages.OK) {
 					UISettings.getInstance().setSortTabsAlphabetically(false);
 					myTabs.relayout(true, false);
