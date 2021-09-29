@@ -76,7 +76,6 @@ public abstract class Link {
 			LOG.warn("VirtualFile is null for " + getPath());
 			return getPath();
 		}
-
 		if (uiSettings != null && uiSettings.getHideKnownExtensionInTabs()) {
 			return virtualFile.getNameWithoutExtension();
 		} else {
