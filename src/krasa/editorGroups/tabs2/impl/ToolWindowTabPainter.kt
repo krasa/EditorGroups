@@ -17,8 +17,8 @@ class ToolWindowTabPainter : JBDefaultTabPainter(ToolWindowTabTheme()) {
         rect.y += borderThickness
         rect.height -= borderThickness
 
-        when (position) {
-            JBTabsPosition.top -> rect.height -= borderThickness
+        if (position == JBTabsPosition.top) {
+            rect.height -= borderThickness
         }
 
         super.paintTab(position, g, rect, borderThickness, tabColor, hovered)

@@ -1,7 +1,7 @@
 <idea-plugin>
     <id>EditorGroups</id>
     <name>Editor Groups</name>
-    <version>0.44</version>
+    <version>0.45</version>
 
     <vendor url="https://github.com/krasa/GrepConsole" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
@@ -14,13 +14,13 @@
     ]]></description>
 
     <change-notes><![CDATA[
-Fix for IJ 2021.3
+Disabled tab colors due to incompatibility with IJ 2022.3
     ]]>
     </change-notes>
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="213.000"/>
+    <idea-version since-build="223.000"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -36,7 +36,7 @@ Fix for IJ 2021.3
         <projectService serviceImplementation="krasa.editorGroups.ExternalGroupProvider"/>
         <projectService serviceImplementation="krasa.editorGroups.IndexCache"/>
         <editorTabTitleProvider implementation="krasa.editorGroups.EditorGroupTabTitleProvider" order="first"/>
-        <editorTabColorProvider implementation="krasa.editorGroups.MyEditorTabColorProvider" order="first"/>
+        <!--        <editorTabColorProvider implementation="krasa.editorGroups.MyEditorTabColorProvider" order="first"/>-->
         <defaultLiveTemplatesProvider implementation="krasa.editorGroups.support.EditorGroupsLiveTemplatesProvider"/>
 
         <!--<fileBasedIndex implementation="krasa.editorGroups.EditorGroupFileBasedIndexExtension"/>-->
