@@ -16,8 +16,6 @@
 package krasa.editorGroups.index;
 
 import com.intellij.openapi.util.text.StringUtil;
-import com.intellij.psi.search.IndexPattern;
-import com.intellij.psi.search.IndexPatternOptimizer;
 import com.intellij.psi.search.IndexPatternProvider;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -2,7 +2,6 @@ package krasa.editorGroups;
 
 import com.intellij.openapi.fileEditor.FileEditor;
 import com.intellij.openapi.fileEditor.impl.EditorTabColorProvider;
-import com.intellij.openapi.fileEditor.impl.FileEditorManagerImpl;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.model.EditorGroup;
@@ -32,9 +31,9 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 	@Nullable
 	@Override
 	public Color getEditorTabColor(@NotNull Project project, @NotNull VirtualFile file) {
-		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
+//		FileEditor textEditor = FileEditorManagerImpl.getInstanceEx(project).getSelectedEditor(file);
 
-		return getBgColor(project, textEditor, file);
+		return getBgColor(project, null, file);
 	}
 
 //	/**
@@ -101,8 +100,8 @@ public class MyEditorTabColorProvider implements EditorTabColorProvider {
 		Color bgColor = null;
 
 		EditorGroup group = null;
-		if (textEditor != null) {
-			group = textEditor.getUserData(EditorGroupPanel.EDITOR_GROUP);
+		if (file != null) {
+			group = file.getUserData(EditorGroupPanel.EDITOR_GROUP);
 		}
 		if (group != null) {
 			bgColor = group.getBgColor();
