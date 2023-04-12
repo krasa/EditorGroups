@@ -50,8 +50,7 @@ public class Utils {
 		if (file != null) {
 			return file;
 		}
-
-		return unwrap(FileEditorManagerEx.getInstanceEx(project).getFile(textEditor));
+		return unwrap(textEditor.getFile());
 	}
 
 	@Nullable

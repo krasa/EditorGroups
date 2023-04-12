@@ -1,6 +1,7 @@
 plugins {
     id("java")
     id("org.jetbrains.intellij") version "1.13.3"
+    id("org.jetbrains.kotlin.jvm") version "1.8.20"
 }
 
 group = "EditorGroups"
@@ -8,8 +9,8 @@ version = "0.46"
 
 tasks {
     patchPluginXml {
-        sinceBuild.set("223")
-        untilBuild.set("")
+        sinceBuild.set("231")
+        untilBuild.set("231.*")
         changeNotes.set(
             buildString {
                 append("- Compatibility with IJ 2023").append("<br>")
@@ -19,8 +20,8 @@ tasks {
 
     // Set the JVM compatibility versions
     withType<JavaCompile> {
-        sourceCompatibility = "11"
-        targetCompatibility = "11"
+        sourceCompatibility = "17"
+        targetCompatibility = "17"
     }
 
 
@@ -37,6 +38,14 @@ tasks {
     buildSearchableOptions {
         enabled = false
     }
+
+    compileKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
+
+    compileTestKotlin {
+        kotlinOptions.jvmTarget = "17"
+    }
 }
 
 repositories {
@@ -45,7 +54,7 @@ repositories {
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    version.set("2022.3")
+    version.set("2023.1")
     type.set("IC") // Target IDE Platform
 
     plugins.set(listOf("java"))

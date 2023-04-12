@@ -513,7 +513,7 @@ public class EditorGroupManager {
 					//not sure, but it seems to mess order of tabs less if we do it after opening a new tab
 					if (selectedFile != null && !newTab) {
 						if (LOG.isDebugEnabled()) LOG.debug("closeFile " + selectedFile);
-						manager.closeFile(selectedFile, currentWindow, false);
+						manager.closeFile(selectedFile, currentWindow);
 					}
 				} finally {
 					UISettings.getInstance().setReuseNotModifiedTabs(reuseNotModifiedTabs);
