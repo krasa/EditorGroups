@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "EditorGroups"
-version = "0.46"
+version = "0.47"
 
 tasks {
     patchPluginXml {
@@ -13,7 +13,7 @@ tasks {
         untilBuild.set("231.*")
         changeNotes.set(
             buildString {
-                append("- Compatibility with IJ 2023").append("<br>")
+                append("- Icons fix").append("<br>")
             }
         )
     }

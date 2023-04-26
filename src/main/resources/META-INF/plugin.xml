@@ -73,7 +73,7 @@
         </group>
 
         <action class="krasa.editorGroups.actions.PreviousAction" id="krasa.editorGroups.Previous"
-                text="Open Previous File in Editor Group" icon="/krasa/editorGroups/icons/back.png">
+                text="Open Previous File in Editor Group" icon="/icons/back.png">
             <keyboard-shortcut first-keystroke="ctrl  SEMICOLON" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button143" keymap="$default"/>
         </action>
@@ -91,7 +91,7 @@
 
 
         <action class="krasa.editorGroups.actions.NextAction" id="krasa.editorGroups.Next"
-                text="Open Next File in Editor Group" icon="/krasa/editorGroups/icons/forward.png">
+                text="Open Next File in Editor Group" icon="/icons/forward.png">
             <keyboard-shortcut first-keystroke="ctrl  QUOTE" keymap="$default"/>
             <mouse-shortcut keystroke="ctrl button142" keymap="$default"/>
         </action>
@@ -109,17 +109,17 @@
 
         <action class="krasa.editorGroups.actions.RefreshAction" id="krasa.editorGroups.Refresh"
                 text="Refresh" description="Refresh Editor Groups panel in current file"
-                icon="/krasa/editorGroups/icons/refresh.png">
+                icon="/icons/refresh.png">
             <keyboard-shortcut first-keystroke="ctrl alt Q" keymap="$default"/>
         </action>
 
 
         <action id="krasa.editorGroups.Reindex" class="krasa.editorGroups.index.ReindexAction"
-                text="Reindex All Projects" icon="/krasa/editorGroups/icons/forceRefresh.png">
+                text="Reindex All Projects" icon="/icons/forceRefresh.png">
         </action>
 
         <action id="krasa.editorGroups.ReindexThisFile" class="krasa.editorGroups.index.ReindexThisFileAction"
-                icon="/krasa/editorGroups/icons/forceRefresh.png"
+                icon="/icons/forceRefresh.png"
                 text="Reindex This File">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt F3"/>
         </action>
@@ -154,12 +154,12 @@
 
 
         <action id="krasa.editorGroups.SwitchGroup" class="krasa.editorGroups.actions.SwitchGroupAction"
-                text="Switch Editor Group" icon="/krasa/editorGroups/icons/groupBy.svg">
+                text="Switch Editor Group" icon="/icons/groupBy.svg">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt W"/>
         </action>
         <action id="krasa.editorGroups.SwitchFile" class="krasa.editorGroups.actions.SwitchFileAction"
                 text="Switch File" description="Switch File in Editor Group"
-                icon="/krasa/editorGroups/icons/listFiles.svg">
+                icon="/icons/listFiles.svg">
             <keyboard-shortcut keymap="$default" first-keystroke="ctrl shift alt W"/>
         </action>
 
