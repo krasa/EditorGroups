@@ -14,7 +14,7 @@ import java.awt.Graphics2D
 import java.awt.Point
 import java.awt.Rectangle
 
-open class KrDefaultTabPainter(val theme: KrTabTheme = KrDefaultTabTheme()) : KrTabPainter {
+open class KrDefaultTabPainter(private val theme: KrTabTheme = KrDefaultTabTheme()) : KrTabPainter {
 
   override fun getTabTheme(): KrTabTheme = theme
 
@@ -52,13 +52,25 @@ open class KrDefaultTabPainter(val theme: KrTabTheme = KrDefaultTabTheme()) : Kr
     }
   }
 
-  override fun paintTab(position: KrTabsPosition, g: Graphics2D, rect: Rectangle, borderThickness: Int, tabColor: Color?, active: Boolean, hovered: Boolean) {
+  override fun paintTab(position: KrTabsPosition,
+                        g: Graphics2D,
+                        rect: Rectangle,
+                        borderThickness: Int,
+                        tabColor: Color?,
+                        active: Boolean,
+                        hovered: Boolean) {
     getCustomBackground(tabColor, selected = false, active, hovered)?.let {
       g.fill2DRect(rect, it)
     }
   }
 
-  override fun paintSelectedTab(position: KrTabsPosition, g: Graphics2D, rect: Rectangle, borderThickness: Int, tabColor: Color?, active: Boolean, hovered: Boolean) {
+  override fun paintSelectedTab(position: KrTabsPosition,
+                                g: Graphics2D,
+                                rect: Rectangle,
+                                borderThickness: Int,
+                                tabColor: Color?,
+                                active: Boolean,
+                                hovered: Boolean) {
     getCustomBackground(tabColor, selected = true, active, hovered)?.let {
       g.fill2DRect(rect, it)
     }

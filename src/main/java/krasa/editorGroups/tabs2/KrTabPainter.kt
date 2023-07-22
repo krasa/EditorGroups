@@ -5,6 +5,7 @@ import krasa.editorGroups.tabs2.impl.KrEditorTabPainter
 import krasa.editorGroups.tabs2.impl.KrToolWindowTabPainter
 import krasa.editorGroups.tabs2.impl.themes.KrDebuggerTabTheme
 import krasa.editorGroups.tabs2.impl.themes.KrTabTheme
+import krasa.editorGroups.tabs2.my.EditorGroupsTabTheme
 import java.awt.Color
 import java.awt.Graphics2D
 import java.awt.Point
@@ -13,7 +14,7 @@ import java.awt.Rectangle
 interface KrTabPainter {
   companion object {
     @JvmStatic
-    val DEFAULT: KrTabPainter = KrDefaultTabPainter()
+    val DEFAULT: KrTabPainter = KrDefaultTabPainter(EditorGroupsTabTheme())
 
     @JvmStatic
     val EDITOR: KrEditorTabPainter = KrEditorTabPainter()

@@ -5,8 +5,7 @@ import java.awt.Graphics
 import java.awt.Graphics2D
 import java.awt.Rectangle
 
-
-class KrDefaultTabPainterAdapter(val painter: KrTabPainter): KrTabPainterAdapter {
+class KrDefaultTabPainterAdapter(private val painter: KrTabPainter) : KrTabPainterAdapter {
   override val tabPainter: KrTabPainter
     get() = painter
 
@@ -21,8 +20,7 @@ class KrDefaultTabPainterAdapter(val painter: KrTabPainter): KrTabPainterAdapter
       painter
         .paintSelectedTab(tabs.position, g2d, rect, tabs.borderThickness, info.tabColor, tabs.isActiveTabs(info),
           tabs.isHoveredTab(label))
-    }
-    else {
+    } else {
       painter.paintTab(tabs.position, g2d, rect, tabs.borderThickness, info.tabColor, tabs.isActiveTabs(info), tabs.isHoveredTab(label) && tabs.getVisibleInfos().size > 1)
     }
   }
