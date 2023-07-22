@@ -28,58 +28,53 @@ import java.util.Collections;
 import java.util.Map;
 
 public class FilenameWithoutExtensionIndex extends ScalarIndexExtension<String> {
-	public @NonNls
-	static final ID<String, Void> NAME = ID.create("krasa.FilenameWithoutExtensionIndex");
+  public @NonNls
+  static final ID<String, Void> NAME = ID.create("krasa.FilenameWithoutExtensionIndex");
 
-	@NotNull
-	@Override
-	public ID<String, Void> getName() {
-		return NAME;
-	}
+  @NotNull
+  @Override
+  public ID<String, Void> getName() {
+    return NAME;
+  }
 
-	@NotNull
-	@Override
-	public DataIndexer<String, Void, FileContent> getIndexer() {
-		return new DataIndexer<String, Void, FileContent>() {
-			@NotNull
-			@Override
-			public Map<String, Void> map(@NotNull FileContent inputData) {
-				String fileName = inputData.getFileName();
-				String key = StringUtils.substringBefore(fileName, ".");
-				return Collections.singletonMap(key, null);
-			}
-		};
-	}
+  @NotNull
+  @Override
+  public DataIndexer<String, Void, FileContent> getIndexer() {
+    return new DataIndexer<>() {
+      @NotNull
+      @Override
+      public Map<String, Void> map(@NotNull FileContent inputData) {
+        String fileName = inputData.getFileName();
+        String key = StringUtils.substringBefore(fileName, ".");
+        return Collections.singletonMap(key, null);
+      }
+    };
+  }
 
-	@NotNull
-	@Override
-	public KeyDescriptor<String> getKeyDescriptor() {
-		return EnumeratorStringDescriptor.INSTANCE;
-	}
+  @NotNull
+  @Override
+  public KeyDescriptor<String> getKeyDescriptor() {
+    return EnumeratorStringDescriptor.INSTANCE;
+  }
 
-	@NotNull
-	@Override
-	public FileBasedIndex.InputFilter getInputFilter() {
-		return file -> file instanceof VirtualFileSystemEntry;
-	}
+  @NotNull
+  @Override
+  public FileBasedIndex.InputFilter getInputFilter() {
+    return file -> file instanceof VirtualFileSystemEntry;
+  }
 
-	@Override
-	public boolean dependsOnFileContent() {
-		return false;
-	}
+  @Override
+  public boolean dependsOnFileContent() {
+    return false;
+  }
 
-	@Override
-	public boolean indexDirectories() {
-		return false;
-	}
+  @Override
+  public int getVersion() {
+    return 1;
+  }
 
-	@Override
-	public int getVersion() {
-		return 1;
-	}
-
-	@Override
-	public boolean traceKeyHashToVirtualFileMapping() {
-		return true;
-	}
+  @Override
+  public boolean traceKeyHashToVirtualFileMapping() {
+    return true;
+  }
 }

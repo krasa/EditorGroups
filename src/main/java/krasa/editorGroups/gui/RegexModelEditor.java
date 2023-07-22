@@ -28,230 +28,193 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class RegexModelEditor extends DialogWrapper {
-	private static final Logger LOG = Logger.getInstance(RegexModelEditor.class);
-	private JTextField regex;
-	private JComboBox<RegexGroupModel.Scope> scopeCombo;
-	private JPanel root;
-	private ErrorLabel error;
-	//	private FileTextField fileName;
-	private JPanel testResult;
-	private JPanel fileNamePanel;
-	private JEditorPane help;
-	private JTextField notComparingGroups;
-	private EditorImpl myEditor;
-	//	private TextFieldWithBrowseButton textFieldWithBrowseButton;
-	private JBTextField fileNameField;
-	private static String _fileName = "";
+  private static final Logger LOG = Logger.getInstance(RegexModelEditor.class);
+  private JTextField regex;
+  private JComboBox<RegexGroupModel.Scope> scopeCombo;
+  private JPanel root;
+  private ErrorLabel error;
+  //	private FileTextField fileName;
+  private JPanel testResult;
+  private JPanel fileNamePanel;
+  private JEditorPane help;
+  private JTextField notComparingGroups;
+  private EditorImpl myEditor;
+  //	private TextFieldWithBrowseButton textFieldWithBrowseButton;
+  private final JBTextField fileNameField;
+  private static String _fileName = "";
 
-	private void createUIComponents() {
-		myEditor = (EditorImpl) createEditorPreview();
-		testResult = (JPanel) myEditor.getComponent();
-		testResult.setPreferredSize(new Dimension(400, 200));
-	}
+  private void createUIComponents() {
+    myEditor = (EditorImpl) createEditorPreview();
+    testResult = (JPanel) myEditor.getComponent();
+    testResult.setPreferredSize(new Dimension(400, 200));
+  }
 
-	public RegexModelEditor(String title, String regex, String snotComparingGroupsText, RegexGroupModel.Scope scope) {
-		super(true);
-		help.setText(
-				"- the current file name is matched against the regex\n" +
-						"- if it matches, then all other files within the scope are matched against the same regex\n" +
-						"- for each matching file, the content of each regex group is compared against the current file\n" +
-						"- the comparison can be disabled for each group\n" +
-						"- example: '(.*)(Service|Repository|Controller).*' (disable group 2)\n" +
-						"- example: '(.*)\\..*'");
+  public RegexModelEditor(String title, String regex, String snotComparingGroupsText, RegexGroupModel.Scope scope) {
+    super(true);
+    help.setText(
+      """
+        - the current file name is matched against the regex
+        - if it matches, then all other files within the scope are matched against the same regex
+        - for each matching file, the content of each regex group is compared against the current file
+        - the comparison can be disabled for each group
+        - example: '(.*)(Service|Repository|Controller).*' (disable group 2)
+        - example: '(.*)\\..*'""");
 
-//		FileChooserDescriptor singleFileDescriptor = new FileChooserDescriptor(true, false, false, false, false, false);
-//		Project currentContextProject = ProjectUtils.getCurrentContextProject();
-//		if (currentContextProject != null) {
-//			singleFileDescriptor.setRoots(ProjectRootManager.getInstance(currentContextProject).getContentRoots());
-//		}
-//		
-//		fileName = FileChooserFactoryImpl.getInstance().createFileTextField(singleFileDescriptor, null);
-//                                                              
-
-//		textFieldWithBrowseButton = new TextFieldWithBrowseButton(fileName.getField());
-//
-//		fileName.getField().setText("");
-//
-//
-//		textFieldWithBrowseButton.addBrowseFolderListener(new TextBrowseFolderListener(singleFileDescriptor, currentContextProject) {
-//															  @NotNull
-//															  @Override
-//															  protected String chosenFileToResultingText(@NotNull VirtualFile chosenFile) {
-//																  return chosenFile.getName();
-//															  }
-//														  }
-//		);
+    fileNameField = new JBTextField(_fileName);
+    fileNamePanel.add(fileNameField, BorderLayout.CENTER);
 
 
-//		fileNamePanel.add(textFieldWithBrowseButton, BorderLayout.CENTER);
-//		fileNamePanel.add(fileName.getField(), BorderLayout.CENTER);
-		fileNameField = new JBTextField(_fileName);
-		fileNamePanel.add(fileNameField, BorderLayout.CENTER);
+    error.setForeground(DialogWrapper.ERROR_FOREGROUND_COLOR);
+    setTitle(title);
+    this.regex.setNextFocusableComponent(this.regex);
+    scopeCombo.setModel(new EnumComboBoxModel<>(RegexGroupModel.Scope.class));
+
+    this.regex.getDocument().addDocumentListener(new DocumentAdapter() {
+      @Override
+      public void textChanged(@NotNull DocumentEvent event) {
+        updateControls();
+        updateTest();
+      }
+    });
+    fileNameField.getDocument().addDocumentListener(new DocumentAdapter() {
+      @Override
+      public void textChanged(@NotNull DocumentEvent event) {
+        updateTest();
+      }
+    });
+
+    this.regex.setText(regex);
+    this.notComparingGroups.setText(snotComparingGroupsText);
+    this.scopeCombo.setSelectedItem(scope);
+    init();
+    updateControls();
+  }
 
 
-		error.setForeground(DialogWrapper.ERROR_FOREGROUND_COLOR);
-		setTitle(title);
-		this.regex.setNextFocusableComponent(this.regex);
-		scopeCombo.setModel(new EnumComboBoxModel<>(RegexGroupModel.Scope.class));
+  private void updateTest() {
+    StringBuilder sb = new StringBuilder();
+    try {
+      String text = regex.getText();
+      String fileName = getFileName();
+      if (StringUtils.isNotBlank(text) && StringUtils.isNotBlank(fileName)) {
+        Pattern compile = Pattern.compile(text);
+        Matcher matcher = compile.matcher(fileName);
+        sb.append("Matches: ").append(matcher.matches()).append("\n");
+        int groups = matcher.groupCount();
+        if (matcher.matches()) {
+          sb.append("Groups: ").append(groups).append("\n");
+          for (int j = 1; j <= groups; j++) {
+            sb.append("Group ").append(j).append(": ").append(matcher.group(j)).append("\n");
+          }
+        }
+      }
+    } catch (Throwable e) {
+      sb.append(e);
+    }
 
-		this.regex.getDocument().addDocumentListener(new DocumentAdapter() {
-			@Override
-			public void textChanged(@NotNull DocumentEvent event) {
-				updateControls();
-				updateTest();
-			}
-		});
-//		this.fileName.getField().getDocument().addDocumentListener(new DocumentAdapter() {
-//			@Override
-//			public void textChanged(@NotNull DocumentEvent event) {
-//				updateTest();
-//			}
-//		});
-		fileNameField.getDocument().addDocumentListener(new DocumentAdapter() {
-			@Override
-			public void textChanged(@NotNull DocumentEvent event) {
-				updateTest();
-			}
-		});
+    ApplicationManager.getApplication().runWriteAction(new Runnable() {
+      @Override
+      public void run() {
+        String replace = sb.toString().replace("\r\n", "\n");
+        myEditor.getDocument().setText(replace);
+        testResult.validate();
+        testResult.repaint();
+      }
+    });
 
-		this.regex.setText(regex);
-		this.notComparingGroups.setText(snotComparingGroupsText);
-		this.scopeCombo.setSelectedItem(scope);
-		init();
-		updateControls();
-	}
+  }
 
+  @Nullable
+  private String getFileName() {
+    _fileName = fileNameField.getText();
+    return _fileName;
+  }
 
-	private void updateTest() {
-		StringBuilder sb = new StringBuilder();
-		try {
-			String text = regex.getText();
-			String fileName = getFileName();
-			if (StringUtils.isNotBlank(text) && StringUtils.isNotBlank(fileName)) {
-				Pattern compile = Pattern.compile(text);
-				Matcher matcher = compile.matcher(fileName);
-				sb.append("Matches: ").append(matcher.matches()).append("\n");
-				int groups = matcher.groupCount();
-				if (matcher.matches()) {
-					sb.append("Groups: ").append(groups).append("\n");
-					for (int j = 1; j <= groups; j++) {
-						sb.append("Group ").append(j).append(": ").append(matcher.group(j)).append("\n");
-					}
-				}
-			}
-		} catch (Throwable e) {
-			sb.append(e.toString());
-		}
+  @NotNull
+  private static Editor createEditorPreview() {
+    EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
+    ColorAndFontOptions options = new ColorAndFontOptions();
+    options.reset();
+    options.selectScheme(scheme.getName());
+    return createPreviewEditor(scheme);
+  }
 
-		ApplicationManager.getApplication().runWriteAction(new Runnable() {
-			@Override
-			public void run() {
-				String replace = sb.toString().replace("\r\n", "\n");
-				myEditor.getDocument().setText(replace);
-				testResult.validate();
-				testResult.repaint();
-			}
-		});
+  static Editor createPreviewEditor(EditorColorsScheme scheme) {
+    EditorFactory editorFactory = EditorFactory.getInstance();
+    Document editorDocument = editorFactory.createDocument("");
+    EditorEx editor = (EditorEx) (editorFactory.createViewer(editorDocument));
+    editor.setColorsScheme(scheme);
+    EditorSettings settings = editor.getSettings();
+    settings.setLineNumbersShown(false);
+    settings.setWhitespacesShown(false);
+    settings.setLineMarkerAreaShown(false);
+    settings.setIndentGuidesShown(false);
+    settings.setFoldingOutlineShown(false);
+    settings.setAdditionalColumnsCount(0);
+    settings.setAdditionalLinesCount(1);
+    settings.setRightMarginShown(false);
 
-	}
+    return editor;
+  }
 
-	@Nullable
-	private String getFileName() {
-//		String fileName = null;
-//		VirtualFile selectedFile1 = this.fileName.getSelectedFile();
-//		if (selectedFile1 != null) {
-//			fileName = selectedFile1.getName();
-//		}
-//		return fileName;
-		_fileName = fileNameField.getText();
-		return _fileName;
-	}
+  private void updateControls() {
+    getOKAction().setEnabled(isRegexOK(getRegex()));
+  }
 
-	@NotNull
-	private static Editor createEditorPreview() {
-		EditorColorsScheme scheme = EditorColorsManager.getInstance().getGlobalScheme();
-		ColorAndFontOptions options = new ColorAndFontOptions();
-		options.reset();
-		options.selectScheme(scheme.getName());
-		return createPreviewEditor("", scheme, false);
-	}
+  private boolean isRegexOK(String regex) {
+    error.setText("");
+    if (regex.isEmpty()) {
+      return false;
+    }
+    try {
+      Pattern compile = Pattern.compile(regex);
+      return true;
+    } catch (Exception e) {
+      root.revalidate();
+      root.repaint();
+      error.setText("Regex not valid");
+      return false;
+    }
+  }
 
-	static Editor createPreviewEditor(String text, EditorColorsScheme scheme, boolean editable) {
-		EditorFactory editorFactory = EditorFactory.getInstance();
-		Document editorDocument = editorFactory.createDocument(text);
-		EditorEx editor = (EditorEx) (editable ? editorFactory.createEditor(editorDocument) : editorFactory.createViewer(editorDocument));
-		editor.setColorsScheme(scheme);
-		EditorSettings settings = editor.getSettings();
-		settings.setLineNumbersShown(false);
-		settings.setWhitespacesShown(false);
-		settings.setLineMarkerAreaShown(false);
-		settings.setIndentGuidesShown(false);
-		settings.setFoldingOutlineShown(false);
-		settings.setAdditionalColumnsCount(0);
-		settings.setAdditionalLinesCount(1);
-		settings.setRightMarginShown(false);
+  @Override
+  public JComponent getPreferredFocusedComponent() {
+    return regex;
+  }
 
-		return editor;
-	}
+  @Override
+  protected String getHelpId() {
+    return null;
+  }
 
-	private void updateControls() {
-		getOKAction().setEnabled(isRegexOK(getRegex()));
-	}
+  @Override
+  protected void doOKAction() {
+    if (!isRegexOK(getRegex())) return;
+    super.doOKAction();
+  }
 
-	private boolean isRegexOK(String regex) {
-		error.setText("");
-		if (regex.isEmpty()) {
-			return false;
-		}
-		try {
-			Pattern compile = Pattern.compile(regex);
-			return true;
-		} catch (Exception e) {
-			root.revalidate();
-			root.repaint();
-			error.setText("Regex not valid");
-			return false;
-		}
-	}
+  public String getRegex() {
+    return regex.getText().trim();
+  }
 
-	@Override
-	public JComponent getPreferredFocusedComponent() {
-		return regex;
-	}
+  public String getNotComparingGroups() {
+    return notComparingGroups.getText().trim();
+  }
 
-	@Override
-	protected String getHelpId() {
-		return null;
-	}
+  public RegexGroupModel.Scope getScopeCombo() {
+    return (RegexGroupModel.Scope) scopeCombo.getSelectedItem();
+  }
 
-	@Override
-	protected void doOKAction() {
-		if (!isRegexOK(getRegex())) return;
-		super.doOKAction();
-	}
+  @Override
+  protected JComponent createCenterPanel() {
+    return root;
+  }
 
-	public String getRegex() {
-		return regex.getText().trim();
-	}
-
-	public String getNotComparingGroups() {
-		return notComparingGroups.getText().trim();
-	}
-
-	public RegexGroupModel.Scope getScopeCombo() {
-		return (RegexGroupModel.Scope) scopeCombo.getSelectedItem();
-	}
-
-	@Override
-	protected JComponent createCenterPanel() {
-		return root;
-	}
-
-	@Nullable
-	protected String getDimensionServiceKey() {
+  @Nullable
+  protected String getDimensionServiceKey() {
 //		return null; 	
-		return "krasa.editorGroups.ModelEditor3";
-	}
+    return "krasa.editorGroups.ModelEditor3";
+  }
 
 
 }

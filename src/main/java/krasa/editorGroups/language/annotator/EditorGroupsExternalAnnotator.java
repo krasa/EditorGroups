@@ -12,70 +12,71 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class EditorGroupsExternalAnnotator extends ExternalAnnotator<EditorGroupsPsiFile, FileAnnotationResult> {
-	private static final Logger LOG = Logger.getInstance(EditorGroupsExternalAnnotator.class);
+  private static final Logger LOG = Logger.getInstance(EditorGroupsExternalAnnotator.class);
 
-	@Nullable
-	@Override
-	public EditorGroupsPsiFile collectInformation(@NotNull PsiFile file) {
-		if (file instanceof EditorGroupsPsiFile) {
-			return (EditorGroupsPsiFile) file;
-		}
-		return null;
-	}
+  @Nullable
+  @Override
+  public EditorGroupsPsiFile collectInformation(@NotNull PsiFile file) {
+    if (file instanceof EditorGroupsPsiFile) {
+      return (EditorGroupsPsiFile) file;
+    }
+    return null;
+  }
 
-	@Nullable
-	@Override
-	public FileAnnotationResult doAnnotate(EditorGroupsPsiFile file) {
-		FileAnnotationResult result = new FileAnnotationResult();
+  @Nullable
+  @Override
+  public FileAnnotationResult doAnnotate(EditorGroupsPsiFile file) {
+    FileAnnotationResult result = new FileAnnotationResult();
 
-		Integer sourceOffset = 0;
+    int sourceOffset = 0;
 
-		SourceAnnotationResult sourceAnnotationResult = new SourceAnnotationResult(sourceOffset);
+    SourceAnnotationResult sourceAnnotationResult = new SourceAnnotationResult(sourceOffset);
 
-		String source = file.getFirstChild().getText();
+    String source = Objects.requireNonNull(file).getFirstChild().getText();
 
-		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
-			LanguagePatternHolder.INSTANCE.keywordsPattern,
-			DefaultLanguageHighlighterColors.KEYWORD));
+    sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
+      LanguagePatternHolder.keywordsPattern,
+      DefaultLanguageHighlighterColors.KEYWORD));
 
-		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
-			LanguagePatternHolder.INSTANCE.colorPattern,
-			DefaultLanguageHighlighterColors.STATIC_FIELD));
+    sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
+      LanguagePatternHolder.colorPattern,
+      DefaultLanguageHighlighterColors.STATIC_FIELD));
 
-		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
-			LanguagePatternHolder.INSTANCE.macrosPattern,
-			DefaultLanguageHighlighterColors.STATIC_METHOD));
+    sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
+      LanguagePatternHolder.macrosPattern,
+      DefaultLanguageHighlighterColors.STATIC_METHOD));
 
-		sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
-			LanguagePatternHolder.INSTANCE.metadataPattern,
-			DefaultLanguageHighlighterColors.METADATA));
+    sourceAnnotationResult.addAll(annotateSyntaxHighlight(source,
+      LanguagePatternHolder.metadataPattern,
+      DefaultLanguageHighlighterColors.METADATA));
 
-		result.add(sourceAnnotationResult);
-
-
-		return result;
-	}
+    result.add(sourceAnnotationResult);
 
 
-	private Collection<SyntaxHighlightAnnotation> annotateSyntaxHighlight(String source, Pattern pattern, TextAttributesKey textAttributesKey) {
-		Collection<SyntaxHighlightAnnotation> result = new ArrayList<SyntaxHighlightAnnotation>();
-		Matcher matcher = pattern.matcher(source);
-		while (matcher.find()) {
-			result.add(new SyntaxHighlightAnnotation(matcher.start(), matcher.end(), textAttributesKey));
-		}
-		return result;
-	}
+    return result;
+  }
 
-	@Override
-	public void apply(@NotNull PsiFile file, FileAnnotationResult fileAnnotationResult, @NotNull AnnotationHolder holder) {
-		if (null != fileAnnotationResult) {
-			fileAnnotationResult.annotate(holder);
-		}
-	}
+
+  private Collection<SyntaxHighlightAnnotation> annotateSyntaxHighlight(String source, Pattern pattern, TextAttributesKey textAttributesKey) {
+    Collection<SyntaxHighlightAnnotation> result = new ArrayList<>();
+    Matcher matcher = pattern.matcher(source);
+    while (matcher.find()) {
+      result.add(new SyntaxHighlightAnnotation(matcher.start(), matcher.end(), textAttributesKey));
+    }
+    return result;
+  }
+
+  @Override
+  public void apply(@NotNull PsiFile file, FileAnnotationResult fileAnnotationResult, @NotNull AnnotationHolder holder) {
+    if (null != fileAnnotationResult) {
+      fileAnnotationResult.annotate(holder);
+    }
+  }
 
 
 }

@@ -32,7 +32,8 @@ import java.util.regex.PatternSyntaxException;
  * @see IndexPatternProvider#getIndexPatterns()
  */
 public class MyIndexPattern {
-  @NotNull private String myPatternString;
+  @NotNull
+  private String myPatternString;
   private Pattern myOptimizedIndexingPattern;
   private boolean myCaseSensitive;
   private Pattern myPattern;
@@ -97,8 +98,7 @@ public class MyIndexPattern {
       myOptimizedIndexingPattern = Pattern.compile(optimizedPattern, flags);
 //      myStringsToFindFirst = IndexPatternOptimizer.getInstance().extractStringsToFind(myPatternString);
       myStringsToFindFirst = Collections.emptyList();
-    }
-    catch(PatternSyntaxException e){
+    } catch (PatternSyntaxException e) {
       myPattern = null;
       myOptimizedIndexingPattern = null;
       myStringsToFindFirst = Collections.emptyList();
@@ -110,12 +110,10 @@ public class MyIndexPattern {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    final MyIndexPattern that = (MyIndexPattern)o;
+    final MyIndexPattern that = (MyIndexPattern) o;
 
     if (myCaseSensitive != that.myCaseSensitive) return false;
-    if (!myPatternString.equals(that.myPatternString)) return false;
-
-    return true;
+    return myPatternString.equals(that.myPatternString);
   }
 
   @Override

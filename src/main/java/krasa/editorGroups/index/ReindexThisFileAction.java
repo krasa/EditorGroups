@@ -8,11 +8,11 @@ import com.intellij.util.indexing.FileBasedIndex;
 
 public class ReindexThisFileAction extends AnAction {
 
-	@Override
-	public void actionPerformed(AnActionEvent e) {
-		VirtualFile data = CommonDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
-		if (data != null) {
-			FileBasedIndex.getInstance().requestReindex(data);
-		}
-	}
+  @Override
+  public void actionPerformed(AnActionEvent e) {
+    VirtualFile data = CommonDataKeys.VIRTUAL_FILE.getData(e.getDataContext());
+    if (data != null) {
+      FileBasedIndex.getInstance().requestReindex(data);
+    }
+  }
 }

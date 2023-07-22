@@ -6,15 +6,15 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 public class FileAnnotationResult {
-	private Collection<SourceAnnotationResult> sourceAnnotationResults = new ArrayList<SourceAnnotationResult>();
+  private final Collection<SourceAnnotationResult> sourceAnnotationResults = new ArrayList<SourceAnnotationResult>();
 
-	public boolean add(SourceAnnotationResult sourceAnnotationResult) {
-		return sourceAnnotationResults.add(sourceAnnotationResult);
-	}
+  public boolean add(SourceAnnotationResult sourceAnnotationResult) {
+    return sourceAnnotationResults.add(sourceAnnotationResult);
+  }
 
-	public void annotate(AnnotationHolder holder) {
-		for (SourceAnnotationResult sourceAnnotationResult : sourceAnnotationResults) {
-			sourceAnnotationResult.annotate(holder);
-		}
-	}
+  public void annotate(AnnotationHolder holder) {
+    for (SourceAnnotationResult sourceAnnotationResult : sourceAnnotationResults) {
+      sourceAnnotationResult.annotate(holder);
+    }
+  }
 }

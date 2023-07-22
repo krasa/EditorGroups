@@ -9,33 +9,33 @@ import java.awt.dnd.*;
  */
 
 public class MyDragListener implements DragSourceListener, DragGestureListener {
-	JList list;
+  JList list;
 
-	DragSource ds = new DragSource();
+  DragSource ds = new DragSource();
 
-	public MyDragListener(JList list) {
-		this.list = list;
-		DragGestureRecognizer dgr = ds.createDefaultDragGestureRecognizer(list, DnDConstants.ACTION_MOVE, this);
+  public MyDragListener(JList list) {
+    this.list = list;
+    DragGestureRecognizer dgr = ds.createDefaultDragGestureRecognizer(list, DnDConstants.ACTION_MOVE, this);
 
-	}
+  }
 
-	public void dragGestureRecognized(DragGestureEvent dge) {
-		StringSelection transferable = new StringSelection(Integer.toString(list.getSelectedIndex()));
-		ds.startDrag(dge, DragSource.DefaultMoveDrop, transferable, this);
-	}
+  public void dragGestureRecognized(DragGestureEvent dge) {
+    StringSelection transferable = new StringSelection(Integer.toString(list.getSelectedIndex()));
+    ds.startDrag(dge, DragSource.DefaultMoveDrop, transferable, this);
+  }
 
-	public void dragEnter(DragSourceDragEvent dsde) {
-	}
+  public void dragEnter(DragSourceDragEvent dsde) {
+  }
 
-	public void dragExit(DragSourceEvent dse) {
-	}
+  public void dragExit(DragSourceEvent dse) {
+  }
 
-	public void dragOver(DragSourceDragEvent dsde) {
-	}
+  public void dragOver(DragSourceDragEvent dsde) {
+  }
 
-	public void dragDropEnd(DragSourceDropEvent dsde) {
-	}
+  public void dragDropEnd(DragSourceDropEvent dsde) {
+  }
 
-	public void dropActionChanged(DragSourceDragEvent dsde) {
-	}
+  public void dropActionChanged(DragSourceDragEvent dsde) {
+  }
 }

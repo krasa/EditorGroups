@@ -6,10 +6,10 @@ import org.jetbrains.annotations.NotNull;
 
 public class EditorGroupsTypeFactory extends FileTypeFactory {
 
-	@Override
-	public void createFileTypes(@NotNull FileTypeConsumer consumer) {
-		consumer.consume(
-			EditorGroupsFileType.EDITOR_GROUPS_FILE_TYPE,
-			EditorGroupsFileType.EXTENSION);
-	}
+  @Override
+  public void createFileTypes(@NotNull FileTypeConsumer consumer) {
+    consumer.consume(
+      EditorGroupsFileType.EDITOR_GROUPS_FILE_TYPE,
+      EditorGroupsFileType.EXTENSION);
+  }
 }
