@@ -55,7 +55,6 @@ public class EditorGroupsTabs {
   @NotNull
   public static Color hoverColor() {
     return JBColor.namedColor("EditorGroupsTabs.hoverColor",
-      new JBColor(0xD9D9D9,
-        0x2E3133));
+      new JBColor(0xD9D9D9, 0x2E3133));
   }
 }

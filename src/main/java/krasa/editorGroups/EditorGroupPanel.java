@@ -36,8 +36,8 @@ import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
-import krasa.editorGroups.tabs2.JBTabs;
-import krasa.editorGroups.tabs2.TabInfo;
+import krasa.editorGroups.tabs2.KrTabs;
+import krasa.editorGroups.tabs2.KrTabInfo;
 import krasa.editorGroups.tabs2.my.MyJBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -130,14 +130,14 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       @Override
       public Object getData(@NotNull String dataId) {
         if (CommonDataKeys.VIRTUAL_FILE.is(dataId)) {
-          TabInfo targetInfo = tabs.getTargetInfo();
+          KrTabInfo targetInfo = tabs.getTargetInfo();
           if (targetInfo instanceof MyTabInfo) {
             Link path = ((MyTabInfo) targetInfo).link;
             return path.getVirtualFile();
           }
         }
         if (FAVORITE_GROUP.is(dataId)) {
-          TabInfo targetInfo = tabs.getTargetInfo();
+          KrTabInfo targetInfo = tabs.getTargetInfo();
           if (targetInfo instanceof MyGroupTabInfo) {
             EditorGroup group = ((MyGroupTabInfo) targetInfo).editorGroup;
             if (group instanceof FavoritesGroup) {
@@ -153,7 +153,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       @Override
       public void mouseReleased(MouseEvent e) {
         if (UIUtil.isCloseClick(e, MouseEvent.MOUSE_RELEASED)) {
-          final TabInfo info = tabs.findInfo(e);
+          final KrTabInfo info = tabs.findInfo(e);
           if (info != null) {
             IdeEventQueue.getInstance().blockNextEvents(e);
             tabs.setMyPopupInfo(info);
@@ -168,11 +168,11 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       }
     });
     tabs.setPopupGroup(getter, "EditorGroupsTabPopup", false);
-    tabs.setSelectionChangeHandler(new JBTabs.SelectionChangeHandler() {
+    tabs.setSelectionChangeHandler(new KrTabs.SelectionChangeHandler() {
 
       @NotNull
       @Override
-      public ActionCallback execute(TabInfo info, boolean requestFocus, @NotNull ActiveRunnable doChangeSelection) {
+      public ActionCallback execute(KrTabInfo info, boolean requestFocus, @NotNull ActiveRunnable doChangeSelection) {
         Integer modifiers = null;
         AWTEvent trueCurrentEvent = IdeEventQueue.getInstance().getTrueCurrentEvent();
         if (trueCurrentEvent instanceof MouseEvent) {
@@ -432,7 +432,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
   }
 
 
-  public static class MyTabInfo extends TabInfo {
+  public static class MyTabInfo extends KrTabInfo {
     Link link;
     public boolean selectable = true;
 
@@ -457,7 +457,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
   }
 
 
-  class MyGroupTabInfo extends TabInfo {
+  class MyGroupTabInfo extends KrTabInfo {
     EditorGroup editorGroup;
 
     public MyGroupTabInfo(EditorGroup editorGroup) {
@@ -485,7 +485,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
     }
 
     int iterations = 0;
-    List<TabInfo> tabs = this.tabs.getTabs();
+    List<KrTabInfo> tabs = this.tabs.getTabs();
     Link link = null;
 
     while (link == null && iterations < tabs.size()) {
@@ -509,8 +509,8 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
     return openFile(link, newTab, newWindow, split);
   }
 
-  private Link getLink(List<TabInfo> tabs, int index) {
-    TabInfo tabInfo = tabs.get(index);
+  private Link getLink(List<KrTabInfo> tabs, int index) {
+    KrTabInfo tabInfo = tabs.get(index);
     if (tabInfo instanceof MyTabInfo) {
       return ((MyTabInfo) tabInfo).link;
     }
@@ -531,7 +531,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       return false;
     }
     int iterations = 0;
-    List<TabInfo> tabs = this.tabs.getTabs();
+    List<KrTabInfo> tabs = this.tabs.getTabs();
     Link link = null;
 
     while (link == null && iterations < tabs.size()) {
@@ -593,9 +593,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
   }
 
   private void selectTabFallback() {
-    List<TabInfo> tabs1 = tabs.getTabs();
+    List<KrTabInfo> tabs1 = tabs.getTabs();
     for (int i = 0; i < tabs1.size(); i++) {
-      TabInfo t = tabs1.get(i);
+      KrTabInfo t = tabs1.get(i);
       if (t instanceof MyTabInfo tab) {
         if (tab.link.fileEquals(fileFromTextEditor)) {
           tabs.setMySelectedInfo(tab);
@@ -607,9 +607,9 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
   }
 
   private void selectTab(@NotNull Link link) {
-    List<TabInfo> tabs = this.tabs.getTabs();
+    List<KrTabInfo> tabs = this.tabs.getTabs();
     for (int i = 0; i < tabs.size(); i++) {
-      TabInfo tab = tabs.get(i);
+      KrTabInfo tab = tabs.get(i);
       if (tab instanceof MyTabInfo) {
         Link link1 = ((MyTabInfo) tab).getLink();
         if (link1.equals(link)) {

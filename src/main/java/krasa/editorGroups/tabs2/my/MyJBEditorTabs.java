@@ -11,12 +11,12 @@ import com.intellij.util.BitUtil;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.SwitchRequest;
-import krasa.editorGroups.tabs2.JBTabPainter;
-import krasa.editorGroups.tabs2.TabInfo;
-import krasa.editorGroups.tabs2.impl.JBEditorTabs;
-import krasa.editorGroups.tabs2.impl.TabLabel;
-import krasa.editorGroups.tabs2.impl.singleRow.ScrollableSingleRowLayout;
-import krasa.editorGroups.tabs2.impl.singleRow.SingleRowLayout;
+import krasa.editorGroups.tabs2.KrTabInfo;
+import krasa.editorGroups.tabs2.KrTabPainter;
+import krasa.editorGroups.tabs2.impl.KrEditorTabs;
+import krasa.editorGroups.tabs2.impl.KrTabLabel;
+import krasa.editorGroups.tabs2.impl.singleRow.KrScrollableSingleRowLayout;
+import krasa.editorGroups.tabs2.impl.singleRow.KrSingleRowLayout;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,11 +26,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 
-public class MyJBEditorTabs extends JBEditorTabs {
+public class MyJBEditorTabs extends KrEditorTabs {
   private static final Logger LOG = Logger.getInstance(MyJBEditorTabs.class);
 
   private final Project project;
   private final VirtualFile file;
+  private final KrSingleRowLayout mySingleRowLayout = createSingleRowLayout();
 
   public MyJBEditorTabs(Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent, VirtualFile file) {
     super(project, actionManager, focusManager, parent);
@@ -39,8 +40,8 @@ public class MyJBEditorTabs extends JBEditorTabs {
     patchMouseListener(this);
   }
 
-  protected TabLabel createTabLabel(TabInfo info) {
-    TabLabel tabLabel = new TabLabel(this, info);
+  protected KrTabLabel createTabLabel(KrTabInfo info) {
+    KrTabLabel tabLabel = new KrTabLabel(this, info);
     patchMouseListener(tabLabel);
 
     return tabLabel;
@@ -69,7 +70,7 @@ public class MyJBEditorTabs extends JBEditorTabs {
   public boolean bulkUpdate;
 
   @Override
-  protected void revalidateAndRepaint(boolean layoutNow) {
+  public void revalidateAndRepaint(boolean layoutNow) {
     if (bulkUpdate) {        //performance optimization
       return;
     }
@@ -77,15 +78,14 @@ public class MyJBEditorTabs extends JBEditorTabs {
   }
 
 
-  @Override
-  protected void updateSideComponent(TabInfo tabInfo) {
+  protected void updateSideComponent(KrTabInfo tabInfo) {
     //performance optimization
   }
 
   @Nullable
   @Override
-  public TabInfo getSelectedInfo() {
-    TabInfo selectedInfo = super.getSelectedInfo();
+  public KrTabInfo getSelectedInfo() {
+    KrTabInfo selectedInfo = super.getSelectedInfo();
     if (selectedInfo instanceof EditorGroupPanel.MyTabInfo) {
       boolean selectable = ((EditorGroupPanel.MyTabInfo) selectedInfo).selectable;
       if (!selectable) {
@@ -95,14 +95,13 @@ public class MyJBEditorTabs extends JBEditorTabs {
     return selectedInfo;
   }
 
-  @Override
-  protected JBTabPainter createTabPainter() {
+  protected KrTabPainter createTabPainter() {
     return new EditorGroupsJBDefaultTabPainter();
   }
 
 
   /**
-   * com.intellij.util.IncorrectOperationException: Sorry but parent: EditorGroups.MyJBEditorTabs visible=[] selected=null has already been disposed (see the cause for stacktrace) so the child: Animator 'JBTabs Attractions' @1845106519 (stopped) will never be disposed
+   * com.intellij.util.IncorrectOperationException: Sorry but parent: EditorGroups.MyJBEditorTabs visible=[] selected=null has already been disposed (see the cause for stacktrace) so the child: Animator 'KrTabs Attractions' @1845106519 (stopped) will never be disposed
    * at com.intellij.openapi.util.objectTree.ObjectTree.register(ObjectTree.java:61)
    * at com.intellij.openapi.util.Disposer.register(Disposer.java:92)
    * at krasa.editorGroups.tabs2.impl.JBTabsImpl$7.initialize(JBTabsImpl.java:340)
@@ -110,17 +109,16 @@ public class MyJBEditorTabs extends JBEditorTabs {
    */
 
   @Override
-  protected SingleRowLayout createSingleRowLayout() {
-    return new ScrollableSingleRowLayout(this);
+  protected KrSingleRowLayout createSingleRowLayout() {
+    return new KrScrollableSingleRowLayout(this);
   }
 
   @Override
-  protected boolean isActiveTabs(TabInfo info) {
+  public boolean isActiveTabs(KrTabInfo info) {
     return true;
   }
 
 
-  @Override
   public boolean isSelectionClick(final MouseEvent e, boolean canBeQuick) {
     if (e.getClickCount() == 1 || canBeQuick) {
       if (!e.isPopupTrigger()) {
@@ -131,7 +129,6 @@ public class MyJBEditorTabs extends JBEditorTabs {
     return false;
   }
 
-  @Override
   public boolean isCloseClick(MouseEvent e) {
     return false;
   }
@@ -158,7 +155,7 @@ public class MyJBEditorTabs extends JBEditorTabs {
   }
 
   public void scroll(int myScrollOffset) {
-    if (mySingleRowLayout.myLastSingRowLayout != null) {
+    if (mySingleRowLayout.lastSingleRowLayout != null) {
       int relativeScroll = myScrollOffset - getMyScrollOffset();
       mySingleRowLayout.scroll(relativeScroll);
       revalidateAndRepaint(false);
@@ -168,23 +165,19 @@ public class MyJBEditorTabs extends JBEditorTabs {
 
   @Override
   public String toString() {
-    return "EditorGroups.MyJBEditorTabs visible=" + myVisibleInfos + " selected=" + mySelectedInfo;
+    return "EditorGroups.MyJBEditorTabs visible=" + getVisibleInfos() + " selected=" + getSelectedInfo();
   }
 
 
-  public void setMyPopupInfo(TabInfo myPopupInfo) {
-    this.myPopupInfo = myPopupInfo;
+  public void setMyPopupInfo(KrTabInfo myPopupInfo) {
+    this.setPopupInfo(myPopupInfo);
   }
 
-
-  public void setMySelectedInfo(TabInfo mySelectedInfo) {
-    this.mySelectedInfo = mySelectedInfo;
-  }
 
   public int getMyScrollOffset() {
-    if (mySingleRowLayout instanceof ScrollableSingleRowLayout) {
-      ScrollableSingleRowLayout mySingleRowLayout = (ScrollableSingleRowLayout) this.mySingleRowLayout;
-      return mySingleRowLayout.getMyScrollOffset();
+    if (mySingleRowLayout instanceof KrScrollableSingleRowLayout) {
+      KrScrollableSingleRowLayout mySingleRowLayout = (KrScrollableSingleRowLayout) this.mySingleRowLayout;
+      return mySingleRowLayout.getScrollOffset();
     }
     return 0;
   }
