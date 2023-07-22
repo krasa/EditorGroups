@@ -5,8 +5,8 @@ import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
 import com.intellij.openapi.fileEditor.FileEditor;
-import com.intellij.openapi.fileTypes.FileTypeManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Iconable;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.io.OSAgnosticPathUtil;
 import com.intellij.openapi.util.text.StringUtil;
@@ -14,6 +14,7 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
+import com.intellij.util.IconUtil;
 import com.intellij.util.ReflectionUtil;
 import krasa.editorGroups.model.Link;
 import org.jetbrains.annotations.NotNull;
@@ -493,7 +494,11 @@ public class Utils {
 
   @Nullable
   public static Icon getFileIcon(String path) {
-    return FileTypeManager.getInstance().getFileTypeByFileName(path).getIcon();
+    VirtualFile file = getFileByPath(path);
+    if (file == null) {
+      return null;
+    }
+    return IconUtil.computeFileIcon(Objects.requireNonNull(file), Iconable.ICON_FLAG_READ_STATUS, null);
   }
 
   public static boolean isJarOrZip(@NotNull VirtualFile file) {

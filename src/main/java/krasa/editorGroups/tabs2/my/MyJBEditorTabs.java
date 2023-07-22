@@ -40,7 +40,7 @@ public class MyJBEditorTabs extends KrEditorTabs {
     patchMouseListener(this);
   }
 
-  protected KrTabLabel createTabLabel(KrTabInfo info) {
+  protected @NotNull KrTabLabel createTabLabel(@NotNull KrTabInfo info) {
     KrTabLabel tabLabel = new KrTabLabel(this, info);
     patchMouseListener(tabLabel);
 
@@ -109,7 +109,7 @@ public class MyJBEditorTabs extends KrEditorTabs {
    */
 
   @Override
-  protected KrSingleRowLayout createSingleRowLayout() {
+  protected @NotNull KrSingleRowLayout createSingleRowLayout() {
     return new KrScrollableSingleRowLayout(this);
   }
 
@@ -164,7 +164,7 @@ public class MyJBEditorTabs extends KrEditorTabs {
 
 
   @Override
-  public String toString() {
+  public @NotNull String toString() {
     return "EditorGroups.MyJBEditorTabs visible=" + getVisibleInfos() + " selected=" + getSelectedInfo();
   }
 
