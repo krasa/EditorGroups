@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "EditorGroups"
-version = "1.1"
+version = "2.0"
 
 tasks {
   patchPluginXml {

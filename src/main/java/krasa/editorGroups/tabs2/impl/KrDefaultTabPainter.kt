@@ -90,12 +90,11 @@ open class KrDefaultTabPainter(private val theme: KrTabTheme = KrDefaultTabTheme
       paintBorderLine(g,
         borderThickness,
         Point(rect.x, rect.y),
-        Point(rect.x + rect.width, rect.y))
+        Point(rect.x, rect.y + rect.height - 1))
       paintBorderLine(g,
         borderThickness,
-        Point(rect.x, rect.y + rect.height - 1),
-        Point(rect.x + rect.width, rect.y + rect.height - 1))
-      return
+        Point(rect.x + rect.width - 1, rect.y),
+        Point(rect.x + rect.width - 1, rect.y + rect.height - 1))
     }
   }
 
