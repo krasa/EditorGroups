@@ -19,7 +19,7 @@ public class UniqueTabNameBuilder {
     this.root = this.root == null ? "" : FileUtil.toSystemIndependentName(this.root);
   }
 
-  public Map<Link, String> getNamesByPath(List<Link> paths, VirtualFile currentFile) {
+  public Map<Link, String> getNamesByPath(List<Link> paths, VirtualFile currentFile, Project project) {
     UniqueNameBuilder<Link> uniqueNameBuilder = new UniqueNameBuilder<>(root, "/");
     Map<Link, String> path_name = new HashMap<>();
     Map<String, Link> name_path = new HashMap<>();
@@ -33,7 +33,7 @@ public class UniqueTabNameBuilder {
       String currentFilePath = currentFile.getPath();
       boolean containsCurrentFile = path_name.keySet().stream().anyMatch(link1 -> link1.getPath().equals(currentFilePath));
       if (!containsCurrentFile) {
-        Link link = new VirtualFileLink(currentFile);
+        Link link = new VirtualFileLink(currentFile, project);
         put(path_name, name_path, paths_withDuplicateName, link);
       }
     }

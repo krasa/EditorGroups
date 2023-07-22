@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import org.jetbrains.annotations.NotNull;
 
@@ -11,12 +12,13 @@ public class VirtualFileLink extends Link {
   @NotNull
   private final VirtualFile virtualFile;
 
-  public VirtualFileLink(@NotNull VirtualFile virtualFile) {
+  public VirtualFileLink(@NotNull VirtualFile virtualFile, @NotNull Project project) {
+    super(project);
     this.virtualFile = virtualFile;
   }
 
-  public VirtualFileLink(@NotNull VirtualFile file, Icon icon, int line) {
-    super(icon, line);
+  public VirtualFileLink(@NotNull VirtualFile file, Icon icon, int line, @NotNull Project project) {
+    super(icon, line, project);
     this.virtualFile = file;
   }
 

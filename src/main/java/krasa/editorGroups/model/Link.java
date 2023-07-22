@@ -2,6 +2,7 @@ package krasa.editorGroups.model;
 
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import krasa.editorGroups.support.LinkComparator;
 import krasa.editorGroups.support.Utils;
@@ -22,36 +23,40 @@ public abstract class Link {
   protected Icon icon;
   @Nullable
   protected Integer line;
+  @NotNull
+  private final Project project;
 
-  public Link() {
+  public Link(@NotNull Project project) {
+    this.project = project;
   }
 
-  public Link(@Nullable Icon icon, @Nullable Integer line) {
+  public Link(@Nullable Icon icon, @Nullable Integer line, Project project) {
+    this(project);
     this.icon = icon;
     this.line = line;
   }
 
-  public static List<Link> from(Collection<String> links) {
+  public static List<Link> from(Collection<String> links, Project project) {
     ArrayList<Link> links1 = new ArrayList<>();
     for (String link : links) {
-      links1.add(new PathLink(link));
+      links1.add(new PathLink(link, project));
     }
     links1.sort(LinkComparator.INSTANCE);
     return links1;
   }
 
 
-  public static List<Link> fromVirtualFiles(Collection<VirtualFile> links) {
+  public static List<Link> fromVirtualFiles(Collection<VirtualFile> links, Project project) {
     ArrayList<Link> links1 = new ArrayList<>();
     for (VirtualFile link : links) {
-      links1.add(new VirtualFileLink(link));
+      links1.add(new VirtualFileLink(link, project));
     }
     links1.sort(LinkComparator.INSTANCE);
     return links1;
   }
 
-  public static Link from(VirtualFile file) {
-    return new VirtualFileLink(file);
+  public static Link from(VirtualFile file, Project project) {
+    return new VirtualFileLink(file, project);
   }
 
   @NotNull
@@ -62,7 +67,7 @@ public abstract class Link {
   }
 
   public Icon getFileIcon() {
-    return icon != null ? icon : Utils.getFileIcon(getPath());
+    return icon != null ? icon : Utils.getFileIcon(getPath(), project);
   }
 
   @Nullable
@@ -90,7 +95,7 @@ public abstract class Link {
     if (this == o) return true;
     if (!(o instanceof Link link)) return false;
 
-		if (!Objects.equals(icon, link.icon)) return false;
+    if (!Objects.equals(icon, link.icon)) return false;
     return Objects.equals(line, link.line);
   }
 

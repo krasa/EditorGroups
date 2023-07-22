@@ -101,7 +101,7 @@ public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAwa
 
           List<Link> links = group.getLinks(project);
           UniqueTabNameBuilder uniqueTabNameBuilder = new UniqueTabNameBuilder(project);
-          Map<Link, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
+          Map<Link, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null, project);
 
           for (Link link : links) {
             defaultActionGroup.add(newAction(project, panel, currentFile, link, namesByPath.get(link)));

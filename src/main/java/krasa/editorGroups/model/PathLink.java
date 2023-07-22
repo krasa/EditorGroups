@@ -1,6 +1,7 @@
 package krasa.editorGroups.model;
 
 import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -12,12 +13,13 @@ public class PathLink extends Link {
   @NotNull
   private final String path;
 
-  public PathLink(@NotNull String path) {
+  public PathLink(@NotNull String path, Project project) {
+    super(project);
     this.path = FileUtil.toSystemIndependentName(path);
   }
 
-  public PathLink(@NotNull String path, @Nullable Icon icon, @Nullable Integer line) {
-    this.path = FileUtil.toSystemIndependentName(path);
+  public PathLink(@NotNull String path, @Nullable Icon icon, @Nullable Integer line, Project project) {
+    this(path, project);
     this.icon = icon;
     this.line = line;
   }

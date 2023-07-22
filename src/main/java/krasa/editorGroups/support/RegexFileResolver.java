@@ -67,7 +67,7 @@ public class RegexFileResolver {
       LOG.debug("<resolveRegexGroup " + duration + "ms links=" + links);
     }
 
-    return Link.fromVirtualFiles(links);
+    return Link.fromVirtualFiles(links, project);
   }
 
   private void processFolders2(@NotNull RegexGroup regexGroup, RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher groupMatcher, ProjectFileIndex projectFileIndex, @NotNull VirtualFile folder) {

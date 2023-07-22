@@ -36,8 +36,8 @@ import krasa.editorGroups.language.EditorGroupsLanguage;
 import krasa.editorGroups.model.*;
 import krasa.editorGroups.support.FileResolver;
 import krasa.editorGroups.support.Utils;
-import krasa.editorGroups.tabs2.KrTabs;
 import krasa.editorGroups.tabs2.KrTabInfo;
+import krasa.editorGroups.tabs2.KrTabs;
 import krasa.editorGroups.tabs2.my.MyJBEditorTabs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -322,7 +322,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       List<Link> links = displayedGroup.getLinks(project);
       updateVisibility(displayedGroup);
 
-      Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(links, file);
+      Map<Link, String> path_name = uniqueNameBuilder.getNamesByPath(links, file, project);
       createTabs(links, path_name);
 
       addCurrentFileTab(path_name);
@@ -332,17 +332,10 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       }
       if (displayedGroup.isStub()) {
         LOG.debug("#reloadTabs: stub - Adding Loading...");
-        MyTabInfo tab = new MyTabInfo(new PathLink("Loading..."), "Loading...");
+        MyTabInfo tab = new MyTabInfo(new PathLink("Loading...", project), "Loading...");
         tab.selectable = false;
         tabs.addTabSilently(tab, -1);
       }
-
-//			if (tabs.getTabCount() > 0 && paintNow) { //premature optimization
-//				tabs.validate();
-//				RepaintManager.currentManager(tabs).paintDirtyRegions(); //less flicker 
-//			}
-
-
     } finally {
       tabs.bulkUpdate = false;
 
@@ -399,7 +392,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
 
   private void addCurrentFileTab(Map<Link, String> path_name) {
     if (currentIndex < 0 && (EditorGroupsLanguage.isEditorGroupsLanguage(file))) {
-      Link link = Link.from(file);
+      Link link = Link.from(file, project);
       MyTabInfo info = new MyTabInfo(link, path_name.get(link));
       customizeSelectedColor(info);
       currentIndex = 0;
@@ -751,7 +744,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
           //switched by bookmark shortcut -> need to select the right tab
           Editor editor = ((TextEditorImpl) fileEditor).getEditor();
           int line = editor.getCaretModel().getCurrentCaret().getLogicalPosition().line;
-          selectTab(new VirtualFileLink(file, null, line));
+          selectTab(new VirtualFileLink(file, null, line, project));
         }
 
 

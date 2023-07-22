@@ -86,6 +86,6 @@ public class ExternalGroupProvider {
 
   public BookmarkGroup getBookmarkGroup() {
     List<Bookmark> validBookmarks = BookmarkManager.getInstance(project).getValidBookmarks();
-    return new BookmarkGroup(validBookmarks);
+    return new BookmarkGroup(validBookmarks, project);
   }
 }

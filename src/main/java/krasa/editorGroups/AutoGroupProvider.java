@@ -102,7 +102,7 @@ public class AutoGroupProvider {
     if (LOG.isDebugEnabled())
       LOG.debug("getSameNameGroup " + t0 + "ms for '" + nameWithoutExtension + "', results: " + paths.size());
 
-    return new SameNameGroup(nameWithoutExtension, Link.fromVirtualFiles(paths));
+    return new SameNameGroup(nameWithoutExtension, Link.fromVirtualFiles(paths, project));
   }
 
 

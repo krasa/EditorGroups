@@ -493,12 +493,12 @@ public class Utils {
   }
 
   @Nullable
-  public static Icon getFileIcon(String path) {
+  public static Icon getFileIcon(String path, Project project) {
     VirtualFile file = getFileByPath(path);
     if (file == null) {
       return null;
     }
-    return IconUtil.computeFileIcon(Objects.requireNonNull(file), Iconable.ICON_FLAG_READ_STATUS, null);
+    return IconUtil.computeFileIcon(Objects.requireNonNull(file), Iconable.ICON_FLAG_READ_STATUS, project);
   }
 
   public static boolean isJarOrZip(@NotNull VirtualFile file) {

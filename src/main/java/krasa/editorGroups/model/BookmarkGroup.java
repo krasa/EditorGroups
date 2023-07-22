@@ -16,15 +16,15 @@ public class BookmarkGroup extends EditorGroup {
   private final List<Link> links;
   private final String name = "Bookmarks";
 
-	public BookmarkGroup(List<Bookmark> validBookmarks) {
-		links = new ArrayList<>(validBookmarks.size());
-		for (Bookmark validBookmark : validBookmarks) {
-			VirtualFile file = validBookmark.getFile();
-			Icon icon = validBookmark.getIcon();
-			int line = validBookmark.getLine();
-			links.add(new VirtualFileLink(file, icon, line));
-		}
-	}
+  public BookmarkGroup(List<Bookmark> validBookmarks, Project project) {
+    links = new ArrayList<>(validBookmarks.size());
+    for (Bookmark validBookmark : validBookmarks) {
+      VirtualFile file = validBookmark.getFile();
+      Icon icon = validBookmark.getIcon();
+      int line = validBookmark.getLine();
+      links.add(new VirtualFileLink(file, icon, line, project));
+    }
+  }
 
 
   @NotNull

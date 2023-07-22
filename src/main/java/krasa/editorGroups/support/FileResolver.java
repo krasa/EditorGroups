@@ -149,7 +149,7 @@ public class FileResolver {
     if (log.isDebugEnabled())
       log.debug("<resolveLinks " + (System.currentTimeMillis() - start) + "ms links=" + links);
 
-    return Link.from(links);
+    return Link.from(links, project);
   }
 
 
