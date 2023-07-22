@@ -1,5 +1,6 @@
 package krasa.editorGroups.support;
 
+import com.intellij.icons.AllIcons;
 import com.intellij.ide.ui.UISettings;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
@@ -492,11 +493,10 @@ public class Utils {
     return myColor;
   }
 
-  @Nullable
-  public static Icon getFileIcon(String path, Project project) {
+  public static @NotNull Icon getFileIcon(String path, Project project) {
     VirtualFile file = getFileByPath(path);
     if (file == null) {
-      return null;
+      return AllIcons.FileTypes.Any_type;
     }
     return IconUtil.computeFileIcon(Objects.requireNonNull(file), Iconable.ICON_FLAG_READ_STATUS, project);
   }

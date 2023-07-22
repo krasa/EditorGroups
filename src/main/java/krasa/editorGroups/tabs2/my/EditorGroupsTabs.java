@@ -18,7 +18,7 @@ public class EditorGroupsTabs {
   }
 
   public static int underlineHeight() {
-    return getInt("EditorGroupsTabs.underlineHeight", JBUIScale.scale(5));
+    return getInt("EditorGroupsTabs.underlineHeight", JBUIScale.scale(3));
   }
 
   @NotNull
@@ -56,5 +56,9 @@ public class EditorGroupsTabs {
   public static Color hoverColor() {
     return JBColor.namedColor("EditorGroupsTabs.hoverColor",
       new JBColor(0xD9D9D9, 0x2E3133));
+  }
+
+  public static int underlineArc() {
+    return getInt("EditorGroupsTabs.underlineArc", JBUIScale.scale(3));
   }
 }

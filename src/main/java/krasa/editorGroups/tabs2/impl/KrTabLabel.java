@@ -185,6 +185,7 @@ public class KrTabLabel extends JPanel implements Accessible, DataProvider {
     return myTabs.getSelectedLabel() == this;
   }
 
+
   @Override
   public boolean isFocusable() {
     // We don't want the focus unless we are the selected tab.
@@ -252,6 +253,8 @@ public class KrTabLabel extends JPanel implements Accessible, DataProvider {
     if (isPinned()) {
       size.width = Math.min(KrTabLayout.getMaxPinnedTabWidth(), size.width);
     }
+
+    size.height = JBUI.CurrentTheme.TabbedPane.TAB_HEIGHT.get();
     return size;
   }
 

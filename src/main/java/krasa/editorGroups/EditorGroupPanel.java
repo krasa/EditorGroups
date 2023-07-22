@@ -207,7 +207,7 @@ public class EditorGroupPanel extends JBPanel implements Weighted, Disposable {
       }
     });
 
-    setPreferredSize(new Dimension(0, 26));
+    setPreferredSize(new Dimension(0, JBUI.CurrentTheme.TabbedPane.TAB_HEIGHT.get()));
     JComponent component = tabs.getComponent();
     add(component, BorderLayout.CENTER);
 

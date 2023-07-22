@@ -3,7 +3,6 @@ package krasa.editorGroups.tabs2.my
 import krasa.editorGroups.tabs2.impl.themes.KrTabTheme
 import java.awt.Color
 
-
 open class EditorGroupsTabTheme : KrTabTheme {
   override val background: Color? get() = EditorGroupsTabs.background()
   override val borderColor: Color get() = EditorGroupsTabs.borderColor()
@@ -21,6 +20,8 @@ open class EditorGroupsTabTheme : KrTabTheme {
     get() = underlinedTabForeground
   override val inactiveColoredTabBackground: Color?
     get() = EditorGroupsTabs.background()
+  override val underlineArc: Int
+    get() = EditorGroupsTabs.underlineArc()
 }
 
 
