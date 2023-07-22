@@ -21,28 +21,28 @@ import org.jetbrains.annotations.Nullable;
 import java.awt.*;
 
 public interface UiDecorator {
-	@NotNull
-	UiDecoration getDecoration();
+  @NotNull
+  UiDecoration getDecoration();
 
-	class UiDecoration {
-		private @Nullable
-		final Font myLabelFont;
-		private @Nullable
-		final Insets myLabelInsets;
+  class UiDecoration {
+    private @Nullable
+    final Font myLabelFont;
+    private @Nullable
+    final Insets myLabelInsets;
 
-		public UiDecoration(final Font labelFont, final Insets labelInsets) {
-			myLabelFont = labelFont;
-			myLabelInsets = labelInsets;
-		}
+    public UiDecoration(final @Nullable Font labelFont, final @Nullable Insets labelInsets) {
+      myLabelFont = labelFont;
+      myLabelInsets = labelInsets;
+    }
 
-		@Nullable
-		public Font getLabelFont() {
-			return myLabelFont;
-		}
+    @Nullable
+    public Font getLabelFont() {
+      return myLabelFont;
+    }
 
-		@Nullable
-		public Insets getLabelInsets() {
-			return myLabelInsets;
-		}
-	}
+    @Nullable
+    public Insets getLabelInsets() {
+      return myLabelInsets;
+    }
+  }
 }

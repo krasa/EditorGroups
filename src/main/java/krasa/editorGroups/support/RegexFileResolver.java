@@ -21,105 +21,103 @@ import java.util.regex.Matcher;
 
 
 public class RegexFileResolver {
-	private static final Logger LOG = Logger.getInstance(RegexFileResolver.class);
-	private final Project project;
-	protected Set<VirtualFile> links = new HashSet<>();
-	protected ApplicationConfiguration config;
-	                      
-	public RegexFileResolver(Project project) {
-		this.project = project;
-		config = ApplicationConfiguration.state();
-	}
+  private static final Logger LOG = Logger.getInstance(RegexFileResolver.class);
+  private final Project project;
+  protected Set<VirtualFile> links = new HashSet<>();
+  protected ApplicationConfiguration config;
 
-	public List<Link> resolveRegexGroupLinks(@NotNull RegexGroup regexGroup, @Nullable VirtualFile currentFile) {
-		LOG.debug(">resolveRegexGroupLinks");
-		long start = System.currentTimeMillis();
-		RegexGroupModel regexGroupModel = regexGroup.getRegexGroupModel();
-		Matcher referenceMatcher = regexGroup.getReferenceMatcher();
+  public RegexFileResolver(Project project) {
+    this.project = project;
+    config = ApplicationConfiguration.state();
+  }
 
-		if (currentFile != null) {
-			//always include it in case there are to many matches
-			links.add(currentFile);
-		}
+  public List<Link> resolveRegexGroupLinks(@NotNull RegexGroup regexGroup, @Nullable VirtualFile currentFile) {
+    LOG.debug(">resolveRegexGroupLinks");
+    long start = System.currentTimeMillis();
+    RegexGroupModel regexGroupModel = regexGroup.getRegexGroupModel();
+    Matcher referenceMatcher = regexGroup.getReferenceMatcher();
 
-		Matcher groupMatcher = regexGroupModel.getRegexPattern().matcher("");
-		ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
-		List<VirtualFile> folders = regexGroup.getScopes(project);
-		try {
-			for (VirtualFile dir : folders) {
-				if (dir != null) {
-					processFolders2(regexGroup, regexGroupModel, referenceMatcher, groupMatcher, projectFileIndex, dir);
-				}
-			}
-		} catch (TooManyFilesException e) {
-			e.showNotification();
-			LOG.warn("Found too many matching files, skipping. Size=" + links.size() + " " + regexGroup);
-			if (LOG.isDebugEnabled()) {
-				LOG.debug(String.valueOf(links));
-			}
-		}
+    if (currentFile != null) {
+      //always include it in case there are to many matches
+      links.add(currentFile);
+    }
 
-
-		long duration = System.currentTimeMillis() - start;
-		if (duration > 500) {
-			LOG.warn("<resolveRegexGroup " + duration + "ms " + regexGroup + "; links=" + links);
-		} else if (LOG.isDebugEnabled()) {
-			LOG.debug("<resolveRegexGroup " + duration + "ms links=" + links);
-		}
-
-		return Link.fromVirtualFiles(links);
-	}
-
-	private void processFolders2(@NotNull RegexGroup regexGroup, RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher groupMatcher, ProjectFileIndex projectFileIndex, @NotNull VirtualFile folder) {
-		VfsUtilCore.visitChildrenRecursively(folder, new VirtualFileVisitor<Object>() {
-			@NotNull
-			@Override
-			public Result visitFileEx(@NotNull VirtualFile child) {
-				if (child.isDirectory()) {
-					ProgressManager.checkCanceled();
-					if (regexGroupModel.getScope() == RegexGroupModel.Scope.CURRENT_FOLDER) {
-						if (child.equals(regexGroup.getFolder())) {
-							//ok
-						} else {
-							return SKIP_CHILDREN;
-						}
-					} else {
-						if (projectFileIndex.isExcluded(child)) {
-							return SKIP_CHILDREN;
-						}
-					}
-				} else {
-					Matcher matcher = groupMatcher.reset(child.getName());
-					if (matches(regexGroupModel, referenceMatcher, matcher)) {
-						links.add(child);
-						if (links.size() > config.getGroupSizeLimitInt()) {
-							throw new TooManyFilesException();
-						}
-					}
-				}
-				return CONTINUE;
-			}
-		});
+    Matcher groupMatcher = regexGroupModel.getRegexPattern().matcher("");
+    ProjectFileIndex projectFileIndex = ProjectFileIndex.getInstance(project);
+    List<VirtualFile> folders = regexGroup.getScopes(project);
+    try {
+      for (VirtualFile dir : folders) {
+        if (dir != null) {
+          processFolders2(regexGroup, regexGroupModel, referenceMatcher, groupMatcher, projectFileIndex, dir);
+        }
+      }
+    } catch (TooManyFilesException e) {
+      e.showNotification();
+      LOG.warn("Found too many matching files, skipping. Size=" + links.size() + " " + regexGroup);
+      if (LOG.isDebugEnabled()) {
+        LOG.debug(String.valueOf(links));
+      }
+    }
 
 
-	}
+    long duration = System.currentTimeMillis() - start;
+    if (duration > 500) {
+      LOG.warn("<resolveRegexGroup " + duration + "ms " + regexGroup + "; links=" + links);
+    } else if (LOG.isDebugEnabled()) {
+      LOG.debug("<resolveRegexGroup " + duration + "ms links=" + links);
+    }
 
-	private boolean matches(RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher matcher) {
-		if (!matcher.matches()) {
-			return false;
-		}
-		if (referenceMatcher != null) {
-			for (int j = 1; j <= matcher.groupCount(); j++) {
-				if (regexGroupModel.isComparingGroup(j)) {
-					String refGroup = referenceMatcher.group(j);
-					String group = matcher.group(j);
-					if (!refGroup.equals(group)) {
-						return false;
-					}
-				}
-			}
-		}
-		return true;
-	}
+    return Link.fromVirtualFiles(links);
+  }
+
+  private void processFolders2(@NotNull RegexGroup regexGroup, RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher groupMatcher, ProjectFileIndex projectFileIndex, @NotNull VirtualFile folder) {
+    VfsUtilCore.visitChildrenRecursively(folder, new VirtualFileVisitor<>() {
+      @NotNull
+      @Override
+      public Result visitFileEx(@NotNull VirtualFile child) {
+        if (child.isDirectory()) {
+          ProgressManager.checkCanceled();
+          if (regexGroupModel.getScope() == RegexGroupModel.Scope.CURRENT_FOLDER) {
+            if (!child.equals(regexGroup.getFolder())) {
+              return SKIP_CHILDREN;
+            }
+          } else {
+            if (projectFileIndex.isExcluded(child)) {
+              return SKIP_CHILDREN;
+            }
+          }
+        } else {
+          Matcher matcher = groupMatcher.reset(child.getName());
+          if (matches(regexGroupModel, referenceMatcher, matcher)) {
+            links.add(child);
+            if (links.size() > config.getGroupSizeLimitInt()) {
+              throw new TooManyFilesException();
+            }
+          }
+        }
+        return CONTINUE;
+      }
+    });
+
+
+  }
+
+  private boolean matches(RegexGroupModel regexGroupModel, @Nullable Matcher referenceMatcher, Matcher matcher) {
+    if (!matcher.matches()) {
+      return false;
+    }
+    if (referenceMatcher != null) {
+      for (int j = 1; j <= matcher.groupCount(); j++) {
+        if (regexGroupModel.isComparingGroup(j)) {
+          String refGroup = referenceMatcher.group(j);
+          String group = matcher.group(j);
+          if (!refGroup.equals(group)) {
+            return false;
+          }
+        }
+      }
+    }
+    return true;
+  }
 
 }

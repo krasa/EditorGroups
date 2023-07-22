@@ -35,121 +35,121 @@ import java.util.Map;
 
 public class SwitchFileAction extends QuickSwitchSchemeAction implements DumbAware {
 
-	private static final Logger LOG = Logger.getInstance(SwitchFileAction.class);
+  private static final Logger LOG = Logger.getInstance(SwitchFileAction.class);
 
-	protected void showPopup(AnActionEvent e, ListPopup popup) {
-		registerActions((ListPopupImpl) popup);
-		Project project = e.getProject();
-		if (project != null) {
-			InputEvent inputEvent = e.getInputEvent();
-			if (inputEvent instanceof MouseEvent) {
-				Component component = inputEvent.getComponent();
-				if (component instanceof ActionMenuItem) { //from popup menu
-					popup.showInBestPositionFor(e.getDataContext());
-				} else {
-					popup.showUnderneathOf(component);
-				}
-			} else {
-				popup.showCenteredInCurrentWindow(project);
-			}
-		} else {
-			popup.showInBestPositionFor(e.getDataContext());
-		}
-	}
+  protected void showPopup(AnActionEvent e, ListPopup popup) {
+    registerActions((ListPopupImpl) popup);
+    Project project = e.getProject();
+    if (project != null) {
+      InputEvent inputEvent = e.getInputEvent();
+      if (inputEvent instanceof MouseEvent) {
+        Component component = inputEvent.getComponent();
+        if (component instanceof ActionMenuItem) { //from popup menu
+          popup.showInBestPositionFor(e.getDataContext());
+        } else {
+          popup.showUnderneathOf(component);
+        }
+      } else {
+        popup.showCenteredInCurrentWindow(project);
+      }
+    } else {
+      popup.showInBestPositionFor(e.getDataContext());
+    }
+  }
 
-	private void registerActions(ListPopupImpl popup) {
-		popup.registerAction("newTab", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), customAction(popup));
-		popup.registerAction("newWindow", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), customAction(popup));
-		popup.registerAction("verticalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK), customAction(popup));
-		popup.registerAction("horizontalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK), customAction(popup));
-	}
+  private void registerActions(ListPopupImpl popup) {
+    popup.registerAction("newTab", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.CTRL_DOWN_MASK), customAction(popup));
+    popup.registerAction("newWindow", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK), customAction(popup));
+    popup.registerAction("verticalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.ALT_DOWN_MASK), customAction(popup));
+    popup.registerAction("horizontalSplit", KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK | InputEvent.ALT_DOWN_MASK), customAction(popup));
+  }
 
-	@NotNull
-	private AbstractAction customAction(ListPopupImpl popup) {
-		return new AbstractAction() {
-			public void actionPerformed(ActionEvent e) {
-				JList list = popup.getList();
-				PopupFactoryImpl.ActionItem selectedValue = (PopupFactoryImpl.ActionItem) list.getSelectedValue();
-				if (selectedValue != null) {
-					AnAction action1 = selectedValue.getAction();
-					action1.actionPerformed(new AnActionEvent(null, getDataContext(popup), myActionPlace, getTemplatePresentation(), ActionManager.getInstance(), e.getModifiers()));
-					popup.closeOk(null);
-				}
-			}
-		};
-	}
+  @NotNull
+  private AbstractAction customAction(ListPopupImpl popup) {
+    return new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        JList list = popup.getList();
+        PopupFactoryImpl.ActionItem selectedValue = (PopupFactoryImpl.ActionItem) list.getSelectedValue();
+        if (selectedValue != null) {
+          AnAction action1 = selectedValue.getAction();
+          action1.actionPerformed(new AnActionEvent(null, getDataContext(popup), myActionPlace, getTemplatePresentation(), ActionManager.getInstance(), e.getModifiers()));
+          popup.closeOk(null);
+        }
+      }
+    };
+  }
 
-	private DataContext getDataContext(ListPopupImpl popup) {
-		DataContext dataContext = DataManager.getInstance().getDataContext(popup.getOwner());
-		Project project = dataContext.getData(CommonDataKeys.PROJECT);
-		if (project == null) {
-			throw new IllegalStateException("Project is null for " + popup.getOwner());
-		}
-		return dataContext;
-	}
+  private DataContext getDataContext(ListPopupImpl popup) {
+    DataContext dataContext = DataManager.getInstance().getDataContext(popup.getOwner());
+    Project project = dataContext.getData(CommonDataKeys.PROJECT);
+    if (project == null) {
+      throw new IllegalStateException("Project is null for " + popup.getOwner());
+    }
+    return dataContext;
+  }
 
-	@Override
-	protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
-		try {
-			FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
-			EditorGroupPanel panel = null;
-			if (data != null) {
-				panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
-				if (panel != null) {
-					String currentFile = panel.getFile().getPath();
-					EditorGroup group = panel.getDisplayedGroup();
+  @Override
+  protected void fillActions(Project project, @NotNull DefaultActionGroup defaultActionGroup, @NotNull DataContext dataContext) {
+    try {
+      FileEditor data = dataContext.getData(PlatformDataKeys.FILE_EDITOR);
+      EditorGroupPanel panel = null;
+      if (data != null) {
+        panel = data.getUserData(EditorGroupPanel.EDITOR_PANEL);
+        if (panel != null) {
+          String currentFile = panel.getFile().getPath();
+          EditorGroup group = panel.getDisplayedGroup();
 
-					List<Link> links = group.getLinks(project);
-					UniqueTabNameBuilder uniqueTabNameBuilder = new UniqueTabNameBuilder(project);
-					Map<Link, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
+          List<Link> links = group.getLinks(project);
+          UniqueTabNameBuilder uniqueTabNameBuilder = new UniqueTabNameBuilder(project);
+          Map<Link, String> namesByPath = uniqueTabNameBuilder.getNamesByPath(links, null);
 
-					for (Link link : links) {
-						defaultActionGroup.add(newAction(project, panel, currentFile, link, namesByPath.get(link)));
-					}
-				}
-			}
-		} catch (IndexNotReadyException e) {
-			LOG.error("That should not happen", e);
-		}
-	}
+          for (Link link : links) {
+            defaultActionGroup.add(newAction(project, panel, currentFile, link, namesByPath.get(link)));
+          }
+        }
+      }
+    } catch (IndexNotReadyException e) {
+      LOG.error("That should not happen", e);
+    }
+  }
 
-	@NotNull
-	private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, Link link, String text) {
-		OpenFileAction action = new OpenFileAction(link, project, panel, text);
-		if (link.getPath().equals(currentFile)) {
-			action.getTemplatePresentation().setEnabled(false);
-			action.getTemplatePresentation().setText(text + " - current", false);
-			action.getTemplatePresentation().setIcon(null);
-		}
-		return action;
-	}
+  @NotNull
+  private OpenFileAction newAction(Project project, EditorGroupPanel panel, String currentFile, Link link, String text) {
+    OpenFileAction action = new OpenFileAction(link, project, panel, text);
+    if (link.getPath().equals(currentFile)) {
+      action.getTemplatePresentation().setEnabled(false);
+      action.getTemplatePresentation().setText(text + " - current", false);
+      action.getTemplatePresentation().setIcon(null);
+    }
+    return action;
+  }
 
 
-	private static class OpenFileAction extends DumbAwareAction {
-		private final Link link;
-		private final EditorGroupPanel panel;
-		private final VirtualFile virtualFile;
-		private final Project project;
+  private static class OpenFileAction extends DumbAwareAction {
+    private final Link link;
+    private final EditorGroupPanel panel;
+    private final VirtualFile virtualFile;
+    private final Project project;
 
-		public OpenFileAction(Link link, Project project, EditorGroupPanel panel, String text) {
-			super(text, link.getPath(), link.getFileIcon());
-			this.link = link;
-			this.panel = panel;
-			this.virtualFile = link.getVirtualFile();
-			this.project = project;
-			getTemplatePresentation().setEnabled(virtualFile != null && virtualFile.exists());
-		}
+    public OpenFileAction(Link link, Project project, EditorGroupPanel panel, String text) {
+      super(text, link.getPath(), link.getFileIcon());
+      this.link = link;
+      this.panel = panel;
+      this.virtualFile = link.getVirtualFile();
+      this.project = project;
+      getTemplatePresentation().setEnabled(virtualFile != null && virtualFile.exists());
+    }
 
-		@Override
-		public void actionPerformed(AnActionEvent e) {
-			if (virtualFile != null) {
-				boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_MASK);
-				boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_MASK);
-				EditorGroupManager instance = EditorGroupManager.getInstance(project);
-				instance.open(panel, virtualFile, null, window, tab, Splitters.from(e));
-			} else {
-				Notifications.warning("File not found " + link, null);
-			}
-		}
-	}
+    @Override
+    public void actionPerformed(@NotNull AnActionEvent e) {
+      if (virtualFile != null) {
+        boolean tab = BitUtil.isSet(e.getModifiers(), InputEvent.CTRL_DOWN_MASK);
+        boolean window = BitUtil.isSet(e.getModifiers(), InputEvent.SHIFT_DOWN_MASK);
+        EditorGroupManager instance = EditorGroupManager.getInstance(project);
+        instance.open(panel, virtualFile, null, window, tab, Splitters.from(e));
+      } else {
+        Notifications.warning("File not found " + link, null);
+      }
+    }
+  }
 }

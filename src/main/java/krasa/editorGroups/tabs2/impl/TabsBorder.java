@@ -9,69 +9,63 @@ import java.awt.*;
 
 public class TabsBorder {
 
-	private Insets myBorderSize;
-	private int myTabBorderSize;
+  private Insets myBorderSize;
+  private int myTabBorderSize;
 
-	private final krasa.editorGroups.tabs2.impl.JBTabsImpl myTabs;
+  private final krasa.editorGroups.tabs2.impl.JBTabsImpl myTabs;
 
-	private JBTabsPosition myPosition;
+  private JBTabsPosition myPosition;
 
-	private Insets myEffectiveBorder;
+  private Insets myEffectiveBorder;
 
-	public TabsBorder(krasa.editorGroups.tabs2.impl.JBTabsImpl tabs) {
-		myTabs = tabs;
-		myBorderSize = new Insets(krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1));
-		myTabBorderSize = krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1);
-	}
+  public TabsBorder(krasa.editorGroups.tabs2.impl.JBTabsImpl tabs) {
+    myTabs = tabs;
+    myBorderSize = JBUI.insets(JBTabsImpl.getBorder(-1), JBTabsImpl.getBorder(-1), JBTabsImpl.getBorder(-1), JBTabsImpl.getBorder(-1));
+    myTabBorderSize = krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(-1);
+  }
 
-	public JBTabsPresentation setPaintBorder(int top, int left, int right, int bottom) {
-		final Insets newBorder = new Insets(
-			krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(top), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(left), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(bottom), krasa.editorGroups.tabs2.impl.JBTabsImpl.getBorder(right));
-		if (newBorder.equals(myBorderSize)) return myTabs;
+  public JBTabsPresentation setPaintBorder(int top, int left, int right, int bottom) {
+    final Insets newBorder = JBUI.insets(JBTabsImpl.getBorder(top), JBTabsImpl.getBorder(left), JBTabsImpl.getBorder(bottom), JBTabsImpl.getBorder(right));
+    if (newBorder.equals(myBorderSize)) return myTabs;
 
-		myBorderSize = newBorder;
+    myBorderSize = newBorder;
 
-		myEffectiveBorder = null;
+    myEffectiveBorder = null;
 
-		myTabs.relayout(true, false);
+    myTabs.relayout(true, false);
 
-		return myTabs;
-	}
+    return myTabs;
+  }
 
-	public JBTabsPresentation setTabSidePaintBorder(int size) {
-		final int newSize = JBTabsImpl.getBorder(size);
-		if (myTabBorderSize == newSize) return myTabs;
+  public JBTabsPresentation setTabSidePaintBorder(int size) {
+    final int newSize = JBTabsImpl.getBorder(size);
+    if (myTabBorderSize == newSize) return myTabs;
 
-		myTabBorderSize = newSize;
-		myEffectiveBorder = null;
+    myTabBorderSize = newSize;
+    myEffectiveBorder = null;
 
-		myTabs.revalidateAndRepaint(false);
+    myTabs.revalidateAndRepaint(false);
 
-		return myTabs;
-	}
+    return myTabs;
+  }
 
-	public int getTabBorderSize() {
-		return myTabBorderSize;
-	}
+  public int getTabBorderSize() {
+    return myTabBorderSize;
+  }
 
-	public Insets getEffectiveBorder() {
-		if (myEffectiveBorder != null && myTabs.getTabsPosition() == myPosition)
-			return (Insets) myEffectiveBorder.clone();
+  public Insets getEffectiveBorder() {
+    if (myEffectiveBorder != null && myTabs.getTabsPosition() == myPosition)
+      return (Insets) myEffectiveBorder.clone();
 
-		myPosition = myTabs.getTabsPosition();
+    myPosition = myTabs.getTabsPosition();
 
-		if (myTabs.isEditorTabs()) {
-			myEffectiveBorder = JBUI.emptyInsets();
-		} else {
-			myEffectiveBorder = new Insets(
-				myPosition == JBTabsPosition.top ? myTabBorderSize : myBorderSize.top,
-				myPosition == JBTabsPosition.left ? myTabBorderSize : myBorderSize.left,
-				myPosition == JBTabsPosition.bottom ? myTabBorderSize : myBorderSize.bottom,
-				myPosition == JBTabsPosition.right ? myTabBorderSize : myBorderSize.right
-			);
-		}
+    if (myTabs.isEditorTabs()) {
+      myEffectiveBorder = JBUI.emptyInsets();
+    } else {
+      myEffectiveBorder = JBUI.insets(myPosition == JBTabsPosition.top ? myTabBorderSize : myBorderSize.top, myPosition == JBTabsPosition.left ? myTabBorderSize : myBorderSize.left, myPosition == JBTabsPosition.bottom ? myTabBorderSize : myBorderSize.bottom, myPosition == JBTabsPosition.right ? myTabBorderSize : myBorderSize.right);
+    }
 
 
-		return (Insets) myEffectiveBorder.clone();
-	}
+    return (Insets) myEffectiveBorder.clone();
+  }
 }

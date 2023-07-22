@@ -1,16 +1,16 @@
 plugins {
     id("java")
-    id("org.jetbrains.intellij") version "1.13.3"
-    id("org.jetbrains.kotlin.jvm") version "1.8.20"
+    id("org.jetbrains.intellij") version "1.14.1"
+    id("org.jetbrains.kotlin.jvm") version "1.8.21"
 }
 
 group = "EditorGroups"
-version = "0.47"
+version = "1.0"
 
 tasks {
     patchPluginXml {
         sinceBuild.set("231")
-        untilBuild.set("231.*")
+        untilBuild.set("241.*")
         changeNotes.set(
             buildString {
                 append("- Icons fix").append("<br>")
@@ -54,8 +54,8 @@ repositories {
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    version.set("2023.1")
-    type.set("IC") // Target IDE Platform
+    version.set("LATEST-EAP-SNAPSHOT")
+    type.set("IU") // Target IDE Platform
 
     plugins.set(listOf("java"))
 }

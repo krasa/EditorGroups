@@ -16,91 +16,92 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.List;
 
+@SuppressWarnings("UnusedReturnValue")
 public interface JBTabs {
 
-	@NotNull
-	TabInfo addTab(TabInfo info, int index);
+  @NotNull
+  TabInfo addTab(TabInfo info, int index);
 
-	@NotNull
-	TabInfo addTab(TabInfo info);
+  @NotNull
+  TabInfo addTab(TabInfo info);
 
-	@NotNull
-	ActionCallback removeTab(@Nullable TabInfo info);
+  @NotNull
+  ActionCallback removeTab(@Nullable TabInfo info);
 
-	void removeAllTabs();
+  void removeAllTabs();
 
-	@NotNull
-	ActionCallback select(@NotNull TabInfo info, boolean requestFocus);
+  @NotNull
+  ActionCallback select(@NotNull TabInfo info, boolean requestFocus);
 
-	@Nullable
-	TabInfo getSelectedInfo();
+  @Nullable
+  TabInfo getSelectedInfo();
 
-	@NotNull
-	TabInfo getTabAt(int tabIndex);
+  @NotNull
+  TabInfo getTabAt(int tabIndex);
 
-	int getTabCount();
+  int getTabCount();
 
-	@NotNull
-	JBTabsPresentation getPresentation();
+  @NotNull
+  JBTabsPresentation getPresentation();
 
-	@Nullable
-	DataProvider getDataProvider();
+  @Nullable
+  DataProvider getDataProvider();
 
-	JBTabs setDataProvider(@NotNull DataProvider dataProvider);
+  JBTabs setDataProvider(@NotNull DataProvider dataProvider);
 
-	@NotNull
-	List<TabInfo> getTabs();
+  @NotNull
+  List<TabInfo> getTabs();
 
-	@Nullable
-	TabInfo getTargetInfo();
+  @Nullable
+  TabInfo getTargetInfo();
 
-	@NotNull
-	JBTabs addTabMouseListener(@NotNull MouseListener listener);
+  @NotNull
+  JBTabs addTabMouseListener(@NotNull MouseListener listener);
 
-	JBTabs addListener(@NotNull TabsListener listener);
+  JBTabs addListener(@NotNull TabsListener listener);
 
-	JBTabs setSelectionChangeHandler(SelectionChangeHandler handler);
+  JBTabs setSelectionChangeHandler(SelectionChangeHandler handler);
 
-	@NotNull
-	JComponent getComponent();
+  @NotNull
+  JComponent getComponent();
 
-	@Nullable
-	TabInfo findInfo(MouseEvent event);
+  @Nullable
+  TabInfo findInfo(MouseEvent event);
 
-	@Nullable
-	TabInfo findInfo(Object object);
+  @Nullable
+  TabInfo findInfo(Object object);
 
-	@Nullable
-	TabInfo findInfo(Component component);
+  @Nullable
+  TabInfo findInfo(Component component);
 
-	int getIndexOf(@Nullable final TabInfo tabInfo);
+  int getIndexOf(@Nullable final TabInfo tabInfo);
 
-	void requestFocus();
+  void requestFocus();
 
-	JBTabs setNavigationActionBinding(String prevActiobId, String nextActionId);
+  JBTabs setNavigationActionBinding(String prevActiobId, String nextActionId);
 
-	JBTabs setNavigationActionsEnabled(boolean enabled);
+  JBTabs setNavigationActionsEnabled(boolean enabled);
 
-	boolean isDisposed();
+  boolean isDisposed();
 
-	@NotNull
-	JBTabs setPopupGroup(@NotNull ActionGroup popupGroup, @NotNull String place, boolean addNavigationGroup);
+  @NotNull
+  JBTabs setPopupGroup(@NotNull ActionGroup popupGroup, @NotNull String place, boolean addNavigationGroup);
 
-	@NotNull
-	JBTabs setPopupGroup(@NotNull Getter<? extends ActionGroup> popupGroup,
-						 @NotNull String place,
-						 boolean addNavigationGroup);
+  @NotNull
+  JBTabs setPopupGroup(@NotNull Getter<? extends ActionGroup> popupGroup,
+                       @NotNull String place,
+                       boolean addNavigationGroup);
 
-	void resetDropOver(TabInfo tabInfo);
+  void resetDropOver(TabInfo tabInfo);
 
-	Image startDropOver(TabInfo tabInfo, RelativePoint point);
+  Image startDropOver(TabInfo tabInfo, RelativePoint point);
 
-	void processDropOver(TabInfo over, RelativePoint point);
+  void processDropOver(TabInfo over, RelativePoint point);
 
-	Component getTabLabel(TabInfo tabInfo);
+  Component getTabLabel(TabInfo tabInfo);
 
-	interface SelectionChangeHandler {
-		@NotNull
-		ActionCallback execute(final TabInfo info, final boolean requestFocus, @NotNull ActiveRunnable doChangeSelection);
-	}
+  interface SelectionChangeHandler {
+    @NotNull
+    ActionCallback execute(final TabInfo info, final boolean requestFocus, @NotNull ActiveRunnable doChangeSelection);
+  }
 }

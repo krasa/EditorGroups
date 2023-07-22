@@ -10,43 +10,45 @@ import com.intellij.ui.PopupHandler;
 import krasa.editorGroups.EditorGroupManager;
 import krasa.editorGroups.EditorGroupPanel;
 import krasa.editorGroups.icons.MyIcons;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Objects;
 
 public class RefreshAction extends EditorGroupsAction implements CustomComponentAction {
-	@Override
-	public void actionPerformed(AnActionEvent anActionEvent) {
-		Document doc = getDocument(anActionEvent);
-		if (doc != null) {
-			FileDocumentManager.getInstance().saveDocument(doc);
-		}
+  @Override
+  public void actionPerformed(@NotNull AnActionEvent anActionEvent) {
+    Document doc = getDocument(anActionEvent);
+    if (doc != null) {
+      FileDocumentManager.getInstance().saveDocument(doc);
+    }
 
-		EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
-		if (panel != null) {
-			panel._refresh(true, null);
-		}
+    EditorGroupPanel panel = getEditorGroupPanel(anActionEvent);
+    if (panel != null) {
+      panel._refresh(true, null);
+    }
 
 
-		EditorGroupManager editorGroupManager = EditorGroupManager.getInstance(anActionEvent.getProject());
-		editorGroupManager.resetSwitching();
-	}
+    EditorGroupManager editorGroupManager = EditorGroupManager.getInstance(Objects.requireNonNull(anActionEvent.getProject()));
+    editorGroupManager.resetSwitching();
+  }
 
-	@Override
-	public JComponent createCustomComponent(Presentation presentation) {
-		ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		refresh.addMouseListener(new PopupHandler() {
-			public void invokePopup(Component comp, int x, int y) {
-				PopupMenu.popupInvoked(comp, x, y);
-			}
-		});
-		presentation.setIcon(MyIcons.refresh);
+  @Override
+  public @NotNull JComponent createCustomComponent(@NotNull Presentation presentation) {
+    ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
+    refresh.addMouseListener(new PopupHandler() {
+      public void invokePopup(Component comp, int x, int y) {
+        PopupMenu.popupInvoked(comp, x, y);
+      }
+    });
+    presentation.setIcon(MyIcons.refresh);
 
-		return refresh;
-	}
+    return refresh;
+  }
 
-	private static Document getDocument(AnActionEvent e) {
-		Editor editor = e.getData(CommonDataKeys.EDITOR);
-		return editor != null ? editor.getDocument() : null;
-	}
+  private static Document getDocument(AnActionEvent e) {
+    Editor editor = e.getData(CommonDataKeys.EDITOR);
+    return editor != null ? editor.getDocument() : null;
+  }
 }

@@ -32,9 +32,9 @@ public class PanelRefresher {
 	private static final Logger LOG = Logger.getInstance(PanelRefresher.class);
 
 	private final Project project;
-	private AtomicBoolean cacheReady = new AtomicBoolean();
+	private final AtomicBoolean cacheReady = new AtomicBoolean();
 	private final ExecutorService ourThreadExecutorsService;
-	private IndexCache cache;
+	private final IndexCache cache;
 	private FavoritesListener favoritesListener;
 
 	public PanelRefresher(Project project) {

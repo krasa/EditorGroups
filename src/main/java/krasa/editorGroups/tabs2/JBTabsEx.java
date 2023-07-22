@@ -13,28 +13,28 @@ import java.util.Comparator;
  * @author yole
  */
 public interface JBTabsEx extends JBTabs {
-	public static final DataKey<JBTabsEx> NAVIGATION_ACTIONS_KEY = DataKey.create("JBTabs");
+  DataKey<JBTabsEx> NAVIGATION_ACTIONS_KEY = DataKey.create("JBTabs");
 
-	boolean isEditorTabs();
+  boolean isEditorTabs();
 
-	void updateTabActions(boolean validateNow);
+  void updateTabActions(boolean validateNow);
 
-	boolean canShowMorePopup();
+  boolean canShowMorePopup();
 
-	void showMorePopup(@Nullable MouseEvent e);
+  void showMorePopup(@Nullable MouseEvent e);
 
-	TabInfo addTabSilently(TabInfo info, int index);
+  TabInfo addTabSilently(TabInfo info, int index);
 
-	@NotNull
-	ActionCallback removeTab(TabInfo info, @Nullable TabInfo forcedSelectionTransfer, boolean transferFocus);
+  @NotNull
+  ActionCallback removeTab(TabInfo info, @Nullable TabInfo forcedSelectionTransfer, boolean transferFocus);
 
-	@Nullable
-	TabInfo getToSelectOnRemoveOf(TabInfo info);
+  @Nullable
+  TabInfo getToSelectOnRemoveOf(TabInfo info);
 
-	void sortTabs(Comparator<? super TabInfo> comparator);
+  void sortTabs(Comparator<? super TabInfo> comparator);
 
-	int getDropInfoIndex();
+  int getDropInfoIndex();
 
-	boolean isEmptyVisible();
+  boolean isEmptyVisible();
 
 }

@@ -12,9 +12,9 @@ import java.util.List;
 import java.util.Objects;
 
 public class BookmarkGroup extends EditorGroup {
-	public static final String ID = "BOOKMARKS";
-	private List<Link> links;
-	private final String name = "Bookmarks";
+  public static final String ID = "BOOKMARKS";
+  private final List<Link> links;
+  private final String name = "Bookmarks";
 
 	public BookmarkGroup(List<Bookmark> validBookmarks) {
 		links = new ArrayList<>(validBookmarks.size());
@@ -27,65 +27,65 @@ public class BookmarkGroup extends EditorGroup {
 	}
 
 
-	@NotNull
-	@Override
-	public String getId() {
-		return ID;
-	}
+  @NotNull
+  @Override
+  public String getId() {
+    return ID;
+  }
 
-	@Override
-	public String getTitle() {
-		return name;
-	}
+  @Override
+  public String getTitle() {
+    return name;
+  }
 
 
-	@Override
-	public String switchTitle(Project project) {
-		return getTitle();
-	}
+  @Override
+  public String switchTitle(Project project) {
+    return getTitle();
+  }
 
-	public String getName() {
-		return name;
-	}
+  public String getName() {
+    return name;
+  }
 
-	@Override
-	public boolean isValid() {
-		return true;
-	}
+  @Override
+  public boolean isValid() {
+    return true;
+  }
 
-	@Override
-	public Icon icon() {
-		return AllIcons.Actions.Checked_selected;
-	}
+  @Override
+  public Icon icon() {
+    return AllIcons.Actions.Checked_selected;
+  }
 
-	@Override
-	public void invalidate() {
+  @Override
+  public void invalidate() {
 
-	}
+  }
 
-	@Override
-	public int size(Project project) {
-		return links.size();
-	}
+  @Override
+  public int size(Project project) {
+    return links.size();
+  }
 
-	@Override
-	public List<Link> getLinks(Project project) {
-		return links;
-	}
+  @Override
+  public List<Link> getLinks(Project project) {
+    return links;
+  }
 
-	@Override
-	public boolean isOwner(String ownerPath) {
-		return false;
-	}
+  @Override
+  public boolean isOwner(String ownerPath) {
+    return false;
+  }
 
-	@Override
-	public boolean equals(Object obj) {
-		return (obj instanceof BookmarkGroup) && Objects.equals(((BookmarkGroup) obj).getId(), this.getId());
-	}
+  @Override
+  public boolean equals(Object obj) {
+    return (obj instanceof BookmarkGroup) && Objects.equals(((BookmarkGroup) obj).getId(), this.getId());
+  }
 
-	@Override
-	public String toString() {
-		return "BookmarksGroup{" +
-			"links=" + links + '}';
-	}
+  @Override
+  public String toString() {
+    return "BookmarksGroup{" +
+      "links=" + links + '}';
+  }
 }

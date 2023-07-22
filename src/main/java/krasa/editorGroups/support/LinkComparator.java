@@ -6,18 +6,16 @@ import krasa.editorGroups.model.Link;
 import java.util.Comparator;
 
 public class LinkComparator implements Comparator<Link> {
-	public static final LinkComparator INSTANCE = new LinkComparator();
+  public static final LinkComparator INSTANCE = new LinkComparator();
 
-	protected LinkComparator() {
-	}
+  protected LinkComparator() {
+  }
 
-	@Override
-	public int compare(Link link1, Link link2) {
-		String s1 = link1.getPath();
-		String s2 = link2.getPath();
-		if (s1 == null) return s2 == null ? 0 : -1;
-		if (s2 == null) return +1;
+  @Override
+  public int compare(Link link1, Link link2) {
+    String s1 = link1.getPath();
+    String s2 = link2.getPath();
 
-		return FileNameComparator.INSTANCE.compare(s1, s2);
-	}
+    return FileNameComparator.INSTANCE.compare(s1, s2);
+  }
 }

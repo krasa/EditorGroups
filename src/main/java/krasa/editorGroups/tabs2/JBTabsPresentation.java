@@ -9,75 +9,75 @@ import java.awt.*;
 
 public interface JBTabsPresentation {
 
-	boolean isHideTabs();
+  boolean isHideTabs();
 
-	void setHideTabs(boolean hideTabs);
+  void setHideTabs(boolean hideTabs);
 
-	/**
-	 * @deprecated You should implement {@link JBTabsBorder} abstract class
-	 */
-	@Deprecated
-	JBTabsPresentation setPaintBorder(int top, int left, int right, int bottom);
+  /**
+   * @deprecated You should implement {@link JBTabsBorder} abstract class
+   */
+  @Deprecated
+  JBTabsPresentation setPaintBorder(int top, int left, int right, int bottom);
 
-	/**
-	 * @deprecated You should implement {@link JBTabsBorder} abstract class
-	 */
-	@Deprecated
-	JBTabsPresentation setTabSidePaintBorder(int size);
+  /**
+   * @deprecated You should implement {@link JBTabsBorder} abstract class
+   */
+  @Deprecated
+  JBTabsPresentation setTabSidePaintBorder(int size);
 
-	JBTabsPresentation setPaintFocus(boolean paintFocus);
+  JBTabsPresentation setPaintFocus(boolean paintFocus);
 
-	JBTabsPresentation setStealthTabMode(boolean stealthTabMode);
+  JBTabsPresentation setStealthTabMode(boolean stealthTabMode);
 
-	JBTabsPresentation setSideComponentVertical(boolean vertical);
+  JBTabsPresentation setSideComponentVertical(boolean vertical);
 
-	JBTabsPresentation setSideComponentOnTabs(boolean onTabs);
+  JBTabsPresentation setSideComponentOnTabs(boolean onTabs);
 
-	JBTabsPresentation setSideComponentBefore(boolean before);
+  JBTabsPresentation setSideComponentBefore(boolean before);
 
-	JBTabsPresentation setSingleRow(boolean singleRow);
+  JBTabsPresentation setSingleRow(boolean singleRow);
 
-	boolean isSingleRow();
+  boolean isSingleRow();
 
-	JBTabsPresentation setUiDecorator(@Nullable UiDecorator decorator);
+  JBTabsPresentation setUiDecorator(@Nullable UiDecorator decorator);
 
-	JBTabsPresentation setRequestFocusOnLastFocusedComponent(boolean request);
+  JBTabsPresentation setRequestFocusOnLastFocusedComponent(boolean request);
 
-	void setPaintBlocked(boolean blocked, final boolean takeSnapshot);
+  void setPaintBlocked(boolean blocked, final boolean takeSnapshot);
 
-	JBTabsPresentation setInnerInsets(Insets innerInsets);
+  JBTabsPresentation setInnerInsets(Insets innerInsets);
 
-	JBTabsPresentation setGhostsAlwaysVisible(boolean visible);
+  JBTabsPresentation setGhostsAlwaysVisible(boolean visible);
 
-	JBTabsPresentation setFocusCycle(final boolean root);
+  JBTabsPresentation setFocusCycle(final boolean root);
 
-	@NotNull
-	JBTabsPresentation setToDrawBorderIfTabsHidden(boolean draw);
+  @NotNull
+  JBTabsPresentation setToDrawBorderIfTabsHidden(boolean draw);
 
-	@NotNull
-	JBTabs getJBTabs();
+  @NotNull
+  JBTabs getJBTabs();
 
-	@NotNull
-	JBTabsPresentation setActiveTabFillIn(@Nullable Color color);
+  @NotNull
+  JBTabsPresentation setActiveTabFillIn(@Nullable Color color);
 
-	@NotNull
-	JBTabsPresentation setTabLabelActionsAutoHide(boolean autoHide);
+  @NotNull
+  JBTabsPresentation setTabLabelActionsAutoHide(boolean autoHide);
 
-	@NotNull
-	JBTabsPresentation setTabLabelActionsMouseDeadzone(TimedDeadzone.Length length);
+  @NotNull
+  JBTabsPresentation setTabLabelActionsMouseDeadzone(TimedDeadzone.Length length);
 
-	@NotNull
-	JBTabsPresentation setTabsPosition(krasa.editorGroups.tabs2.JBTabsPosition position);
+  @NotNull
+  JBTabsPresentation setTabsPosition(krasa.editorGroups.tabs2.JBTabsPosition position);
 
-	JBTabsPosition getTabsPosition();
+  JBTabsPosition getTabsPosition();
 
-	JBTabsPresentation setTabDraggingEnabled(boolean enabled);
+  JBTabsPresentation setTabDraggingEnabled(boolean enabled);
 
-	JBTabsPresentation setAlphabeticalMode(boolean alphabeticalMode);
+  JBTabsPresentation setAlphabeticalMode(boolean alphabeticalMode);
 
-	JBTabsPresentation setSupportsCompression(boolean supportsCompression);
+  JBTabsPresentation setSupportsCompression(boolean supportsCompression);
 
-	void setFirstTabOffset(int offset);
+  void setFirstTabOffset(int offset);
 
-	JBTabsPresentation setEmptyText(@Nullable String text);
+  JBTabsPresentation setEmptyText(@Nullable String text);
 }

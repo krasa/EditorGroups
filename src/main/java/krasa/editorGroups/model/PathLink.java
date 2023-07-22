@@ -8,51 +8,51 @@ import org.jetbrains.annotations.Nullable;
 import javax.swing.*;
 
 public class PathLink extends Link {
-	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(PathLink.class);
-	@NotNull
-	private String path;
+  private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(PathLink.class);
+  @NotNull
+  private final String path;
 
-	public PathLink(@NotNull String path) {
-		this.path = FileUtil.toSystemIndependentName(path);
-	}
+  public PathLink(@NotNull String path) {
+    this.path = FileUtil.toSystemIndependentName(path);
+  }
 
-	public PathLink(@NotNull String path, @Nullable Icon icon, @Nullable Integer line) {
-		this.path = FileUtil.toSystemIndependentName(path);
-		this.icon = icon;
-		this.line = line;
-	}
+  public PathLink(@NotNull String path, @Nullable Icon icon, @Nullable Integer line) {
+    this.path = FileUtil.toSystemIndependentName(path);
+    this.icon = icon;
+    this.line = line;
+  }
 
 
-	@NotNull
-	@Override
-	public String getPath() {
-		return path;
-	}
+  @NotNull
+  @Override
+  public String getPath() {
+    return path;
+  }
 
-	@Override
-	public boolean equals(Object o) {
-		if (this == o) return true;
-		if (o == null || getClass() != o.getClass()) return false;
-		if (!super.equals(o)) return false;
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
 
-		PathLink pathLink = (PathLink) o;
+    PathLink pathLink = (PathLink) o;
 
-		return path.equals(pathLink.path);
-	}
+    return path.equals(pathLink.path);
+  }
 
-	@Override
-	public int hashCode() {
-		int result = path.hashCode();
-		result = 31 * result + (line != null ? line.hashCode() : 0);
-		return result;
-	}
+  @Override
+  public int hashCode() {
+    int result = path.hashCode();
+    result = 31 * result + (line != null ? line.hashCode() : 0);
+    return result;
+  }
 
-	@Override
-	public String toString() {
-		return "Link{" +
-			"line=" + line +
-			", path='" + path + '\'' +
-			", icon=" + icon +
-			'}';
-	}
+  @Override
+  public String toString() {
+    return "Link{" +
+      "line=" + line +
+      ", path='" + path + '\'' +
+      ", icon=" + icon +
+      '}';
+  }
 }

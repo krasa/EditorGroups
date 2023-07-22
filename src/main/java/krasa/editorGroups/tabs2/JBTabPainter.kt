@@ -12,38 +12,41 @@ import java.awt.Point
 import java.awt.Rectangle
 
 interface JBTabPainter {
-    companion object {
-        @JvmStatic
-        val DEFAULT: JBTabPainter = JBDefaultTabPainter()
-        @JvmStatic
-        val EDITOR = JBEditorTabPainter()
-        @JvmStatic
-        val TOOL_WINDOW: JBTabPainter = ToolWindowTabPainter()
-        @JvmStatic
-        val DEBUGGER: JBTabPainter = JBDefaultTabPainter(DebuggerTabTheme())
-    }
+  companion object {
+    @JvmStatic
+    val DEFAULT: JBTabPainter = JBDefaultTabPainter()
 
-    fun getTabTheme(): TabTheme
+    @JvmStatic
+    val EDITOR = JBEditorTabPainter()
 
-    fun getBackgroundColor(): Color
+    @JvmStatic
+    val TOOL_WINDOW: JBTabPainter = ToolWindowTabPainter()
 
-    fun paintBorderLine(g: Graphics2D, thickness: Int, from: Point, to: Point)
+    @JvmStatic
+    val DEBUGGER: JBTabPainter = JBDefaultTabPainter(DebuggerTabTheme())
+  }
 
-    fun fillBackground(g: Graphics2D, rect: Rectangle)
+  fun getTabTheme(): TabTheme
 
-    fun paintTab(position: JBTabsPosition,
-                 g: Graphics2D,
-                 bounds: Rectangle,
-                 borderThickness: Int,
-                 tabColor: Color?,
-                 hovered: Boolean)
+  fun getBackgroundColor(): Color
 
-    fun paintSelectedTab(position: JBTabsPosition,
-                         g: Graphics2D,
-                         rect: Rectangle,
-                         borderThickness: Int,
-                         tabColor: Color?,
-                         active: Boolean,
-                         hovered: Boolean,
-                         singleTab: Boolean)
+  fun paintBorderLine(g: Graphics2D, thickness: Int, from: Point, to: Point)
+
+  fun fillBackground(g: Graphics2D, rect: Rectangle)
+
+  fun paintTab(position: JBTabsPosition,
+               g: Graphics2D,
+               bounds: Rectangle,
+               borderThickness: Int,
+               tabColor: Color?,
+               hovered: Boolean)
+
+  fun paintSelectedTab(position: JBTabsPosition,
+                       g: Graphics2D,
+                       rect: Rectangle,
+                       borderThickness: Int,
+                       tabColor: Color?,
+                       active: Boolean,
+                       hovered: Boolean,
+                       singleTab: Boolean)
 }

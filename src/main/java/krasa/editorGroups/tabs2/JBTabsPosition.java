@@ -16,5 +16,5 @@
 package krasa.editorGroups.tabs2;
 
 public enum JBTabsPosition {
-	top, left, bottom, right
+  top, left, bottom, right
 }

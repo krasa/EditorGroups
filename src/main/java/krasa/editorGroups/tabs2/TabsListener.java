@@ -4,22 +4,22 @@ package krasa.editorGroups.tabs2;
 import org.jetbrains.annotations.NotNull;
 
 public interface TabsListener {
-	default void selectionChanged(krasa.editorGroups.tabs2.TabInfo oldSelection, krasa.editorGroups.tabs2.TabInfo newSelection) {
-	}
+  default void selectionChanged(TabInfo oldSelection, TabInfo newSelection) {
+  }
 
-	default void beforeSelectionChanged(krasa.editorGroups.tabs2.TabInfo oldSelection, krasa.editorGroups.tabs2.TabInfo newSelection) {
-	}
+  default void beforeSelectionChanged(TabInfo oldSelection, TabInfo newSelection) {
+  }
 
-	default void tabRemoved(@NotNull TabInfo tabToRemove) {
-	}
+  default void tabRemoved(@NotNull TabInfo tabToRemove) {
+  }
 
-	default void tabsMoved() {
-	}
+  default void tabsMoved() {
+  }
 
-	/**
-	 * @deprecated use {@link TabsListener} directly
-	 */
-	@Deprecated
-	class Adapter implements TabsListener {
-	}
+  /**
+   * @deprecated use {@link TabsListener} directly
+   */
+  @Deprecated
+  class Adapter implements TabsListener {
+  }
 }

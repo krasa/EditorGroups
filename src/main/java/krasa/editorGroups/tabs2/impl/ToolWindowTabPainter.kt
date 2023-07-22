@@ -8,33 +8,33 @@ import java.awt.Graphics2D
 import java.awt.Rectangle
 
 class ToolWindowTabPainter : JBDefaultTabPainter(ToolWindowTabTheme()) {
-    override fun paintTab(position: JBTabsPosition,
-                          g: Graphics2D,
-                          rect: Rectangle,
-                          borderThickness: Int,
-                          tabColor: Color?,
-                          hovered: Boolean) {
-        rect.y += borderThickness
-        rect.height -= borderThickness
+  override fun paintTab(position: JBTabsPosition,
+                        g: Graphics2D,
+                        rect: Rectangle,
+                        borderThickness: Int,
+                        tabColor: Color?,
+                        hovered: Boolean) {
+    rect.y += borderThickness
+    rect.height -= borderThickness
 
-        if (position == JBTabsPosition.top) {
-            rect.height -= borderThickness
-        }
-
-        super.paintTab(position, g, rect, borderThickness, tabColor, hovered)
+    if (position == JBTabsPosition.top) {
+      rect.height -= borderThickness
     }
 
-    override fun paintSelectedTab(position: JBTabsPosition,
-                                  g: Graphics2D,
-                                  rect: Rectangle,
-                                  borderThickness: Int,
-                                  tabColor: Color?,
-                                  active: Boolean,
-                                  hovered: Boolean,
-                                  singleTab: Boolean) {
-        rect.y += borderThickness
-        rect.height -= borderThickness
+    super.paintTab(position, g, rect, borderThickness, tabColor, hovered)
+  }
 
-        super.paintSelectedTab(position, g, rect, borderThickness, tabColor, active, hovered, singleTab)
-    }
+  override fun paintSelectedTab(position: JBTabsPosition,
+                                g: Graphics2D,
+                                rect: Rectangle,
+                                borderThickness: Int,
+                                tabColor: Color?,
+                                active: Boolean,
+                                hovered: Boolean,
+                                singleTab: Boolean) {
+    rect.y += borderThickness
+    rect.height -= borderThickness
+
+    super.paintSelectedTab(position, g, rect, borderThickness, tabColor, active, hovered, singleTab)
+  }
 }

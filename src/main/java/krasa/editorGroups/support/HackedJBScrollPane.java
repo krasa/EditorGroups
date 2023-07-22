@@ -11,44 +11,43 @@ import java.awt.event.MouseWheelListener;
 import java.lang.reflect.Field;
 
 public class HackedJBScrollPane extends JBScrollPane {
-	private static final Logger LOG = Logger.getInstance(JBScrollPane.class);
+  private static final Logger LOG = Logger.getInstance(JBScrollPane.class);
 
-	public HackedJBScrollPane(EditorGroupPanel panel) {
-		super(panel);
-	}
+  public HackedJBScrollPane(EditorGroupPanel panel) {
+    super(panel);
+  }
 
-	@Override
-	public void setUI(ScrollPaneUI ui) {
-		super.setUI(ui);
-		if (ui instanceof BasicScrollPaneUI) {
-			try {
-				Field field = BasicScrollPaneUI.class.getDeclaredField("mouseScrollListener");
-				field.setAccessible(true);
-				Object value = field.get(ui);
-				if (value instanceof MouseWheelListener) {
-					MouseWheelListener oldListener = (MouseWheelListener) value;
-					MouseWheelListener newListener = event -> {
-						if (isScrollEvent(event)) {
-							try {
-								//WE HAVE THE BEST HACKS !!!
-								Field modifiers = InputEvent.class.getDeclaredField("modifiers");
-								modifiers.setAccessible(true);
-								modifiers.setInt(event, modifiers.getModifiers() | InputEvent.SHIFT_MASK);
-							} catch (Exception e) {
-								LOG.error(e);
-							}
+  @Override
+  public void setUI(ScrollPaneUI ui) {
+    super.setUI(ui);
+    if (ui instanceof BasicScrollPaneUI) {
+      try {
+        Field field = BasicScrollPaneUI.class.getDeclaredField("mouseScrollListener");
+        field.setAccessible(true);
+        Object value = field.get(ui);
+        if (value instanceof MouseWheelListener oldListener) {
+          MouseWheelListener newListener = event -> {
+            if (isScrollEvent(event)) {
+              try {
+                //WE HAVE THE BEST HACKS !!!
+                Field modifiers = InputEvent.class.getDeclaredField("modifiers");
+                modifiers.setAccessible(true);
+                modifiers.setInt(event, modifiers.getModifiers() | InputEvent.SHIFT_DOWN_MASK);
+              } catch (Exception e) {
+                LOG.error(e);
+              }
 
-							oldListener.mouseWheelMoved(event);
-						}
-					};
-					field.set(ui, newListener);
-					// replace listener if field updated successfully
-					removeMouseWheelListener(oldListener);
-					addMouseWheelListener(newListener);
-				}
-			} catch (Exception exception) {
-				LOG.warn(exception);
-			}
-		}
-	}
+              oldListener.mouseWheelMoved(event);
+            }
+          };
+          field.set(ui, newListener);
+          // replace listener if field updated successfully
+          removeMouseWheelListener(oldListener);
+          addMouseWheelListener(newListener);
+        }
+      } catch (Exception exception) {
+        LOG.warn(exception);
+      }
+    }
+  }
 }

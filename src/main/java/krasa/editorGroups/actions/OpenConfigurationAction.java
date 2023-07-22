@@ -10,21 +10,22 @@ import com.intellij.openapi.options.ShowSettingsUtil;
 import com.intellij.openapi.project.DumbAwareAction;
 import krasa.editorGroups.MyConfigurable;
 import krasa.editorGroups.icons.MyIcons;
+import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
 public class OpenConfigurationAction extends DumbAwareAction implements CustomComponentAction {
-	@Override
-	public void actionPerformed(AnActionEvent e) {
-		MyConfigurable instance = new MyConfigurable();
-		ShowSettingsUtil.getInstance().editConfigurable(e.getProject(), "EditorGroupsSettings", instance, true);
-	}
+  @Override
+  public void actionPerformed(AnActionEvent e) {
+    MyConfigurable instance = new MyConfigurable();
+    ShowSettingsUtil.getInstance().editConfigurable(e.getProject(), "EditorGroupsSettings", instance, true);
+  }
 
-	@Override
-	public JComponent createCustomComponent(Presentation presentation) {
-		ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
-		presentation.setIcon(MyIcons.settings);
-		return refresh;
-	}
+  @Override
+  public @NotNull JComponent createCustomComponent(@NotNull Presentation presentation) {
+    ActionButton refresh = new ActionButton(this, presentation, ActionPlaces.UNKNOWN, ActionToolbar.DEFAULT_MINIMUM_BUTTON_SIZE);
+    presentation.setIcon(MyIcons.settings);
+    return refresh;
+  }
 
 }

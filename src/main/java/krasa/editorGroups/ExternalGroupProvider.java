@@ -4,7 +4,6 @@ import com.intellij.ide.bookmarks.Bookmark;
 import com.intellij.ide.bookmarks.BookmarkManager;
 import com.intellij.ide.favoritesTreeView.FavoritesManager;
 import com.intellij.ide.projectView.impl.AbstractUrl;
-import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.roots.ProjectFileIndex;
@@ -21,72 +20,72 @@ import java.util.Collection;
 import java.util.List;
 
 public class ExternalGroupProvider {
-	private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(ExternalGroupProvider.class);
+  private static final Logger LOG = com.intellij.openapi.diagnostic.Logger.getInstance(ExternalGroupProvider.class);
 
-	private FavoritesManager favoritesManager;
-	private final Project project;
-	private final ProjectFileIndex fileIndex;
+  private final FavoritesManager favoritesManager;
+  private final Project project;
+  private final ProjectFileIndex fileIndex;
 
-	public static ExternalGroupProvider getInstance(@NotNull Project project) {
-		return ServiceManager.getService(project, ExternalGroupProvider.class);
-	}
+  public static ExternalGroupProvider getInstance(@NotNull Project project) {
+    return project.getService(ExternalGroupProvider.class);
+  }
 
-	public ExternalGroupProvider(Project project) {
-		this.project = project;
-		this.favoritesManager = FavoritesManager.getInstance(project);
-		this.fileIndex = ProjectFileIndex.getInstance(project);
-	}
+  public ExternalGroupProvider(Project project) {
+    this.project = project;
+    this.favoritesManager = FavoritesManager.getInstance(project);
+    this.fileIndex = ProjectFileIndex.getInstance(project);
+  }
 
-	public Collection<FavoritesGroup> getFavoritesGroups() {
-		List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
+  public Collection<FavoritesGroup> getFavoritesGroups() {
+    List<String> availableFavoritesListNames = favoritesManager.getAvailableFavoritesListNames();
 
-		ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
-		for (String name : availableFavoritesListNames) {
-			List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
-			if (favoritesListRootUrls.isEmpty()) {
-				continue;
+    ArrayList<FavoritesGroup> favoritesGroups = new ArrayList<>();
+    for (String name : availableFavoritesListNames) {
+      List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(name);
+      if (favoritesListRootUrls.isEmpty()) {
+        continue;
 
-			}
-			FavoritesGroup e = new FavoritesGroup(name, favoritesListRootUrls, project, fileIndex);
-			if (e.size(project) > 0) {
-				favoritesGroups.add(e);
-			}
-		}
+      }
+      FavoritesGroup e = new FavoritesGroup(name, favoritesListRootUrls, project, fileIndex);
+      if (e.size(project) > 0) {
+        favoritesGroups.add(e);
+      }
+    }
 
-		return favoritesGroups;
-	}
+    return favoritesGroups;
+  }
 
-	public EditorGroup getFavoritesGroup(String title) {
-		List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(title);
-		if (favoritesListRootUrls.isEmpty()) {
-			return EditorGroup.EMPTY;
-		}
+  public EditorGroup getFavoritesGroup(String title) {
+    List<TreeItem<Pair<AbstractUrl, String>>> favoritesListRootUrls = favoritesManager.getFavoritesListRootUrls(title);
+    if (favoritesListRootUrls.isEmpty()) {
+      return EditorGroup.EMPTY;
+    }
 
-		return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
-	}
+    return new FavoritesGroup(title, favoritesListRootUrls, project, fileIndex);
+  }
 
-	public List<EditorGroup> findGroups(VirtualFile currentFile) {
-		List<EditorGroup> favoritesGroups = new ArrayList<>();
-		long start = System.currentTimeMillis();
+  public List<EditorGroup> findGroups(VirtualFile currentFile) {
+    List<EditorGroup> favoritesGroups = new ArrayList<>();
+    long start = System.currentTimeMillis();
 
-		for (FavoritesGroup group : getFavoritesGroups()) {
-			if (group.containsLink(project, currentFile)) {
-				favoritesGroups.add(group);
-			}
-		}
-
-
-		if (LOG.isDebugEnabled()) {
-			LOG.debug("findGroups " + (System.currentTimeMillis() - start) + "ms");
-		}
+    for (FavoritesGroup group : getFavoritesGroups()) {
+      if (group.containsLink(project, currentFile)) {
+        favoritesGroups.add(group);
+      }
+    }
 
 
-		return favoritesGroups;
+    if (LOG.isDebugEnabled()) {
+      LOG.debug("findGroups " + (System.currentTimeMillis() - start) + "ms");
+    }
 
-	}
 
-	public BookmarkGroup getBookmarkGroup() {
-		List<Bookmark> validBookmarks = BookmarkManager.getInstance(project).getValidBookmarks();
-		return new BookmarkGroup(validBookmarks);
-	}
+    return favoritesGroups;
+
+  }
+
+  public BookmarkGroup getBookmarkGroup() {
+    List<Bookmark> validBookmarks = BookmarkManager.getInstance(project).getValidBookmarks();
+    return new BookmarkGroup(validBookmarks);
+  }
 }

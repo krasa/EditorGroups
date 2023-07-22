@@ -13,91 +13,93 @@ import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
+import static krasa.editorGroups.tabs2.impl.JBTabsImpl.SIDE_TABS_SIZE_LIMIT_KEY;
+
 
 class TabsSideSplitter implements Splittable, PropertyChangeListener {
 
-	@NotNull
-	private final krasa.editorGroups.tabs2.impl.JBTabsImpl myTabs;
-	private int mySideTabsLimit = krasa.editorGroups.tabs2.impl.JBTabsImpl.DEFAULT_MAX_TAB_WIDTH;
-	private boolean myDragging;
-	private final OnePixelDivider myDivider;
+  @NotNull
+  private final krasa.editorGroups.tabs2.impl.JBTabsImpl myTabs;
+  private int mySideTabsLimit = krasa.editorGroups.tabs2.impl.JBTabsImpl.DEFAULT_MAX_TAB_WIDTH;
+  private boolean myDragging;
+  private final OnePixelDivider myDivider;
 
 
-	TabsSideSplitter(@NotNull krasa.editorGroups.tabs2.impl.JBTabsImpl tabs) {
-		myTabs = tabs;
-		myTabs.addPropertyChangeListener(krasa.editorGroups.tabs2.impl.JBTabsImpl.SIDE_TABS_SIZE_LIMIT_KEY.toString(), this);
-		myDivider = new OnePixelDivider(false, this);
-	}
+  TabsSideSplitter(@NotNull krasa.editorGroups.tabs2.impl.JBTabsImpl tabs) {
+    myTabs = tabs;
+    myTabs.addPropertyChangeListener(SIDE_TABS_SIZE_LIMIT_KEY.toString(), this);
+    myDivider = new OnePixelDivider(false, this);
+  }
 
-	OnePixelDivider getDivider() {
-		return myDivider;
-	}
+  OnePixelDivider getDivider() {
+    return myDivider;
+  }
 
-	@Override
-	public float getMinProportion(boolean first) {
-		return Math.min(.5F, (float) krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH / Math.max(1, myTabs.getWidth()));
-	}
+  @Override
+  public float getMinProportion(boolean first) {
+    return Math.min(.5F, (float) krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH / Math.max(1, myTabs.getWidth()));
+  }
 
-	@Override
-	public void setProportion(float proportion) {
-		int width = myTabs.getWidth();
-		if (myTabs.getTabsPosition() == JBTabsPosition.left) {
-			setSideTabsLimit((int) Math.max(krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH, proportion * width));
-		} else if (myTabs.getTabsPosition() == JBTabsPosition.right) {
-			setSideTabsLimit(width - (int) Math.max(krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH, proportion * width));
-		}
-	}
+  @Override
+  public void setProportion(float proportion) {
+    int width = myTabs.getWidth();
+    if (myTabs.getTabsPosition() == JBTabsPosition.left) {
+      setSideTabsLimit((int) Math.max(krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH, proportion * width));
+    } else if (myTabs.getTabsPosition() == JBTabsPosition.right) {
+      setSideTabsLimit(width - (int) Math.max(krasa.editorGroups.tabs2.impl.JBTabsImpl.MIN_TAB_WIDTH, proportion * width));
+    }
+  }
 
-	int getSideTabsLimit() {
-		return mySideTabsLimit;
-	}
+  int getSideTabsLimit() {
+    return mySideTabsLimit;
+  }
 
-	void setSideTabsLimit(int sideTabsLimit) {
-		if (mySideTabsLimit != sideTabsLimit) {
-			mySideTabsLimit = sideTabsLimit;
-			UIUtil.putClientProperty(myTabs, krasa.editorGroups.tabs2.impl.JBTabsImpl.SIDE_TABS_SIZE_LIMIT_KEY, mySideTabsLimit);
-			myTabs.resetLayout(true);
-			myTabs.doLayout();
-			myTabs.repaint();
-			TabInfo info = myTabs.getSelectedInfo();
-			JComponent page = info != null ? info.getComponent() : null;
-			if (page != null) {
-				page.revalidate();
-				page.repaint();
-			}
-		}
-	}
+  void setSideTabsLimit(int sideTabsLimit) {
+    if (mySideTabsLimit != sideTabsLimit) {
+      mySideTabsLimit = sideTabsLimit;
+      myTabs.putClientProperty(SIDE_TABS_SIZE_LIMIT_KEY, mySideTabsLimit);
+      myTabs.resetLayout(true);
+      myTabs.doLayout();
+      myTabs.repaint();
+      TabInfo info = myTabs.getSelectedInfo();
+      JComponent page = info != null ? info.getComponent() : null;
+      if (page != null) {
+        page.revalidate();
+        page.repaint();
+      }
+    }
+  }
 
-	@Override
-	public boolean getOrientation() {
-		return false;
-	}
+  @Override
+  public boolean getOrientation() {
+    return false;
+  }
 
-	@Override
-	public void setOrientation(boolean verticalSplit) {
-		//ignore
-	}
+  @Override
+  public void setOrientation(boolean verticalSplit) {
+    //ignore
+  }
 
-	@Override
-	public void setDragging(boolean dragging) {
-		myDragging = dragging;
-	}
+  @Override
+  public void setDragging(boolean dragging) {
+    myDragging = dragging;
+  }
 
-	boolean isDragging() {
-		return myDragging;
-	}
+  boolean isDragging() {
+    return myDragging;
+  }
 
-	@NotNull
-	@Override
-	public Component asComponent() {
-		return myTabs;
-	}
+  @NotNull
+  @Override
+  public Component asComponent() {
+    return myTabs;
+  }
 
-	@Override
-	public void propertyChange(PropertyChangeEvent evt) {
-		if (evt.getSource() != myTabs) return;
-		Integer limit = UIUtil.getClientProperty(myTabs, krasa.editorGroups.tabs2.impl.JBTabsImpl.SIDE_TABS_SIZE_LIMIT_KEY);
-		if (limit == null) limit = JBTabsImpl.DEFAULT_MAX_TAB_WIDTH;
-		setSideTabsLimit(limit);
-	}
+  @Override
+  public void propertyChange(PropertyChangeEvent evt) {
+    if (evt.getSource() != myTabs) return;
+    Integer limit = UIUtil.getClientProperty(myTabs, SIDE_TABS_SIZE_LIMIT_KEY);
+    if (limit == null) limit = JBTabsImpl.DEFAULT_MAX_TAB_WIDTH;
+    setSideTabsLimit(limit);
+  }
 }

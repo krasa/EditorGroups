@@ -25,77 +25,71 @@ import java.util.function.Supplier;
  * @author pegov
  */
 public class JBEditorTabs extends JBTabsImpl implements JBEditorTabsBase {
-	/**
-	 * @deprecated use {@link #myTabPainter}.
-	 */
-	@Deprecated
-	protected JBEditorTabsPainter myDefaultPainter = new DefaultEditorTabsPainter(this);
-	private boolean myAlphabeticalModeChanged = false;
+  /**
+   * @deprecated use {@link #myTabPainter}.
+   */
+  @Deprecated
+  protected JBEditorTabsPainter myDefaultPainter = new DefaultEditorTabsPainter(this);
+  private boolean myAlphabeticalModeChanged = false;
 
-	public JBEditorTabs(@Nullable Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent) {
-		super(project, actionManager, focusManager, parent);
-		ApplicationManager.getApplication().getMessageBus().connect(parent).subscribe(UISettingsListener.TOPIC, (settings) -> {
-			ApplicationManager.getApplication().invokeLater(() -> {
-				resetTabsCache();
-				relayout(true, false);
-			});
-		});
-		setSupportsCompression(true);
-	}
+  public JBEditorTabs(@Nullable Project project, @NotNull ActionManager actionManager, IdeFocusManager focusManager, @NotNull Disposable parent) {
+    super(project, actionManager, focusManager, parent);
+    ApplicationManager.getApplication().getMessageBus().connect(parent)
+      .subscribe(UISettingsListener.TOPIC, (UISettingsListener) (settings) -> ApplicationManager.getApplication().invokeLater(() -> {
+        resetTabsCache();
+        relayout(true, false);
+      }));
+    setSupportsCompression(true);
+  }
 
-	@Override
-	protected SingleRowLayout createSingleRowLayout() {
-		if (!UISettings.getInstance().getHideTabsIfNeeded() && supportsCompression()) {
-			return new CompressibleSingleRowLayout(this);
-		} else if (ApplicationManager.getApplication().isInternal() || Registry.is("editor.use.scrollable.tabs")) {
-			return new ScrollableSingleRowLayout(this);
-		}
-		return super.createSingleRowLayout();
-	}
+  @Override
+  protected SingleRowLayout createSingleRowLayout() {
+    if (!UISettings.getInstance().getHideTabsIfNeeded() && supportsCompression()) {
+      return new CompressibleSingleRowLayout(this);
+    } else if (ApplicationManager.getApplication().isInternal() || Registry.is("editor.use.scrollable.tabs")) {
+      return new ScrollableSingleRowLayout(this);
+    }
+    return super.createSingleRowLayout();
+  }
 
-	@Override
-	public boolean isEditorTabs() {
-		return true;
-	}
+  @Override
+  public boolean isEditorTabs() {
+    return true;
+  }
 
-	@Override
-	public boolean isGhostsAlwaysVisible() {
-		return false;
-	}
+  @Override
+  public boolean isGhostsAlwaysVisible() {
+    return false;
+  }
 
-	@Override
-	public boolean useSmallLabels() {
-		return UISettings.getInstance().getUseSmallLabelsOnTabs();
-	}
+  @Override
+  public boolean useSmallLabels() {
+    return UISettings.getInstance().getUseSmallLabelsOnTabs();
+  }
 
-	@Override
-	public boolean useBoldLabels() {
-		return false;
-	}
+  @Override
+  public boolean isAlphabeticalMode() {
+    if (myAlphabeticalModeChanged) {
+      return super.isAlphabeticalMode();
+    }
+    return UISettings.getInstance().getSortTabsAlphabetically();
+  }
 
-	@Override
-	public boolean isAlphabeticalMode() {
-		if (myAlphabeticalModeChanged) {
-			return super.isAlphabeticalMode();
-		}
-		return UISettings.getInstance().getSortTabsAlphabetically();
-	}
+  @Override
+  public JBTabsPresentation setAlphabeticalMode(boolean alphabeticalMode) {
+    myAlphabeticalModeChanged = true;
+    return super.setAlphabeticalMode(alphabeticalMode);
+  }
 
-	@Override
-	public JBTabsPresentation setAlphabeticalMode(boolean alphabeticalMode) {
-		myAlphabeticalModeChanged = true;
-		return super.setAlphabeticalMode(alphabeticalMode);
-	}
+  @Override
+  public void setEmptySpaceColorCallback(@NotNull Supplier<? extends Color> callback) {
+  }
 
-	@Override
-	public void setEmptySpaceColorCallback(@NotNull Supplier<? extends Color> callback) {
-	}
-
-	/**
-	 * @deprecated You should move the painting logic to an implementation of {@link JBTabPainter} interface
-	 */
-	@Deprecated
-	protected Color getEmptySpaceColor() {
-		return myTabPainter.getBackgroundColor();
-	}
+  /**
+   * @deprecated You should move the painting logic to an implementation of {@link JBTabPainter} interface
+   */
+  @Deprecated
+  protected Color getEmptySpaceColor() {
+    return myTabPainter.getBackgroundColor();
+  }
 }

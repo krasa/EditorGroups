@@ -149,7 +149,7 @@ public class TabInfo implements Queryable, PlaceProvider {
 	@NotNull
 	public TabInfo setIcon(Icon icon) {
 		Icon old = myIcon;
-		if (!IconDeferrer.getInstance().equalIcons(old, icon)) {
+		if (!old.equals(icon)) {
 			myIcon = icon;
 			myChangeSupport.firePropertyChange(ICON, old, icon);
 		}

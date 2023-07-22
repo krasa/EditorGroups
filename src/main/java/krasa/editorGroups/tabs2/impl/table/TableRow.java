@@ -8,18 +8,18 @@ import java.util.List;
 
 class TableRow {
 
-	private final TablePassInfo myData;
-	final List<TabInfo> myColumns = new ArrayList<>();
-	int width;
+  private final TablePassInfo myData;
+  final List<TabInfo> myColumns = new ArrayList<>();
+  int width;
 
-	TableRow(final TablePassInfo data) {
-		myData = data;
-	}
+  TableRow(final TablePassInfo data) {
+    myData = data;
+  }
 
-	void add(TabInfo info) {
-		myColumns.add(info);
-		width += myData.myTabs.myInfo2Label.get(info).getPreferredSize().width;
-		myData.myInfo2Row.put(info, this);
-	}
+  void add(TabInfo info) {
+    myColumns.add(info);
+    width += myData.myTabs.myInfo2Label.get(info).getPreferredSize().width;
+    myData.myInfo2Row.put(info, this);
+  }
 
 }

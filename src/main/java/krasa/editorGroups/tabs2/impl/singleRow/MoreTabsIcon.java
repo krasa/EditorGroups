@@ -15,56 +15,56 @@ import java.awt.*;
  * @author pegov
  */
 public abstract class MoreTabsIcon {
-	private final Icon icon = AllIcons.General.MoreTabs;
-	private int myCounter;
+  private final Icon icon = AllIcons.General.MoreTabs;
+  private int myCounter;
 
-	public void paintIcon(final Component c, Graphics graphics) {
-		if (myCounter <= 0)
-			return;
-		final Rectangle moreRect = getIconRec();
+  public void paintIcon(final Component c, Graphics graphics) {
+    if (myCounter <= 0)
+      return;
+    final Rectangle moreRect = getIconRec();
 
-		if (moreRect == null) return;
+    if (moreRect == null) return;
 
-		int iconY = getIconY(moreRect);
-		int iconX = getIconX(moreRect);
-		graphics.setFont(UIUtil.getLabelFont().deriveFont((float) Math.min(8, UIUtil.getButtonFont().getSize())));
-		int width = graphics.getFontMetrics().stringWidth(String.valueOf(myCounter));
-		iconX -= width / 2 + 1;
+    int iconY = getIconY(moreRect);
+    int iconX = getIconX(moreRect);
+    graphics.setFont(UIUtil.getLabelFont().deriveFont((float) Math.min(8, UIUtil.getButtonFont().getSize())));
+    int width = graphics.getFontMetrics().stringWidth(String.valueOf(myCounter));
+    iconX -= width / 2 + 1;
 
-		icon.paintIcon(c, graphics, iconX, iconY);
-		Graphics g = graphics.create();
-		try {
-			UISettings.setupAntialiasing(g);
-			UIUtil.drawStringWithHighlighting(g, String.valueOf(myCounter),
-				iconX + getIconWidth() + 2,
-				iconY + getIconHeight() - 5,
-				JBColor.BLACK,
-				ColorUtil.withPreAlpha(JBColor.WHITE, .9));
-		} finally {
-			g.dispose();
-		}
-	}
+    icon.paintIcon(c, graphics, iconX, iconY);
+    Graphics g = graphics.create();
+    try {
+      UISettings.setupAntialiasing(g);
+      UIUtil.drawStringWithHighlighting(g, String.valueOf(myCounter),
+        iconX + getIconWidth() + 2,
+        iconY + getIconHeight() - 5,
+        JBColor.BLACK,
+        ColorUtil.withPreAlpha(JBColor.WHITE, .9));
+    } finally {
+      g.dispose();
+    }
+  }
 
-	public int getIconWidth() {
-		return icon.getIconWidth();
-	}
+  public int getIconWidth() {
+    return icon.getIconWidth();
+  }
 
-	public int getIconHeight() {
-		return icon.getIconHeight();
-	}
+  public int getIconHeight() {
+    return icon.getIconHeight();
+  }
 
-	protected int getIconX(final Rectangle iconRec) {
-		return iconRec.x + iconRec.width / 2 - (getIconWidth()) / 2;
-	}
+  protected int getIconX(final Rectangle iconRec) {
+    return iconRec.x + iconRec.width / 2 - (getIconWidth()) / 2;
+  }
 
-	protected int getIconY(final Rectangle iconRec) {
-		return iconRec.y + iconRec.height / 2 - getIconHeight() / 2;
-	}
+  protected int getIconY(final Rectangle iconRec) {
+    return iconRec.y + iconRec.height / 2 - getIconHeight() / 2;
+  }
 
-	@Nullable
-	protected abstract Rectangle getIconRec();
+  @Nullable
+  protected abstract Rectangle getIconRec();
 
-	public void updateCounter(int counter) {
-		myCounter = counter;
-	}
+  public void updateCounter(int counter) {
+    myCounter = counter;
+  }
 }
