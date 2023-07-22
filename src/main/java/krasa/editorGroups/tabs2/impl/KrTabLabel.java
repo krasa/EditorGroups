@@ -200,7 +200,7 @@ public class KrTabLabel extends JPanel implements Accessible, DataProvider {
     SimpleColoredComponent label = new SimpleColoredComponent() {
       @Override
       public Font getFont() {
-        Font font = super.getFont();
+        Font font = JBUI.CurrentTheme.EditorTabs.font();
 
         return (isFontSet() || !myTabs.useSmallLabels()) ? font :
           RelativeFont.NORMAL.fromResource("EditorTabs.fontSizeOffset", -2, JBUIScale.scale(11f)).derive(StartupUiUtil.getLabelFont());
