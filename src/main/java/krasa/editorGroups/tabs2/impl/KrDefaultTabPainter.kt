@@ -3,6 +3,7 @@ package krasa.editorGroups.tabs2.impl
 import com.intellij.openapi.rd.fill2DRect
 import com.intellij.openapi.rd.fill2DRoundRect
 import com.intellij.openapi.rd.paint2DLine
+import com.intellij.openapi.util.registry.Registry
 import com.intellij.ui.ColorUtil
 import com.intellij.ui.paint.LinePainter2D
 import krasa.editorGroups.tabs2.KrTabPainter
@@ -62,6 +63,8 @@ open class KrDefaultTabPainter(private val theme: KrTabTheme = KrDefaultTabTheme
     getCustomBackground(tabColor, selected = false, active, hovered)?.let {
       g.fill2DRect(rect, it)
     }
+
+    paintLeftRightBorders(g, borderThickness, rect, position)
   }
 
   override fun paintSelectedTab(position: KrTabsPosition,
@@ -78,6 +81,21 @@ open class KrDefaultTabPainter(private val theme: KrTabTheme = KrDefaultTabTheme
     //this code smells. Remove when animation is default for all tabs
     if (!KrEditorTabsBorder.hasAnimation() || this !is KrEditorTabPainter) {
       paintUnderline(position, rect, borderThickness, g, active)
+    }
+    paintLeftRightBorders(g, borderThickness, rect, position)
+  }
+
+  private fun paintLeftRightBorders(g: Graphics2D, borderThickness: Int, rect: Rectangle, position: KrTabsPosition) {
+    if (!position.isSide && Registry.`is`("ide.new.editor.tabs.vertical.borders")) {
+      paintBorderLine(g,
+        borderThickness,
+        Point(rect.x, rect.y),
+        Point(rect.x + rect.width, rect.y))
+      paintBorderLine(g,
+        borderThickness,
+        Point(rect.x, rect.y + rect.height - 1),
+        Point(rect.x + rect.width, rect.y + rect.height - 1))
+      return
     }
   }
 
