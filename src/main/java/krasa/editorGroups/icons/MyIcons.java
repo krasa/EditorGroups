@@ -1,16 +1,16 @@
 package krasa.editorGroups.icons;
 
-import com.intellij.openapi.util.IconLoader;
+import com.intellij.icons.AllIcons;
 
 import javax.swing.*;
 
 public class MyIcons {
-  public static final Icon regex = IconLoader.getIcon("/icons/regexp.svg", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon folder = IconLoader.getIcon("/icons/folder.png", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon settings = IconLoader.getIcon("/icons/settings.png", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon refresh = IconLoader.getIcon("/icons/refresh.png", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon copy = IconLoader.getIcon("/icons/copy.png", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon groupBy = IconLoader.getIcon("/icons/groupBy.svg", MyIcons.class.getClassLoader()); // 16x16
-  public static final Icon listFiles = IconLoader.getIcon("/icons/listFiles.svg", MyIcons.class.getClassLoader()); // 16x16
+  public static final Icon regex = AllIcons.Actions.Regex; // 16x16
+  public static final Icon folder = AllIcons.Nodes.Folder; // 16x16
+  public static final Icon settings = AllIcons.General.Settings; // 16x16
+  public static final Icon refresh = AllIcons.Actions.Refresh; // 16x16
+  public static final Icon copy = AllIcons.Actions.Copy; // 16x16
+  public static final Icon groupBy = AllIcons.Actions.GroupBy; // 16x16
+  public static final Icon listFiles = AllIcons.Actions.ListFiles; // 16x16
 
 }

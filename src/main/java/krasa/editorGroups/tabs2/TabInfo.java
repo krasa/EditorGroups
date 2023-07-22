@@ -36,6 +36,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TabInfo implements Queryable, PlaceProvider {
 
@@ -129,13 +130,12 @@ public class TabInfo implements Queryable, PlaceProvider {
     return attributes;
   }
 
-  public TabInfo clearText(final boolean invalidate) {
+  public void clearText(final boolean invalidate) {
     final String old = myText.toString();
     myText.clear();
     if (invalidate) {
       myChangeSupport.firePropertyChange(TEXT, old, myText.toString());
     }
-    return this;
   }
 
   public TabInfo append(@NotNull String fragment, @NotNull SimpleTextAttributes attributes) {
@@ -148,7 +148,7 @@ public class TabInfo implements Queryable, PlaceProvider {
   @NotNull
   public TabInfo setIcon(Icon icon) {
     Icon old = myIcon;
-    if (old != null && !old.equals(icon)) {
+    if (old == null || !old.equals(icon)) {
       myIcon = icon;
       myChangeSupport.firePropertyChange(ICON, old, icon);
     }
@@ -326,11 +326,10 @@ public class TabInfo implements Queryable, PlaceProvider {
     return this;
   }
 
-  public TabInfo setDefaultForeground(final Color fg) {
+  public void setDefaultForeground(final Color fg) {
     myDefaultForeground = fg;
     myDefaultAttributes = null;
     update();
-    return this;
   }
 
   public Color getDefaultForeground() {
@@ -354,28 +353,24 @@ public class TabInfo implements Queryable, PlaceProvider {
     update();
   }
 
-  @NotNull
-  public TabInfo setTooltipText(final String text) {
+  public void setTooltipText(final String text) {
     String old = myTooltipText;
-    if (!Comparing.equal(old, text)) {
+    if (!Objects.equals(old, text)) {
       myTooltipText = text;
       myChangeSupport.firePropertyChange(TEXT, old, myTooltipText);
     }
-    return this;
   }
 
   public String getTooltipText() {
     return myTooltipText;
   }
 
-  @NotNull
-  public TabInfo setTabColor(Color color) {
+  public void setTabColor(Color color) {
     Color old = myTabColor;
     if (!Comparing.equal(color, old)) {
       myTabColor = color;
       myChangeSupport.firePropertyChange(TAB_COLOR, old, color);
     }
-    return this;
   }
 
   public Color getTabColor() {

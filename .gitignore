@@ -8,3 +8,5 @@
 .idea
 out
 target/
+build/
+.gradle
