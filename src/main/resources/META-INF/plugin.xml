@@ -6,10 +6,17 @@
 
     <description><![CDATA[
         <h1>Editor Groups</h1>
-        <h2>Adds a second tab bar for quick access to files related to each other!</h2>
+        <h4>Adds a second tab bar for quick access to files related to each other!</h4>
 
-        <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/editorGroups.png" alt="EditorGroups"/>
-        <br/>
+        <div>
+            <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/editorGroups.png"
+            alt="EditorGroups" width="1024" height="768"/>
+        </div>
+        <br>
+        <div>
+            <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/editorGroupsSettings.png"
+            alt="EditorGroups Settings" width="1024" height="768"/>
+        </div>
 
         <h2>Features</h2>
         <ul>
@@ -17,17 +24,18 @@
             <li>Group files by name (ex: classes and tests, css and html, etc)</li>
             <li>Group files under the same folder</li>
             <li>Group files by a regular expression (ex: all files containing "test", "yaml", etc)</li>
-            <li>Group by bookmarked files</li>
+            <li>Group by bookmarked files (TODO!)</li>
         </ul>
 
         <h2>Advanced Features</h2>
         <ul>
-            <li>Create custom groups and save them in a <em>*.egroups</em> file</li>
+            <li>Create custom groups and save them in a <code>*.egroups</code> file</li>
             <li>Colorize tabs belonging to the same group</li>
             <li>Set custom colors to the selected tab</li>
+            <li>Compact mode</li>
         </ul>
 
-        <p>More information: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</a></p>
+        <p>More information: <a href="https://github.com/mallowigi/EditorGroups">https://github.com/mallowigi/EditorGroups</a></p>
         <br>
         <p>Thanks to Vojtech Krasa for creating this plugin.</p>
         <br>
