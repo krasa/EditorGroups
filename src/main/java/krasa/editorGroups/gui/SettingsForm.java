@@ -26,6 +26,7 @@ public class SettingsForm {
   private JCheckBox initializeSynchronously;
   private JCheckBox indexOnlyEditorGroupsFileCheckBox;
   private JCheckBox excludeEGroups;
+  private JCheckBox compactTabs;
   private JPanel tabColors;
   private JCheckBox rememberLastGroup;
   /**
@@ -128,6 +129,7 @@ public class SettingsForm {
     continuousScrolling.setSelected(data.isContinuousScrolling());
     groupSwitchGroupAction.setSelected(data.isGroupSwitchGroupAction());
     excludeEGroups.setSelected(data.isExcludeEditorGroupsFiles());
+    compactTabs.setSelected(data.isCompactTabs());
     showPanel.setSelected(data.isShowPanel());
   }
 
@@ -146,6 +148,7 @@ public class SettingsForm {
     data.setContinuousScrolling(continuousScrolling.isSelected());
     data.setGroupSwitchGroupAction(groupSwitchGroupAction.isSelected());
     data.setExcludeEditorGroupsFiles(excludeEGroups.isSelected());
+    data.setCompactTabs(compactTabs.isSelected());
     data.setShowPanel(showPanel.isSelected());
   }
 
@@ -166,6 +169,7 @@ public class SettingsForm {
     if (continuousScrolling.isSelected() != data.isContinuousScrolling()) return true;
     if (groupSwitchGroupAction.isSelected() != data.isGroupSwitchGroupAction()) return true;
     if (excludeEGroups.isSelected() != data.isExcludeEditorGroupsFiles()) return true;
+    if (compactTabs.isSelected() != data.isCompactTabs()) return true;
     return showPanel.isSelected() != data.isShowPanel();
   }
 }

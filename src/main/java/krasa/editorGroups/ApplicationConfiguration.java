@@ -24,6 +24,7 @@ public class ApplicationConfiguration {
   private boolean initializeSynchronously = false;
   private boolean indexOnlyEditorGroupsFiles;
   private boolean excludeEditorGroupsFiles;
+  private boolean compactTabs;
   private Integer tabBgColor;
   private boolean tabBgColorEnabled;
   private Integer tabFgColor;
@@ -133,6 +134,14 @@ public class ApplicationConfiguration {
 
   public void setExcludeEditorGroupsFiles(final boolean excludeEditorGroupsFiles) {
     this.excludeEditorGroupsFiles = excludeEditorGroupsFiles;
+  }
+
+  public boolean isCompactTabs() {
+    return compactTabs;
+  }
+
+  public void setCompactTabs(final boolean compactTabs) {
+    this.compactTabs = compactTabs;
   }
 
   public void setTabBgColor(Integer tabBgColor) {
