@@ -5,11 +5,33 @@
     <vendor url="https://github.com/krasa/EditorGroups" email="vojta.krasa@gmail.com">Vojtech Krasa</vendor>
 
     <description><![CDATA[
-         Usage: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</a>
-        <br/>   <br/>
-        
-       <a href="https://github.com/krasa/EditorGroups/issues">In active development. Please report your ideas and issues.</a>
+        <h1>Editor Groups</h1>
+        <h2>Adds a second tab bar for quick access to files related to each other!</h2>
 
+        <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/EditorGroups.png" alt="EditorGroups"/>
+        <br/>
+
+        <h2>Features</h2>
+        <ul>
+            <li>Quickly switch between files in the current tab</li>
+            <li>Group files by name (ex: classes and tests, css and html, etc)</li>
+            <li>Group files under the same folder</li>
+            <li>Group files by a regular expression (ex: all files containing "test", "yaml", etc)</li>
+            <li>Group by bookmarked files</li>
+        </ul>
+
+        <h2>Advanced Features</h2>
+        <ul>
+            <li>Create custom groups and save them in a <em>*.egroups</em> file</li>
+            <li>Colorize tabs belonging to the same group</li>
+            <li>Set custom colors to the selected tab</li>
+        </ul>
+
+        <p>More information: <a href="https://github.com/krasa/EditorGroups">https://github.com/krasa/EditorGroups</a></p>
+        <br>
+        <p>Thanks to Vojtech Krasa for creating this plugin.</p>
+        <br>
+        <p>Copyright (c) 2015-2023 Vojtech Krasa and Elior Boukhobza</p>
     ]]></description>
 
 
