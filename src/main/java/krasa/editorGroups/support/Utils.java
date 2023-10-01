@@ -2,7 +2,7 @@ package krasa.editorGroups.support;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.ui.UISettings;
-import com.intellij.openapi.application.ex.ApplicationUtil;
+import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -15,7 +15,6 @@ import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileManager;
-import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ReflectionUtil;
@@ -30,6 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.*;
+import java.util.concurrent.ExecutionException;
 
 @SuppressWarnings({"UseJBColor"})
 public class Utils {
@@ -59,7 +59,7 @@ public class Utils {
 
   @Nullable
   public static VirtualFile getFileByUrl(String url) {
-    return VirtualFileManagerEx.getInstance().findFileByUrl(url);
+    return VirtualFileManager.getInstance().findFileByUrl(url);
   }
 
   public static String getFileContent(String ownerPath) {
@@ -118,29 +118,35 @@ public class Utils {
 
   @Nullable
   public static VirtualFile getFileByPath(@NotNull String path, @Nullable VirtualFile currentFile) {
-    VirtualFile file = null;
-    if (OSAgnosticPathUtil.isAbsolute(path)) {
-      file = LocalFileSystem.getInstance().findFileByPath(path);
-    } else if (currentFile != null) {
-      VirtualFile parent = currentFile.getParent();
-      if (parent != null) {
-        file = parent.findFileByRelativePath(path);
-      }
-      if (file == null) {
-        LOG.warn("file is null for child:" + path + " from parent: " + currentFile.getPath());
-      }
-    } else if (path.startsWith("file://")) {
-      file = VirtualFileManager.getInstance().findFileByUrl(path);
-    } else {
-      file = ApplicationUtil.tryRunReadAction(() -> LocalFileSystem.getInstance().findFileByPath(path));
-    }
+    try {
+      return ApplicationManager.getApplication().executeOnPooledThread(() -> {
+        VirtualFile file = null;
+        if (OSAgnosticPathUtil.isAbsolute(path)) {
+          file = LocalFileSystem.getInstance().findFileByPath(path);
+        } else if (currentFile != null) {
+          VirtualFile parent = currentFile.getParent();
+          if (parent != null) {
+            file = parent.findFileByRelativePath(path);
+          }
+          if (file == null) {
+            LOG.warn("file is null for child:" + path + " from parent: " + currentFile.getPath());
+          }
+        } else if (path.startsWith("file://")) {
+          file = VirtualFileManager.getInstance().findFileByUrl(path);
+        } else {
+          file = LocalFileSystem.getInstance().findFileByPath(path);
+        }
 
-    if (file == null && currentFile == null) {
-      LOG.info("#refreshAndFindFileByPath for " + path);
-      file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
-    }
+        if (file == null && currentFile == null) {
+          LOG.info("#refreshAndFindFileByPath for " + path);
+          file = LocalFileSystem.getInstance().refreshAndFindFileByPath(path);
+        }
 
-    return file;
+        return file;
+      }).get();
+    } catch (ExecutionException | InterruptedException e) {
+      throw new RuntimeException(e);
+    }
   }
 
 
