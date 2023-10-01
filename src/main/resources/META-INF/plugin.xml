@@ -10,12 +10,12 @@
 
         <div>
             <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/editorGroups.png"
-            alt="EditorGroups" width="1024" height="768"/>
+                 alt="EditorGroups" width="936" height="741"/>
         </div>
         <br>
         <div>
             <img src="https://raw.githubusercontent.com/mallowigi/EditorGroups/master/docs/editorGroupsSettings.png"
-            alt="EditorGroups Settings" width="1024" height="768"/>
+                 alt="EditorGroups Settings" width="936" height="741"/>
         </div>
 
         <h2>Features</h2>
@@ -35,12 +35,13 @@
             <li>Compact mode</li>
         </ul>
 
-        <p>More information: <a href="https://github.com/mallowigi/EditorGroups">https://github.com/mallowigi/EditorGroups</a></p>
+        <p>More information: <a href="https://github.com/mallowigi/EditorGroups">https://github.com/mallowigi/EditorGroups</a>
+        </p>
         <br>
         <p>Thanks to Vojtech Krasa for creating this plugin.</p>
         <br>
         <p>Copyright (c) 2015-2023 Vojtech Krasa and Elior Boukhobza</p>
-    ]]></description>
+        ]]></description>
 
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html

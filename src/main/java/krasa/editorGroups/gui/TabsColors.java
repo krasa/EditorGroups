@@ -2,7 +2,7 @@ package krasa.editorGroups.gui;
 
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.util.ui.JBDimension;
-import com.intellij.util.ui.UIUtil;
+import com.intellij.util.ui.StartupUiUtil;
 import krasa.editorGroups.ApplicationConfiguration;
 import krasa.editorGroups.support.CheckBoxWithColorChooser;
 
@@ -34,9 +34,10 @@ public class TabsColors {
     return root;
   }
 
+  @SuppressWarnings("UnstableApiUsage")
   public TabsColors() {
-    darcula.setVisible(UIUtil.isUnderDarcula());
-    classic.setVisible(!UIUtil.isUnderDarcula());
+    darcula.setVisible(StartupUiUtil.INSTANCE.isDarkTheme());
+    classic.setVisible(!StartupUiUtil.INSTANCE.isDarkTheme());
 
     opacityDefault.addActionListener(e -> opacity.setText(String.valueOf(ApplicationConfiguration.Tabs.DEFAULT_OPACITY)));
     darcula_opacityDefault.addActionListener(e -> opacity.setText(String.valueOf(ApplicationConfiguration.Tabs.DEFAULT_DARCULA_OPACITY)));

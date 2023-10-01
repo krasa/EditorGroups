@@ -2,6 +2,7 @@ package krasa.editorGroups.support;
 
 import com.intellij.icons.AllIcons;
 import com.intellij.ide.ui.UISettings;
+import com.intellij.openapi.application.ex.ApplicationUtil;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.fileEditor.FileDocumentManager;
@@ -13,10 +14,12 @@ import com.intellij.openapi.util.io.OSAgnosticPathUtil;
 import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.openapi.vfs.VirtualFileManager;
 import com.intellij.openapi.vfs.ex.VirtualFileManagerEx;
 import com.intellij.ui.ColorUtil;
 import com.intellij.util.IconUtil;
 import com.intellij.util.ReflectionUtil;
+import com.intellij.util.ui.NamedColorUtil;
 import krasa.editorGroups.model.Link;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,6 +41,9 @@ public class Utils {
    * intellij-file-preview
    */
   private static Method getSource;
+
+  public static final Color ERROR_FOREGROUND_COLOR = NamedColorUtil.getErrorForeground();
+
 
   /**
    * not good enough for UI forms sometimes
@@ -96,6 +102,20 @@ public class Utils {
     return getFileByPath(path, null);
   }
 
+  public static boolean isBlank(final CharSequence cs) {
+    if (cs == null) return true;
+    final int strLen = cs.length();
+    if (strLen == 0) {
+      return true;
+    }
+    for (int i = 0; i < strLen; i++) {
+      if (!Character.isWhitespace(cs.charAt(i))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @Nullable
   public static VirtualFile getFileByPath(@NotNull String path, @Nullable VirtualFile currentFile) {
     VirtualFile file = null;
@@ -110,9 +130,9 @@ public class Utils {
         LOG.warn("file is null for child:" + path + " from parent: " + currentFile.getPath());
       }
     } else if (path.startsWith("file://")) {
-      file = VirtualFileManagerEx.getInstance().findFileByUrl(path);
+      file = VirtualFileManager.getInstance().findFileByUrl(path);
     } else {
-      file = LocalFileSystem.getInstance().findFileByPath(path);
+      file = ApplicationUtil.tryRunReadAction(() -> LocalFileSystem.getInstance().findFileByPath(path));
     }
 
     if (file == null && currentFile == null) {

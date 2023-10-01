@@ -17,7 +17,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.ErrorLabel;
 import com.intellij.ui.components.JBTextField;
 import krasa.editorGroups.model.RegexGroupModel;
-import org.apache.commons.lang.StringUtils;
+import krasa.editorGroups.support.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -26,6 +26,8 @@ import javax.swing.event.DocumentEvent;
 import java.awt.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static krasa.editorGroups.support.Utils.isBlank;
 
 public class RegexModelEditor extends DialogWrapper {
   private static final Logger LOG = Logger.getInstance(RegexModelEditor.class);
@@ -64,7 +66,7 @@ public class RegexModelEditor extends DialogWrapper {
     fileNamePanel.add(fileNameField, BorderLayout.CENTER);
 
 
-    error.setForeground(DialogWrapper.ERROR_FOREGROUND_COLOR);
+    error.setForeground(Utils.ERROR_FOREGROUND_COLOR);
     setTitle(title);
     this.regex.setNextFocusableComponent(this.regex);
     scopeCombo.setModel(new EnumComboBoxModel<>(RegexGroupModel.Scope.class));
@@ -96,7 +98,7 @@ public class RegexModelEditor extends DialogWrapper {
     try {
       String text = regex.getText();
       String fileName = getFileName();
-      if (StringUtils.isNotBlank(text) && StringUtils.isNotBlank(fileName)) {
+      if (!isBlank(text) && !isBlank(fileName)) {
         Pattern compile = Pattern.compile(text);
         Matcher matcher = compile.matcher(fileName);
         sb.append("Matches: ").append(matcher.matches()).append("\n");
@@ -112,14 +114,11 @@ public class RegexModelEditor extends DialogWrapper {
       sb.append(e);
     }
 
-    ApplicationManager.getApplication().runWriteAction(new Runnable() {
-      @Override
-      public void run() {
-        String replace = sb.toString().replace("\r\n", "\n");
-        myEditor.getDocument().setText(replace);
-        testResult.validate();
-        testResult.repaint();
-      }
+    ApplicationManager.getApplication().runWriteAction(() -> {
+      String replace = sb.toString().replace("\r\n", "\n");
+      myEditor.getDocument().setText(replace);
+      testResult.validate();
+      testResult.repaint();
     });
 
   }
