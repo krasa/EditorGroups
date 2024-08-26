@@ -17,7 +17,7 @@ import com.intellij.ui.EnumComboBoxModel;
 import com.intellij.ui.ErrorLabel;
 import com.intellij.ui.components.JBTextField;
 import krasa.editorGroups.model.RegexGroupModel;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

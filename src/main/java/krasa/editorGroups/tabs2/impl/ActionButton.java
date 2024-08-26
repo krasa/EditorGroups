@@ -2,7 +2,11 @@
 package krasa.editorGroups.tabs2.impl;
 
 import com.intellij.ide.DataManager;
-import com.intellij.openapi.actionSystem.*;
+import com.intellij.openapi.actionSystem.ActionPlaces;
+import com.intellij.openapi.actionSystem.AnAction;
+import com.intellij.openapi.actionSystem.AnActionEvent;
+import com.intellij.openapi.actionSystem.DataContext;
+import com.intellij.openapi.actionSystem.Presentation;
 import com.intellij.openapi.actionSystem.ex.ActionUtil;
 import com.intellij.openapi.keymap.KeymapUtil;
 import com.intellij.openapi.ui.popup.IconButton;
@@ -12,7 +16,11 @@ import com.intellij.util.ui.TimedDeadzone;
 import krasa.editorGroups.tabs2.TabInfo;
 
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.util.function.Consumer;
 
 class ActionButton extends IconButton implements ActionListener {
@@ -113,7 +121,7 @@ class ActionButton extends IconButton implements ActionListener {
 	public void actionPerformed(final ActionEvent e) {
 		AnActionEvent event = createAnEvent(e.getModifiers());
 		if (ActionUtil.lastUpdateAndCheckDumb(myAction, event, true)) {
-			ActionUtil.performActionDumbAware(myAction, event);
+			ActionUtil.performActionDumbAwareWithCallbacks(myAction, event);
 		}
 	}
 

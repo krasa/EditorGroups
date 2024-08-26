@@ -21,7 +21,6 @@ import com.intellij.openapi.editor.markup.TextAttributes;
 import com.intellij.openapi.ui.Queryable;
 import com.intellij.openapi.util.Comparing;
 import com.intellij.reference.SoftReference;
-import com.intellij.ui.IconDeferrer;
 import com.intellij.ui.PlaceProvider;
 import com.intellij.ui.SimpleColoredText;
 import com.intellij.ui.SimpleTextAttributes;
@@ -37,6 +36,7 @@ import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class TabInfo implements Queryable, PlaceProvider {
 
@@ -149,7 +149,7 @@ public class TabInfo implements Queryable, PlaceProvider {
 	@NotNull
 	public TabInfo setIcon(Icon icon) {
 		Icon old = myIcon;
-		if (!IconDeferrer.getInstance().equalIcons(old, icon)) {
+		if (!Objects.equals(old, icon)) {
 			myIcon = icon;
 			myChangeSupport.firePropertyChange(ICON, old, icon);
 		}

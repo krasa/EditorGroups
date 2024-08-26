@@ -5,15 +5,15 @@ plugins {
 }
 
 group = "EditorGroups"
-version = "0.47"
+version = "0.48"
 
 tasks {
     patchPluginXml {
-        sinceBuild.set("231")
-        untilBuild.set("231.*")
+        sinceBuild.set("242")
+        untilBuild.set("242.*")
         changeNotes.set(
             buildString {
-                append("- Icons fix").append("<br>")
+                append("- Add support to 2024.2;").append("<br>").append("- Fix deprecations warnings;")
             }
         )
     }
@@ -54,12 +54,12 @@ repositories {
 
 // Configure Gradle IntelliJ Plugin - read more: https://github.com/JetBrains/gradle-intellij-plugin
 intellij {
-    version.set("2023.1")
+    version.set("2024.2")
     type.set("IC") // Target IDE Platform
+    downloadSources.set(true)
 
     plugins.set(listOf("java"))
 }
-
 
 dependencies {
 // https://mvnrepository.com/artifact/commons-io/commons-io
