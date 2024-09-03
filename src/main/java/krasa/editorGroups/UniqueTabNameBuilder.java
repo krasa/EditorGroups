@@ -1,9 +1,9 @@
 package krasa.editorGroups;
 
+import com.intellij.filename.UniqueNameBuilder;
 import com.intellij.openapi.diagnostic.Logger;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
-import com.intellij.openapi.util.io.UniqueNameBuilder;
 import com.intellij.openapi.vfs.VirtualFile;
 import gnu.trove.THashMap;
 import gnu.trove.THashSet;
@@ -24,7 +24,7 @@ public class UniqueTabNameBuilder {
 	}
 
 	public Map<Link, String> getNamesByPath(List<Link> paths, VirtualFile currentFile) {
-		UniqueNameBuilder<Link> uniqueNameBuilder = new UniqueNameBuilder<>(root, "/", 25);
+		UniqueNameBuilder<Link> uniqueNameBuilder = new UniqueNameBuilder<>(root, "/");
 		Map<Link, String> path_name = new THashMap<>();
 		Map<String, Link> name_path = new THashMap<>();
 		Set<Link> paths_withDuplicateName = new THashSet<>();

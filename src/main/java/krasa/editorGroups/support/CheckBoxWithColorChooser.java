@@ -16,7 +16,7 @@
 package krasa.editorGroups.support;
 
 import com.intellij.openapi.util.SystemInfo;
-import com.intellij.ui.ColorChooser;
+import com.intellij.ui.ColorChooserService;
 import com.intellij.ui.JBColor;
 
 import javax.swing.*;
@@ -132,8 +132,8 @@ public class CheckBoxWithColorChooser extends JPanel {
 			mouseAdapter = new MouseAdapter() {
 				@Override
 				public void mousePressed(MouseEvent e) {
-					final Color color = ColorChooser.chooseColor(MyColorButton.this, "Chose color",
-						CheckBoxWithColorChooser.this.myColor);
+					final Color color = ColorChooserService.getInstance().showDialog(MyColorButton.this,
+							"Choose Color", CheckBoxWithColorChooser.this.myColor);
 					if (color != null) {
 						if (myCheckbox != null && !myCheckbox.isSelected()) {
 							myCheckbox.setSelected(true);
