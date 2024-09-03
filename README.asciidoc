@@ -1,3 +1,5 @@
+=  The development continues at https://github.com/mallowigi/EditorGroups  =
+
 ====  Implementation of https://github.com/SomewhatCloudy/phpstorm-related-proposal  ==== 
 
 image::example.gif[]
